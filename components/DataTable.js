@@ -1,30 +1,63 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-dt/css/jquery.dataTables.css';
+import '../styles/tables.module.css';
 
-function DataTable() {
+const DataTable = () => {
+    let table;
+    useEffect(() => {
+
+        table = $('#myData').DataTable({
+            "language": {
+                "lengthMenu": "Sayfa başına  _MENU_ kayıt görüntüleniyor",
+                "zeroRecords": "Kayıt yok",
+                "info": "Sayfa _PAGE_ / _PAGES_",
+                "infoEmpty": "Herhangi bir kayıt yok.",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+            }
+        });
+        return () => {
+            table.destroy();
+        };
+
+
+    }, []);
+
     return (
-        <div className="container mx-auto mt-10">
-            <table className="w-full text-center">
-                <thead>
-                <tr className="bg-gray-800 text-white">
-                    <th className="p-4">Lisans Key</th>
-                    <th className="p-4">Bayi</th>
-                    <th className="p-4">Satış Tarihi</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr className="bg-gray-100">
-                    <td className="p-4">CXS2-ASD2-GGG4-2212</td>
-                    <td className="p-4">AVENCOM</td>
-                    <td className="p-4">26.12.2022</td>
-                </tr>
-                <tr className="bg-gray-200">
-                    <td className="p-4">DXS2-ASD2-2DG4-2112</td>
-                    <td className="p-4">COMNET</td>
-                    <td className="p-4">25.12.2022</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+
+        <table id="myData" className="stripe hover">
+            <thead>
+            <tr>
+                <th data-priority="1">Field 1</th>
+                <th data-priority="2">Field 2</th>
+                <th data-priority="3">Field 3</th>
+                <th data-priority="4">Field 4</th>
+                <th data-priority="5">Boolean Field</th>
+                <th data-priority="6">Fieelldd</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Tiger Nixon</td>
+                <td>System Architect</td>
+                <td>Edinburgh</td>
+                <td>61</td>
+                <td>2011/04/25</td>
+                <td>$320,800</td>
+            </tr>
+
+            <tr>
+                <td>Donna Snider</td>
+                <td>Customer Support</td>
+                <td>New York</td>
+                <td>27</td>
+                <td>2011/01/25</td>
+                <td>$112,000</td>
+            </tr>
+            </tbody>
+        </table>
+
     );
 }
 
