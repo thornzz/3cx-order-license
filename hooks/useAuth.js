@@ -6,7 +6,7 @@ const useAuth = () => {
 
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
-            setIsLoggedIn(user && user.uid ? true : false);
+            setIsLoggedIn(!!(user && user.uid));
             setUser(user);
         });
     });

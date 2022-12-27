@@ -6,6 +6,7 @@ import '../styles/tables.module.css';
 
 const DataTable = () => {
     let table;
+
     useEffect(() => {
 
         table = $('#myData').DataTable({

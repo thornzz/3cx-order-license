@@ -1,22 +1,66 @@
-import React, {Fragment, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {Modal} from "flowbite-react";
 import Select from 'react-select'
+import PostData from "../utility/HttpPostUtility";
 const BuyLicenseModal = (props) => {
 
-    const [toggleValue, setToggleValue] = useState(false)
-    const [selectValue, setSelectValue] = useState('')
-    const [numberValue1, setNumberValue1] = useState(0)
-    const [numberValue2, setNumberValue2] = useState(0)
-    const [selectValue1, setSelectValue1] = useState('')
-    const [selectValue2, setSelectValue2] = useState('')
-    const [selectValue3, setSelectValue3] = useState('')
+    const [togglePerpetual, setTogglePerpetual] = useState(false)
+    const [quantity, setQuantity] = useState(0)
+    const [partnerId, setPartnerId] = useState(0)
+    const [additionalYear, setAdditionalYear] = useState(0)
+    const [licenseType, setLicenseType] = useState('')
+    const [simCall, setSimCall] = useState('')
+    const [options, setOptions] = useState([]); // Add state to store the options
 
-    const options = [
-        { value: 'avencom', label: 'AVENCOM' },
-        { value: 'comnet', label: 'COMNET' },
-        { value: 'arena', label: 'ARENA' }
-    ]
-    console.log(toggleValue)
+    useEffect(() => {
+        const getPartners = async () => {
+            const response = await fetch('/api/getpartners');
+            const data = await response.json();
+
+            // Extract only the PartnerId and CompanyName fields from each object in the array
+            const filteredData = data.map(partner => ({
+                    value: partner.PartnerId,
+                    label: partner.CompanyName,
+                })
+            );
+
+            setOptions(filteredData); // Update the options state with the filtered data
+        }
+
+        getPartners();
+    }, []); // Call the getPartners function only once when the component mounts
+
+    const PostJsonData = () => {
+        const data = {
+            PO: "MYPO123",
+            SalesCode: "",
+            Notes: "",
+            Lines: [
+                {
+                    Type: "NewLicense",
+                    Edition: licenseType,
+                    SimultaneousCalls: simCall,
+                    IsPerpetual: togglePerpetual,
+                    Quantity: quantity,
+                    AdditionalInsuranceYears: additionalYear,
+                    ResellerId: partnerId,
+                    AddHosting: false
+                }
+            ]
+        };
+
+
+        const jsonData = JSON.stringify(data);
+
+        PostData('/api/newlicense',jsonData).then((data)=>{
+            console.log(data)
+        })
+            .catch((error) => {
+                console.error(error);
+            });
+
+
+    }
     const closeModal = () => {
 
         props.closeModal()
@@ -26,23 +70,23 @@ const BuyLicenseModal = (props) => {
         <Fragment>
             <Modal
                 show={props.showModal}
-                size="md"
+                size="2xl"
                 popup={true}
                 onClose={() => closeModal()}>
                 <Modal.Header/>
                 <Modal.Body>
-                    <h1>YENİ LİSANS</h1>
+                    <h1 className="grid border border-b-3 border-b-blue-600 justify-center pb-2 pt-2 shadow-2xl">YENİ LİSANS</h1>
                     <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="select1">
-                               Lisans Tipi
+                                Lisans Tipi
                             </label>
                             <div className="relative rounded-md shadow-sm">
                                 <select
                                     id="select1"
                                     className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
-                                    value={selectValue1}
-                                    onChange={(event) => setSelectValue1(event.target.value)}
+                                    value={licenseType}
+                                    onChange={(event) => setLicenseType(event.target.value)}
                                 >
                                     <option value="">Lisans Tipini Seçiniz</option>
                                     <option value="Standard">Standard</option>
@@ -57,16 +101,16 @@ const BuyLicenseModal = (props) => {
                             </div>
 
                             <label className="block text-gray-700 text-sm font-bold mb-2 mt-2" htmlFor="select2">
-                               Kanal Sayısı
+                                Kanal Sayısı
                             </label>
                             <div className="relative rounded-md shadow-sm">
                                 <select
                                     id="select2"
                                     className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
-                                    value={selectValue2}
-                                    onChange={(event) => setSelectValue2(event.target.value)}
+                                    value={simCall}
+                                    onChange={(event) => setSimCall(event.target.value)}
                                 >
-                                    <option value="">Kanal sayısını seçiniz </option>
+                                    <option value="">Kanal sayısını seçiniz</option>
                                     <option value="8">8</option>
                                     <option value="16">16</option>
                                     <option value="24">24</option>
@@ -92,62 +136,64 @@ const BuyLicenseModal = (props) => {
                                 <Select options={options}
                                         isLoading={false}
                                         isClearable={true}
-                                        noOptionsMessage={()=> "Uygun kayıt bulunamadı!"}
-                                        placeholder="Bayi seçimi yapınız">
-
+                                        noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
+                                        placeholder="Bayi seçimi yapınız"
+                                        onChange={(data, opt) => {
+                                            setPartnerId(data?.value)
+                                        }}>
                                 </Select>
 
                             </div>
-                    <div className="mb-4 mt-2">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number1">
-                           Adet
-                        </label>
-                        <input
-                            id="number1"
-                            type="number"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            value={numberValue1}
-                            onChange={(event) => setNumberValue1(event.target.value)}
-                        />
-                    </div>
-                    <div className="mb-4 mt-2">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number2">
-                           Ek süre (Yıl)
-                        </label>
-                        <input
-                            id="number2"
-                            type="number"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            value={numberValue2}
-                            onChange={(event) => setNumberValue2(event.target.value)}
-                        />
-                    </div>
-
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="toggle">
-                                Perpetual Lisans mı?
-                            </label>
-                            <div className="relative rounded-md shadow-sm">
+                            <div className="mb-4 mt-2">
+                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number1">
+                                    Adet
+                                </label>
                                 <input
-                                    id="toggle"
-                                    type="checkbox"
-                                    className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                                    checked={toggleValue}
-                                    onChange={(event) => setToggleValue(event.target.checked)}
+                                    id="number1"
+                                    type="number"
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    value={quantity}
+                                    onChange={(event) => setQuantity(event.target.value)}
                                 />
                             </div>
+                            <div className="mb-4 mt-2">
+                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number2">
+                                    Ek süre (Yıl)
+                                </label>
+                                <input
+                                    id="number2"
+                                    type="number"
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    value={additionalYear}
+                                    onChange={(event) => setAdditionalYear(event.target.value)}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="toggle">
+                                    Perpetual Lisans mı?
+                                </label>
+                                <div className="relative rounded-md shadow-sm">
+                                    <input
+                                        id="toggle"
+                                        type="checkbox"
+                                        className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                                        checked={togglePerpetual}
+                                        onChange={(event) => setTogglePerpetual(event.target.checked)}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between">
 
-                        <button
-                            className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="button"
-                        >
-                            SATIN AL
-                        </button>
-                    </div>
+                            <button onClick={PostJsonData}
+                                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="button"
+                            >
+                                SATIN AL
+                            </button>
+                        </div>
                     </form>
 
                 </Modal.Body>
