@@ -2,15 +2,19 @@ import React, {Fragment, useEffect, useState} from 'react';
 import {Modal} from "flowbite-react";
 import Select from 'react-select'
 import PostData from "../utility/HttpPostUtility";
+import { storeWithObject } from "../stores/store"
+
 const BuyLicenseModal = (props) => {
 
-    const [togglePerpetual, setTogglePerpetual] = useState(false)
     const [quantity, setQuantity] = useState(0)
-    const [partnerId, setPartnerId] = useState(0)
+    const [partnerId, setPartnerId] = useState('')
+    const [endUser, setEndUser] = useState('')
     const [additionalYear, setAdditionalYear] = useState(0)
     const [licenseType, setLicenseType] = useState('')
-    const [simCall, setSimCall] = useState('')
-    const [options, setOptions] = useState([]); // Add state to store the options
+    const [simCall, setSimCall] = useState(0)
+    const [options, setOptions] = useState([]);
+    const [lines, SetLines] = useState([]);
+    const [responseData, setResponseData] = useState(null)
 
     useEffect(() => {
         const getPartners = async () => {
@@ -30,37 +34,48 @@ const BuyLicenseModal = (props) => {
         getPartners();
     }, []); // Call the getPartners function only once when the component mounts
 
-    const PostJsonData = () => {
-        const data = {
-            PO: "MYPO123",
-            SalesCode: "",
-            Notes: "",
-            Lines: [
-                {
-                    Type: "NewLicense",
-                    Edition: licenseType,
-                    SimultaneousCalls: simCall,
-                    IsPerpetual: togglePerpetual,
-                    Quantity: quantity,
-                    AdditionalInsuranceYears: additionalYear,
-                    ResellerId: partnerId,
-                    AddHosting: false
-                }
-            ]
-        };
+    const data = {
+        PO: "MYPO123",
+        SalesCode: "",
+        Notes: "",
+        Lines: [
+            {
+                Type: "NewLicense",
+                Edition: licenseType,
+                SimultaneousCalls: parseInt(simCall, 10),
+                Quantity: parseInt(quantity, 10),
+                AdditionalInsuranceYears: parseInt(additionalYear, 10),
+                ResellerId: partnerId,
+                AddHosting: false
+            }
+        ]
+    };
+    function addLine() {
 
+        const newLine = [{
+            Type: "NewLicense",
+            Edition: licenseType,
+            SimultaneousCalls: parseInt(simCall, 10),
+            Quantity: parseInt(quantity, 10),
+            AdditionalInsuranceYears: parseInt(additionalYear, 10),
+            ResellerId: partnerId,
+            AddHosting: false
+        }]
 
-        const jsonData = JSON.stringify(data);
-
-        PostData('/api/newlicense',jsonData).then((data)=>{
-            console.log(data)
-        })
-            .catch((error) => {
-                console.error(error);
-            });
-
-
+        storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
+       // SetLines(prevLines => [...prevLines, ...newLine]);
     }
+
+    const PostJsonData = async () => {
+
+        try {
+            const responseData = await PostData('/api/newlicense', JSON.stringify(data));
+            setResponseData(responseData)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const closeModal = () => {
 
         props.closeModal()
@@ -75,8 +90,37 @@ const BuyLicenseModal = (props) => {
                 onClose={() => closeModal()}>
                 <Modal.Header/>
                 <Modal.Body>
-                    <h1 className="grid border border-b-3 border-b-blue-600 justify-center pb-2 pt-2 shadow-2xl">YENİ LİSANS</h1>
+                    <h1 className="grid border border-b-3 border-b-blue-600 justify-center pb-2 pt-2 shadow-2xl">YENİ
+                        LİSANS</h1>
                     <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+
+                        <label className="block text-gray-700 text-sm font-bold mb-2 mt-2" htmlFor="select3">
+                            Bayi Seçimi
+                        </label>
+                        <div className="relative rounded-md shadow-sm mb-2">
+                            <Select options={options}
+                                    isLoading={false}
+                                    isClearable={true}
+                                    noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
+                                    placeholder="Bayi seçimi yapınız"
+                                    onChange={(data, opt) => {
+                                        setPartnerId(data?.value)
+                                    }}>
+                            </Select>
+
+                        </div>
+                        <div className="mb-4 mt-2 mb-2">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number1">
+                                Son Kullanıcı (Opsiyonel)
+                            </label>
+                            <input
+                                id="enduser"
+                                type="text"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                value={endUser}
+                                onChange={(event) => setEndUser(event.target.value)}
+                            />
+                        </div>
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="select1">
                                 Lisans Tipi
@@ -89,14 +133,11 @@ const BuyLicenseModal = (props) => {
                                     onChange={(event) => setLicenseType(event.target.value)}
                                 >
                                     <option value="">Lisans Tipini Seçiniz</option>
-                                    <option value="Standard">Standard</option>
                                     <option value="Professional">Professional</option>
                                     <option value="Enterprise">Enterprise</option>
-                                    <option value="Free">Free</option>
                                 </select>
                                 <div
                                     className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-
                                 </div>
                             </div>
 
@@ -129,21 +170,6 @@ const BuyLicenseModal = (props) => {
                                 </div>
                             </div>
 
-                            <label className="block text-gray-700 text-sm font-bold mb-2 mt-2" htmlFor="select3">
-                                Bayi Seçimi
-                            </label>
-                            <div className="relative rounded-md shadow-sm">
-                                <Select options={options}
-                                        isLoading={false}
-                                        isClearable={true}
-                                        noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
-                                        placeholder="Bayi seçimi yapınız"
-                                        onChange={(data, opt) => {
-                                            setPartnerId(data?.value)
-                                        }}>
-                                </Select>
-
-                            </div>
                             <div className="mb-4 mt-2">
                                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number1">
                                     Adet
@@ -169,7 +195,7 @@ const BuyLicenseModal = (props) => {
                                 />
                             </div>
 
-                            <div className="mb-4">
+                            {/* <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="toggle">
                                     Perpetual Lisans mı?
                                 </label>
@@ -182,16 +208,16 @@ const BuyLicenseModal = (props) => {
                                         onChange={(event) => setTogglePerpetual(event.target.checked)}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="flex items-center justify-between">
 
-                            <button onClick={PostJsonData}
-                                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            <button onClick={addLine}
+                                    className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                     type="button"
                             >
-                                SATIN AL
+                                SEPETE EKLE
                             </button>
                         </div>
                     </form>

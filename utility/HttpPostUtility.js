@@ -1,5 +1,16 @@
 async function PostData(url = '', data = {}) {
+    // Determine the type of the data parameter
+    const dataType = typeof data;
 
+    // If the data parameter is an object, convert it to a string using JSON.stringify
+    let postData;
+    if (dataType === 'object') {
+        postData = JSON.stringify(data);
+    } else {
+        postData = data;
+    }
+
+    // Rest of the function remains the same
     const username = process.env.NEXT_PUBLIC_3CX_API_KEY;
     const password = ''; // Your password goes here
     const basicAuth = btoa(`${username}:${password}`);
@@ -12,7 +23,9 @@ async function PostData(url = '', data = {}) {
             'Authorization': `Basic ${basicAuth}`
             // 'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        body: postData // body data type must match "Content-Type" header
+    }).catch((error) => {
+        console.log(error)
     });
     return response.json();
 }
