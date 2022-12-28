@@ -52,7 +52,7 @@ const BuyLicenseModal = (props) => {
     };
     function addLine() {
 
-        const newLine = [{
+        const newLine = {
             Type: "NewLicense",
             Edition: licenseType,
             SimultaneousCalls: parseInt(simCall, 10),
@@ -60,9 +60,10 @@ const BuyLicenseModal = (props) => {
             AdditionalInsuranceYears: parseInt(additionalYear, 10),
             ResellerId: partnerId,
             AddHosting: false
-        }]
+        }
 
-        storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
+       // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
+        storeWithObject.addLine(newLine)
        // SetLines(prevLines => [...prevLines, ...newLine]);
     }
 

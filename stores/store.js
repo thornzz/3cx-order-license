@@ -7,9 +7,8 @@ export const storeWithObject=makeAutoObservable({
         return storeWithObject.lines.length
     },
     addLine(data){
-        console.log('store',storeWithObject)
+        console.log(JSON.stringify(data))
         storeWithObject.lines.push(data)
-
     },
     getLines(){
         return  storeWithObject.lines
