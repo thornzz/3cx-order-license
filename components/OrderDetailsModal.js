@@ -1,13 +1,13 @@
 import {Modal, Table} from "flowbite-react";
 import React, {Fragment, useState} from "react";
-import {useRecoilState} from "recoil";
-import {cart,cartLength} from "../atoms/shoppingCartAtom";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {cart, cartDetail, cartDetailDiscountTotal, cartDetailSubTotal} from "../atoms/shoppingCartAtom";
 function OrderDetailsModal(props) {
 
-    const [showModal, setShowModal] = useState(false)
     const [cartState,setCartState] = useRecoilState(cart);
-
-
+    const [cartDetailState,setDetailCartState] = useRecoilState(cartDetail);
+    const subTotal = useRecoilValue(cartDetailSubTotal);
+    const discountTotal = useRecoilValue(cartDetailDiscountTotal);
     const orderDetails = cartState.map((item,index) => {
         return (
             <tr key={index}>
@@ -20,9 +20,19 @@ function OrderDetailsModal(props) {
                 <td className="p-4 px-6 text-center whitespace-nowrap">{item.SimultaneousCalls}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">{item.Quantity}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">{item.AdditionalInsuranceYears}</td>
-                <td className="p-4 px-6 text-center whitespace-nowrap">$595</td>
+                <td className="p-4 px-6 text-center whitespace-nowrap">${cartDetailState[index]?.Items[0].UnitPrice * cartDetailState[index]?.Items[0].Quantity}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">
-                    <button>
+                    <button onClick={()=> {
+                        const updatedCartState = [...cartState];
+                        updatedCartState.splice(index, 1);
+                        setCartState(updatedCartState)
+
+                        const updatedDetailCartState = [...cartDetailState];
+                        updatedDetailCartState.splice(index, 1);
+                        setDetailCartState(updatedDetailCartState)
+
+                    }
+                    }>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="w-6 h-6 text-red-400"
@@ -79,11 +89,11 @@ function OrderDetailsModal(props) {
                                     <h3 className="text-xl font-bold text-blue-600">Sipariş Özeti</h3>
                                     <div className="flex justify-between px-4">
                                         <span className="font-bold">Ara Toplam</span>
-                                        <span className="font-bold">$35.25</span>
+                                        <span className="font-bold">${subTotal}</span>
                                     </div>
                                     <div className="flex justify-between px-4">
                                         <span className="font-bold">İndirim</span>
-                                        <span className="font-bold text-red-600">- $5.00</span>
+                                        <span className="font-bold text-red-600">- ${discountTotal}</span>
                                     </div>
 
                                     <div
@@ -98,7 +108,7 @@ function OrderDetailsModal(props) {
               "
                                     >
                                         <span className="text-xl font-bold">Toplam</span>
-                                        <span className="text-2xl font-bold">$37.50</span>
+                                        <span className="text-2xl font-bold">${subTotal-discountTotal}</span>
                                     </div>
                                 </div>
                             </div>

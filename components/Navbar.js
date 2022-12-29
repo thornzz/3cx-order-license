@@ -2,9 +2,14 @@ import React from 'react';
 import {auth} from "../firebase";
 import Image from 'next/image'
 import ShoppingCart from "./ShoppingCart";
+import {cart} from "../atoms/shoppingCartAtom";
+import {useRecoilState} from "recoil";
 
 function Navbar() {
+    const [resetCart,setResetCart] = useRecoilState(cart);
+
     const Logout = async () => {
+        setResetCart([]);
         await auth.signOut();
     }
     return (

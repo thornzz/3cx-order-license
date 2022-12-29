@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react";
 import Select from 'react-select'
 import PostData from "../utility/HttpPostUtility";
 import {useRecoilState} from "recoil";
-import {cart} from "../atoms/shoppingCartAtom";
+import {cart, cartDetail} from "../atoms/shoppingCartAtom";
 
 const BuyLicenseModal = (props) => {
 
@@ -14,9 +14,8 @@ const BuyLicenseModal = (props) => {
     const [licenseType, setLicenseType] = useState('')
     const [simCall, setSimCall] = useState(0)
     const [options, setOptions] = useState([]);
-    const [lines, SetLines] = useState([]);
-    const [responseData, setResponseData] = useState(null)
-    const [cartState,setCartState] = useRecoilState(cart);
+    const [cartState, setCartState] = useRecoilState(cart);
+    const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
 
     useEffect(() => {
         const getPartners = async () => {
@@ -36,23 +35,7 @@ const BuyLicenseModal = (props) => {
         getPartners();
     }, []); // Call the getPartners function only once when the component mounts
 
-    const data = {
-        PO: "MYPO123",
-        SalesCode: "",
-        Notes: "",
-        Lines: [
-            {
-                Type: "NewLicense",
-                Edition: licenseType,
-                SimultaneousCalls: parseInt(simCall, 10),
-                Quantity: parseInt(quantity, 10),
-                AdditionalInsuranceYears: parseInt(additionalYear, 10),
-                ResellerId: partnerId,
-                AddHosting: false
-            }
-        ]
-    };
-    function addLine() {
+    async function addLine() {
 
         const newLine = {
             Type: "NewLicense",
@@ -64,16 +47,26 @@ const BuyLicenseModal = (props) => {
             AddHosting: false
         }
 
-       // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
-        setCartState([...cartState,newLine]);
-       // SetLines(prevLines => [...prevLines, ...newLine]);
+        // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
+        setCartState([...cartState, newLine]);
+        const res = await PostJsonData(newLine);
+console.log(JSON.stringify(res));
+        setDetailCartState([...cartDetailState, res]);
+        // SetLines(prevLines => [...prevLines, ...newLine]);
     }
 
-    const PostJsonData = async () => {
+    const PostJsonData = async (data) => {
+
+        const postData = {
+            PO: "MYPO123",
+            SalesCode: "",
+            Notes: "",
+            Lines: [data]
+        };
 
         try {
-            const responseData = await PostData('/api/newlicense', JSON.stringify(data));
-            setResponseData(responseData)
+            const responseData = await PostData('/api/newlicense', JSON.stringify(postData));
+            return responseData;
         } catch (error) {
             console.error(error);
         }
