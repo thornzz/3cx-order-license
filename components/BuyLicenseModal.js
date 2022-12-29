@@ -2,7 +2,8 @@ import React, {Fragment, useEffect, useState} from 'react';
 import {Modal} from "flowbite-react";
 import Select from 'react-select'
 import PostData from "../utility/HttpPostUtility";
-import { storeWithObject } from "../stores/store"
+import {useRecoilState} from "recoil";
+import {cart} from "../atoms/shoppingCartAtom";
 
 const BuyLicenseModal = (props) => {
 
@@ -15,6 +16,7 @@ const BuyLicenseModal = (props) => {
     const [options, setOptions] = useState([]);
     const [lines, SetLines] = useState([]);
     const [responseData, setResponseData] = useState(null)
+    const [cartState,setCartState] = useRecoilState(cart);
 
     useEffect(() => {
         const getPartners = async () => {
@@ -63,7 +65,7 @@ const BuyLicenseModal = (props) => {
         }
 
        // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
-        storeWithObject.addLine(newLine)
+        setCartState([...cartState,newLine]);
        // SetLines(prevLines => [...prevLines, ...newLine]);
     }
 

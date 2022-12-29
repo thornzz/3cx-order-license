@@ -1,12 +1,14 @@
 import {Modal, Table} from "flowbite-react";
 import React, {Fragment, useState} from "react";
-import {storeWithObject} from "../stores/store"
-
+import {useRecoilState} from "recoil";
+import {cart,cartLength} from "../atoms/shoppingCartAtom";
 function OrderDetailsModal(props) {
 
     const [showModal, setShowModal] = useState(false)
+    const [cartState,setCartState] = useRecoilState(cart);
 
-    const orderDetails = storeWithObject.lines.map((item,index) => {
+
+    const orderDetails = cartState.map((item,index) => {
         return (
             <tr key={index}>
                 <td className="p-4 px-6 text-center whitespace-nowrap">{item.ResellerId}</td>

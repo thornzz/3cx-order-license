@@ -1,11 +1,11 @@
 import React, {Fragment, useState} from 'react'
 import {FaShoppingCart} from 'react-icons/fa'
-import {storeWithObject} from "../stores/store"
 import OrderDetailsModal from "./OrderDetailsModal";
-
+import {useRecoilValue} from "recoil";
+import {cartLength} from "../atoms/shoppingCartAtom";
 const ShoppingCart = () => {
     const [showModal, setShowModal] = useState(false)
-
+    const  cartLengthState = useRecoilValue(cartLength);
     const toggleModalShow = () => {
        setShowModal(!showModal)
     }
@@ -18,7 +18,7 @@ const ShoppingCart = () => {
             <div
                 className="bg-red-600 rounded-full w-[25px] px-2 mx-2 text-sm  text-white"
             >
-                {storeWithObject.count}
+                {cartLengthState}
             </div>
             <button onClick={toggleModalShow}>
                 <FaShoppingCart className="text-white hover:text-gray-200 w-[20px]"/>
