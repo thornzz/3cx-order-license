@@ -3,12 +3,16 @@ import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import '../styles/tables.module.css';
+import extractData from "../utility/extractFirestoreData";
 
-const DataTable = () => {
+const DataTable = (props) => {
+
     let table;
 
-    useEffect(() => {
 
+
+    useEffect(() => {
+        console.log(props.data)
         table = $('#myData').DataTable({
             "language": {
                 "lengthMenu": "Sayfa başına  _MENU_ kayıt görüntüleniyor",
@@ -16,8 +20,18 @@ const DataTable = () => {
                 "info": "Sayfa _PAGE_ / _PAGES_",
                 "infoEmpty": "Herhangi bir kayıt yok.",
                 "infoFiltered": "(filtered from _MAX_ total records)"
-            }
+            },
+            columns:[
+                { title: 'Bayi' },
+                { title: 'End User' },
+                { title: 'Tarih' },
+                { title: 'Lisans Tipi' },
+                { title: 'Lisans Anahtarı' },
+                { title: 'Kanal Sayısı' }
+            ],
+            data:extractData(props.data)
         });
+
         return () => {
             table.destroy();
         };
@@ -25,38 +39,23 @@ const DataTable = () => {
 
     }, []);
 
+    // generateTableRows = dataArr.map((item, index) => {
+    //     return(
+    //         <tr key={index}>
+    //             <td>{item.ResellerName}</td>
+    //             <td>{item.endUser}</td>
+    //             <td>{item.DateTime.seconds}</td>
+    //             <td>{item.Edition}</td>
+    //             <td>{item.LicenseKey}</td>
+    //             <td>{item.SimultaneousCalls}</td>
+    //         </tr>
+    //     );
+    // });
+
     return (
 
         <table id="myData" className="stripe hover">
-            <thead>
-            <tr>
-                <th data-priority="1">Field 1</th>
-                <th data-priority="2">Field 2</th>
-                <th data-priority="3">Field 3</th>
-                <th data-priority="4">Field 4</th>
-                <th data-priority="5">Boolean Field</th>
-                <th data-priority="6">Fieelldd</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Tiger Nixon</td>
-                <td>System Architect</td>
-                <td>Edinburgh</td>
-                <td>61</td>
-                <td>2011/04/25</td>
-                <td>$320,800</td>
-            </tr>
 
-            <tr>
-                <td>Donna Snider</td>
-                <td>Customer Support</td>
-                <td>New York</td>
-                <td>27</td>
-                <td>2011/01/25</td>
-                <td>$112,000</td>
-            </tr>
-            </tbody>
         </table>
 
     );

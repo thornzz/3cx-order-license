@@ -5,7 +5,7 @@ import {useRecoilValue} from "recoil";
 import {cartLength} from "../atoms/shoppingCartAtom";
 const ShoppingCart = () => {
     const [showModal, setShowModal] = useState(false)
-    const  cartLengthState = useRecoilValue(cartLength);
+    const cartLengthState = useRecoilValue(cartLength);
     const toggleModalShow = () => {
        setShowModal(!showModal)
     }
@@ -20,7 +20,7 @@ const ShoppingCart = () => {
             >
                 {cartLengthState}
             </div>
-            <button onClick={toggleModalShow}>
+            <button onClick={()=> cartLengthState > 0 && toggleModalShow()}>
                 <FaShoppingCart className="text-white hover:text-gray-200 w-[20px]"/>
             </button>
         </div>

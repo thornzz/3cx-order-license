@@ -4,13 +4,13 @@ import Select from 'react-select'
 import PostData from "../utility/HttpPostUtility";
 import {useRecoilState} from "recoil";
 import {cart, cartDetail} from "../atoms/shoppingCartAtom";
-
+import { toast } from "react-toastify";
 const BuyLicenseModal = (props) => {
 
-    const [quantity, setQuantity] = useState(0)
+    const [quantity, setQuantity] = useState(1)
     const [partnerId, setPartnerId] = useState('')
     const [endUser, setEndUser] = useState('')
-    const [additionalYear, setAdditionalYear] = useState(0)
+    const [additionalYear, setAdditionalYear] = useState(1)
     const [licenseType, setLicenseType] = useState('')
     const [simCall, setSimCall] = useState(0)
     const [options, setOptions] = useState([]);
@@ -50,8 +50,23 @@ const BuyLicenseModal = (props) => {
         // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
         setCartState([...cartState, newLine]);
         const res = await PostJsonData(newLine);
-console.log(JSON.stringify(res));
+        res.Items[0].endUser=endUser;
+        res.Items[0].ResellerName=res.Items[0].ProductDescription.split('For:')[1].split('\n')[0].trim();
         setDetailCartState([...cartDetailState, res]);
+
+
+        console.log('cart detail state',res);
+
+        toast.info('Ürün sepete eklendi.', {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+        });
         // SetLines(prevLines => [...prevLines, ...newLine]);
     }
 
@@ -66,6 +81,7 @@ console.log(JSON.stringify(res));
 
         try {
             const responseData = await PostData('/api/newlicense', JSON.stringify(postData));
+            console.log(responseData);
             return responseData;
         } catch (error) {
             console.error(error);
@@ -176,6 +192,8 @@ console.log(JSON.stringify(res));
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     value={quantity}
                                     onChange={(event) => setQuantity(event.target.value)}
+                                    min={1}
+                                    max={50}
                                 />
                             </div>
                             <div className="mb-4 mt-2">
@@ -188,6 +206,8 @@ console.log(JSON.stringify(res));
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     value={additionalYear}
                                     onChange={(event) => setAdditionalYear(event.target.value)}
+                                    min={1}
+                                    max={50}
                                 />
                             </div>
 
