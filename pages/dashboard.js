@@ -1,29 +1,19 @@
 
 import Navbar from "../components/Navbar";
-import DataTable from "../components/DataTable";
 import BuyLicenseModal from "../components/BuyLicenseModal";
 import React, {useEffect, useState} from "react";
-import {Button, Footer} from "flowbite-react";
+import {Button} from "flowbite-react";
 import {db} from '../firebase/index';
-import {collection,getDocs} from "firebase/firestore";
+import {getDocs,collection} from "firebase/firestore";
+import {useCollectionData} from "react-firebase-hooks/firestore";
+import LicensesTable from "../components/LicensesTable";
 
-const Dashboard = () => {
-    const dbInstance = collection(db, 'licenses');
-    const [data,setData] = useState([]);
+const Dashboard = ()  => {
+
     const [openModal, setOpenModal] = useState(false);
 
-    useEffect( () => {
-       getData()
-    }, [])
 
-    const getData = () => {
-        getDocs(dbInstance)
-            .then((data) => {
-                setData(data.docs.map((item) => {
-                    return { ...item.data(), id: item.id }
-                }));
-            })
-    }
+
     const showModal = ()=>{
 
         setOpenModal(!openModal);
@@ -41,11 +31,9 @@ const Dashboard = () => {
                 </Button>
             </div>
 
-            <DataTable data={data}/>
-
-            <Footer/>
-
+            <LicensesTable  />
         </div>
     );
 };
 export default Dashboard;
+

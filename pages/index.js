@@ -5,7 +5,7 @@ import Dashboard from "./dashboard";
 
 export default function Home() {
     const { user } = useAuth();
-    console.log(user);
+
   return (
     <div>
       <Head>
