@@ -1,16 +1,24 @@
 import DataTable from 'react-data-table-component';
-import extractData from "../utility/extractFirestoreData";
-import {db} from '../firebase/index';
-import {getDocs, collection} from "firebase/firestore";
-import React, {useState,useEffect} from "react";
+import React, {useEffect, useState} from "react";
+import {tableStyle} from "./styles/tableStyle";
+import {useRecoilState} from "recoil";
+import {licenses} from "../atoms/fireStoreDataAtom";
+import {RotatingSquare} from "react-loader-spinner";
 
 const LicensesTable = () => {
-    const [myData, setData] = useState([])
+    //const [myData, setData] = useState([])
+    const [searchText, setSearchText] = useState("");
+    const [licenseState, setLicenseState] = useRecoilState(licenses);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [isLoading, setIsLoading] = useState(true);
     const columns = [
         {
             name: 'Bayi',
             selector: row => row.ResellerName,
-            sortable:true
+            sortable: true,
+            grow: 1.2,
+            filter: true
         },
         {
             name: 'Tarih',
@@ -19,7 +27,7 @@ const LicensesTable = () => {
         {
             name: 'End user',
             selector: row => row.endUser,
-            sortable:true
+            sortable: true
         },
         {
             name: 'Lisans Anahtarı',
@@ -28,38 +36,97 @@ const LicensesTable = () => {
         {
             name: 'Lisans Tipi',
             selector: row => row.Edition,
-            sortable:true
+            sortable: true
         },
         {
             name: 'Kanal Sayısı',
             selector: row => row.SimultaneousCalls,
-            sortable:true
+            sortable: true
         },
     ];
+    const handleSearch = event => {
+        setSearchText(event.target.value);
+    };
 
+    const filteredData = licenseState.filter(item =>
+        [item.ResellerName, item.LicenseKey, item.DateTime]
+            .map(val => val.toLowerCase())
+            .some(val => val.includes(searchText.toLowerCase()))
+    );
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
     useEffect(() => {
         (async () => {
-            //setLoading(true)
-            const collectionRef = collection(db, 'licenses');
-            const querySnapshot = await getDocs(collectionRef)
-            const arr = querySnapshot.docs.map((d) => ({...d.data()}))
-            const mydata = await extractData(arr)
-            setData(mydata)
-            //setLoading(false)
+            try {
+                const firestoreData = await fetch('/api/getfirestoredata');
+                const data = await firestoreData.json();
+                setLicenseState(data)
+                const timer = setTimeout(() => {
+                    setIsLoading(false);
+                }, 3000);
+                return () => clearTimeout(timer);
+            } catch (e) {
+                console.log(e)
+            }
 
         })();
 
     }, [])
 
+
     return (
-        <DataTable
-            columns={columns}
-            data={myData}
-    highlightOnHover={true}
-        />
+        <div>
+            {isLoading ? (
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <RotatingSquare
+                        height="100"
+                        width="100"
+                        color="white"
+                        ariaLabel="rotating-square-loading"
+                        strokeWidth="4"
+                        wrapperStyle={{}}
+                        wrapperClass=""
+                        visible={true}
+                    />
+                </div>
+            ) : (
+                <DataTable
+                    columns={columns}
+                    data={paginatedData}
+                    customStyles={tableStyle}
+                    highlightOnHover={true}
+                    noDataComponent={'Herhangi bir kayıt bulunamadı'}
+                    subHeader
+                    subHeaderComponent={
+                        <div style={{display: "flex", alignItems: "center"}}>
+                            <h3 style={{margin: "0 10px"}}>Ara :</h3>
+                            <input
+                                type="text"
+                                value={searchText}
+                                onChange={handleSearch}
+                                style={{border: "none", borderBottom: "1px solid black"}}
+                            />
+                        </div>
+                    }
+                    pagination
+                    paginationComponentOptions={{
+                        rowsPerPageText: "Kayıt sayısı :",
+                        rangeSeparatorText: "/",
+                        noRowsPerPage: false,
+                        selectAllRowsItem: false,
+                        selectAllRowsItemText: "All"
+                    }}
+                    onChangeRowsPerPage={setRowsPerPage}
+                    onChangePage={setCurrentPage}
+                    paginationServer
+                    paginationTotalRows={filteredData.length}
+                    paginationRowsPerPageOptions={[10, 25, 50]}
+                />
+            )}
+        </div>
     )
-
 }
-
 
 export default LicensesTable

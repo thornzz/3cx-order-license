@@ -10,7 +10,7 @@ const BuyLicenseModal = (props) => {
     const [quantity, setQuantity] = useState(1)
     const [partnerId, setPartnerId] = useState('')
     const [endUser, setEndUser] = useState('')
-    const [additionalYear, setAdditionalYear] = useState(1)
+    const [additionalYear, setAdditionalYear] = useState(0)
     const [licenseType, setLicenseType] = useState('')
     const [simCall, setSimCall] = useState(0)
     const [options, setOptions] = useState([]);

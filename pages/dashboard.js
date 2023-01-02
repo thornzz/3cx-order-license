@@ -3,9 +3,6 @@ import Navbar from "../components/Navbar";
 import BuyLicenseModal from "../components/BuyLicenseModal";
 import React, {useEffect, useState} from "react";
 import {Button} from "flowbite-react";
-import {db} from '../firebase/index';
-import {getDocs,collection} from "firebase/firestore";
-import {useCollectionData} from "react-firebase-hooks/firestore";
 import LicensesTable from "../components/LicensesTable";
 
 const Dashboard = ()  => {
@@ -20,7 +17,7 @@ const Dashboard = ()  => {
     }
     return (
 
-        <div className="bg-gray-800 h-screen w-full">
+        <div className="bg-gray-900 h-screen w-full">
 
             <BuyLicenseModal showModal={openModal} closeModal={showModal}></BuyLicenseModal>
 

@@ -13,6 +13,7 @@ const cartDetail = atom({
     default: [],
     effects_UNSTABLE: [persistAtom]
 });
+
 const cartDetailSubTotal = selector({
     key:'cartDetailSubTotal',
     get:({get}) => {

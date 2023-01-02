@@ -29,7 +29,7 @@ function Navbar() {
                 <div className="text-md lg:flex-grow">
                     <a href="#responsive-header"
                        className="block mt-4 lg:inline-block lg:mt-0 text-gray-400 hover:text-white mr-4">
-                     Örnek Link
+
                     </a>
 
                 </div>

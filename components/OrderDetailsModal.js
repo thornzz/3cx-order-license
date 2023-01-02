@@ -8,7 +8,7 @@ import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
 import {db} from '../firebase/index';
 import {addDoc, collection} from "firebase/firestore";
 import mergeJSONObjects from "../utility/MergeJSONObjects";
-
+import {licenses} from "../atoms/fireStoreDataAtom";
 function OrderDetailsModal(props) {
 
     const [cartState, setCartState] = useRecoilState(cart);
@@ -16,11 +16,7 @@ function OrderDetailsModal(props) {
     const subTotal = useRecoilValue(cartDetailSubTotal);
     const cartLengthState = useRecoilValue(cartLength);
     const discountTotal = useRecoilValue(cartDetailDiscountTotal);
-
-
-
-
-
+    const [licenseState, setLicenseState] = useRecoilState(licenses);
     const CompleteOrder = async () => {
 
 
@@ -61,18 +57,15 @@ function OrderDetailsModal(props) {
 
 
             mergeJSONObjects(cartDetailState, tcxResponses);
-            console.log(tcxResponses)
+
             //const now = new Date();
             //const datetime = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
 
             await addDoc(collection(db, "licenses"), {tcxResponses});
-
-            // addtoFirestoreData.Items.forEach(item => {
-            //     item.LicenseKeys.forEach(licenseKey => {
-            //
-            //         console.log(`${datetime} - ${item.ResellerName},${licenseKey.Edition},${licenseKey.SimultaneousCalls},${licenseKey.LicenseKey}`);
-            //     });
-            // });
+            //refresh firestore data
+            const firestoreData = await fetch('/api/getfirestoredata');
+            const data = await firestoreData.json();
+            setLicenseState(data)
 
             setCartState([]);
             setDetailCartState([])
@@ -85,153 +78,6 @@ function OrderDetailsModal(props) {
     };
 
     const CompleteOrderTest = async () => {
-
-        // var jsonObjwithLicenseKeys = {
-        //     "UniqueId": null,
-        //     "TrackingCode": 454975195,
-        //     "Currency": "USD",
-        //     "AdditionalDiscountPerc": 0.0000,
-        //     "AdditionalDiscount": 0.00,
-        //     "SubTotal": 2629.00,
-        //     "TaxPerc": 0.00,
-        //     "Tax": 0.00,
-        //     "GrandTotal": 2629.0000,
-        //     "Items": [
-        //         {
-        //             "Line": 1,
-        //             "Type": "NewLicense",
-        //             "ProductCode": "3CXPSPROFSPLA",
-        //             "SKU": "3CXNAP32M12",
-        //             "ProductName": "3CX Phone System Professional - Annual",
-        //             "ProductDescription": "3CX Phone System Professional 32 SC\nincl. 12 month maintenance\nFor: Sezyum Bilgi Teknolojileri Ltd. Sti.\nSKU: 3CXNAP32M12",
-        //             "UnitPrice": 1195.0000,
-        //             "Discount": 45.0,
-        //             "Quantity": 4,
-        //             "Net": 2629.00,
-        //             "Tax": 0.00,
-        //             "ResellerId": "234161",
-        //             "ResellerPrice": 3346.00,
-        //             "PrivateKeyPassword": null,
-        //             "LicenseKeys": [
-        //                 {
-        //                     "LicenseKey": "9S9X-RZOE-WSSS-RFVC",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "BBIW-OYOJ-KB33-3A8X",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "VXVZ-IWMI-H6C3-FH68",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "EE4O-H7SO-LGJV-K2DO",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 }
-        //             ]
-        //         },
-        //         {
-        //             "Line": 2,
-        //             "Type": "NewLicense",
-        //             "ProductCode": "3CXPSPROFSPLA",
-        //             "SKU": "3CXNAP32M12",
-        //             "ProductName": "3CX Phone System Professional - Annual",
-        //             "ProductDescription": "3CX Phone System Professional 32 SC\nincl. 12 month maintenance\nFor: Avencom Ltd. Sti.\nSKU: 3CXNAP32M12",
-        //             "UnitPrice": 1195.0000,
-        //             "Discount": 45.0,
-        //             "Quantity": 4,
-        //             "Net": 2629.00,
-        //             "Tax": 0.00,
-        //             "ResellerId": "234165",
-        //             "ResellerPrice": 3346.00,
-        //             "PrivateKeyPassword": null,
-        //             "LicenseKeys": [
-        //                 {
-        //                     "LicenseKey": "9S9X-RZOE-WSSS-HB2C",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "BBIW-OYOJ-KB33-HB3C",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "VXVZ-IWMI-H6C3-HB4C",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 },
-        //                 {
-        //                     "LicenseKey": "EE4O-H7SO-LGJV-DOA5",
-        //                     "SimultaneousCalls": 32,
-        //                     "IsPerpetual": false,
-        //                     "Edition": "Professional",
-        //                     "ExpiryIncludedMonths": 12,
-        //                     "ExpiryDate": null,
-        //                     "MaintenanceIncludedMonths": 12,
-        //                     "MaintenanceDate": null,
-        //                     "HostingIncludedMonths": null,
-        //                     "HostingExpiry": null
-        //                 }
-        //             ]
-        //         }
-        //
-        //     ]
-        // }
 
         var jsonObjectwithoutLicenseKeys = {
             "UniqueId": null,
@@ -309,7 +155,7 @@ function OrderDetailsModal(props) {
                 <td className="p-4 px-6 text-center whitespace-nowrap">{item.AdditionalInsuranceYears}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">${cartDetailState[index]?.Items[0].UnitPrice * cartDetailState[index]?.Items[0].Quantity}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">
-                    <button onClick={() => {
+                    <button onClick={async () => {
                         const updatedCartState = [...cartState];
                         updatedCartState.splice(index, 1);
                         setCartState(updatedCartState)
@@ -416,10 +262,10 @@ function OrderDetailsModal(props) {
               w-full
               py-2
               text-center text-white
-              bg-blue-500
+              bg-gray-900
               rounded-md
               shadow
-              hover:bg-blue-600
+              hover:bg-blue-500
             "
                                 >
                                     Siparişi Tamamla
