@@ -10,5 +10,4 @@ module.exports = {
     extend: {},
   },
   plugins: [require("flowbite/plugin")],
-  enabled: process.env.NODE_ENV === "production"
 }
