@@ -19,6 +19,7 @@ export default async function handler(req, res) {
         const filteredData = data.map(partner => ({
             PartnerId: partner.PartnerId,
             CompanyName: partner.CompanyName,
+            PartnerLevelName:partner.PartnerLevelName
         }));
 
         // Send the filtered data as the response

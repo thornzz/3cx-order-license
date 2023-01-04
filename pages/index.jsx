@@ -14,9 +14,9 @@ export default function Home() {
       </Head>
 
       <main>
-          {!user && <Login/> }
           {user && <Dashboard/>}
 
+          {!user && <Login/> }
       </main>
 
 

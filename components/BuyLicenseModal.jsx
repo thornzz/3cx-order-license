@@ -11,8 +11,8 @@ const BuyLicenseModal = (props) => {
     const [partnerId, setPartnerId] = useState('')
     const [endUser, setEndUser] = useState('')
     const [additionalYear, setAdditionalYear] = useState(0)
-    const [licenseType, setLicenseType] = useState('')
-    const [simCall, setSimCall] = useState(0)
+    const [licenseType, setLicenseType] = useState('Professional')
+    const [simCall, setSimCall] = useState(8)
     const [options, setOptions] = useState([]);
     const [cartState, setCartState] = useRecoilState(cart);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
@@ -25,10 +25,10 @@ const BuyLicenseModal = (props) => {
             // Extract only the PartnerId and CompanyName fields from each object in the array
             const filteredData = data.map(partner => ({
                     value: partner.PartnerId,
-                    label: partner.CompanyName,
+                    label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
                 })
             );
-
+            console.log('partnerdata',filteredData)
             setOptions(filteredData); // Update the options state with the filtered data
         }
 
@@ -72,12 +72,21 @@ const BuyLicenseModal = (props) => {
 
     const PostJsonData = async (data) => {
 
+        const renewAnnual = {
+            "Type": "RenewAnnual",
+            "UpgradeKey": "6I7I-EIMB-ILRM-OBS7",
+            "Quantity": 1,
+            "ResellerId": null
+        }
         const postData = {
             PO: "MYPO123",
             SalesCode: "",
             Notes: "",
-            Lines: [data]
+            //Lines: [data]
+            Lines:[renewAnnual]
         };
+
+
 
         try {
             const responseData = await PostData('/api/newlicense', JSON.stringify(postData));
@@ -110,6 +119,7 @@ const BuyLicenseModal = (props) => {
                             Bayi Seçimi
                         </label>
                         <div className="relative rounded-md shadow-sm mb-2">
+
                             <Select options={options}
                                     isLoading={false}
                                     isClearable={true}
@@ -119,20 +129,8 @@ const BuyLicenseModal = (props) => {
                                         setPartnerId(data?.value)
                                     }}>
                             </Select>
+                        </div>
 
-                        </div>
-                        <div className="mb-4 mt-2 mb-2">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number1">
-                                Son Kullanıcı (Opsiyonel)
-                            </label>
-                            <input
-                                id="enduser"
-                                type="text"
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                value={endUser}
-                                onChange={(event) => setEndUser(event.target.value)}
-                            />
-                        </div>
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="select1">
                                 Lisans Tipi
@@ -145,7 +143,7 @@ const BuyLicenseModal = (props) => {
                                     onChange={(event) => setLicenseType(event.target.value)}
                                 >
                                     <option value="">Lisans Tipini Seçiniz</option>
-                                    <option value="Professional">Professional</option>
+                                    <option value="Professional" selected>Professional</option>
                                     <option value="Enterprise">Enterprise</option>
                                 </select>
                                 <div
@@ -161,6 +159,7 @@ const BuyLicenseModal = (props) => {
                                     id="select2"
                                     className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
                                     value={simCall}
+
                                     onChange={(event) => setSimCall(event.target.value)}
                                 >
                                     <option value="">Kanal sayısını seçiniz</option>

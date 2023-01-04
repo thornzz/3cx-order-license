@@ -4,29 +4,49 @@ import BuyLicenseModal from "../components/BuyLicenseModal";
 import React, {useEffect, useState} from "react";
 import {Button} from "flowbite-react";
 import LicensesTable from "../components/LicensesTable";
+import LicenseRenewModal from "../components/LicenseRenewModal";
 
 const Dashboard = ()  => {
 
-    const [openModal, setOpenModal] = useState(false);
+    const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
+    const showNewLicenseModal = ()=>{
 
+        setOpenNewLicenseModal(!openNewLicenseModal);
+    }
+    const [openUpgradeLicenseModal, setOpenUpgradeLicenseModal] = useState(false);
+    const showUpgradeLicenseModal = ()=>{
 
+        setOpenUpgradeLicenseModal(!openNewLicenseModal);
+    }
+    const [openRenewLicenseModal, setRenewLicenseModal] = useState(false);
+    const showRenewLicenseModal = ()=>{
 
-    const showModal = ()=>{
-
-        setOpenModal(!openModal);
+        setRenewLicenseModal(!openRenewLicenseModal);
     }
     return (
 
-        <div className="bg-gray-900 h-screen w-full">
+        <div className="bg-gray-900 h-screen">
 
-            <BuyLicenseModal showModal={openModal} closeModal={showModal}></BuyLicenseModal>
+            <BuyLicenseModal showModal={openNewLicenseModal} closeModal={showNewLicenseModal}></BuyLicenseModal>
 
+            <LicenseRenewModal showModal={openRenewLicenseModal} closeModal={showRenewLicenseModal}></LicenseRenewModal>
             <Navbar/>
-            <div className="grid justify-items-end">
-                <Button onClick={showModal} gradientDuoTone="purpleToPink"  className="px-4 w-35 mb-2 mt-2 mr-2">
+
+            <div className="flex justify-end ">
+
+
+                <Button onClick={showNewLicenseModal}  className="bg-sky-500 px-9 w-35 mb-2 mt-2 mr-2">
                     Yeni Lisans
                 </Button>
+                <Button onClick={showRenewLicenseModal}   className="bg-red-500 px-4 w-35 mb-2 mt-2 mr-2">
+                    Lisans Yenileme
+                </Button>
+                <Button onClick={showUpgradeLicenseModal}  className="bg-green-500 px-4 w-35 mb-2 mt-2 mr-2">
+                    Lisans Yükseltme
+                </Button>
             </div>
+
+
 
             <LicensesTable  />
         </div>
