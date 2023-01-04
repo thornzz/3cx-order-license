@@ -1,13 +1,14 @@
 import React, {Fragment, useEffect, useState} from 'react';
 import {Modal} from "flowbite-react";
 import {GrLicense} from "react-icons/gr";
-import {TbLicense,TbSquareMinus,TbSquarePlus} from "react-icons/tb";
+import {TbLicense, TbSquareMinus, TbSquarePlus} from "react-icons/tb";
 
 const LicenseRenewModal = props => {
 
-    const [showLicenseCard, setShowLicenseCard] = useState(true);
-    const [years, setYears] = useState('');
+    const [showLicenseCard, setShowLicenseCard] = useState(false);
+    const [years, setYears] = useState(1);
     const [licenseKey, setLicenseKey] = useState('');
+    const [licenseKeyData, setLicenseKeyData] = useState(null);
     const [formattedLicenseKey, setFormattedLicenseKey] = useState('');
 
     useEffect(() => {
@@ -15,11 +16,40 @@ const LicenseRenewModal = props => {
         setFormattedLicenseKey(
             licenseKey.replace(/([^-]{4})(?=[^-])/g, '$1-') // Add new hyphens after every fourth character that is not already a hyphen
         );
+
     }, [licenseKey]);
+    useEffect(() => {
+        if (licenseKey.length === 16) {
+            const fetchData = async () => {
+                const response = await getRenewLicenseData(formattedLicenseKey, years)
+                if (response.status === 200) {
+                    const json = await response.json();
+                    setLicenseKeyData(json)
+                    setShowLicenseCard(true)
+                } else {
+                    setShowLicenseCard(false)
+                    setLicenseKeyData(undefined)
+                }
+            }
+            fetchData()
+            console.log(licenseKeyData)
+        } else {
+            setShowLicenseCard(false)
+            setLicenseKeyData(undefined)
+        }
+    }, [formattedLicenseKey]);
 
-    const handleLicenseKeyChange = event => {
+    const addCart = async () => {
+
+
+    }
+
+    const getRenewLicenseData = async (lic, year) => {
+        const response = await fetch(`/api/renew/${lic}/${year}`)
+        return response
+    }
+    const handleLicenseKeyChange = async (event) => {
         let value = event.target.value;
-
         // Only allow digits, letters, and hyphens
         if (/^[0-9A-Za-z-]*$/.test(value)) {
             // Limit the length of the value to 16 characters, excluding hyphens
@@ -27,13 +57,15 @@ const LicenseRenewModal = props => {
 
             // Make the value uppercase
             value = value.toUpperCase();
-
             setLicenseKey(value);
         }
+
+
     };
 
     const closeModal = () => {
-
+        setLicenseKey('')
+        setLicenseKeyData(undefined)
         props.closeModal()
     }
     return (
@@ -62,40 +94,44 @@ const LicenseRenewModal = props => {
                                 onChange={handleLicenseKeyChange}/>
                         </label>
                         {
-                         showLicenseCard && (
-                             <Fragment>
-                                <div className="flex justify-between items-center mb-3">
-                                    <div className="inline-flex items-center self-start">
+                            showLicenseCard && (
+                                <Fragment>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="inline-flex items-center self-start">
 
-                                        <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100"/>
-                                        <span className="font-bold text-gray-900">Professional / 8 Sim call</span>
-                                    </div>
-                                    <div className="flex">
-                                        <button type="button"
-                                                className="bg-yellow-600 p-1.5 font-bold rounded w-10 h-10">
-                                            -
-                                        </button>
-                                        <input id="item_count" type="number" value="1" className="max-w-[100px] font-bold py-1.5 px-2 mx-1.5
-            block border border-gray-300 rounded-md text-sm shadow-sm  placeholder-gray-400
+                                            <TbLicense
+                                                className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100"/>
+                                            <span
+                                                className="font-bold text-gray-900">{licenseKeyData && `${licenseKeyData.Edition} Sürüm / ${licenseKeyData.SimultaneousCalls} Kanal`}</span>
+                                        </div>
+                                        <div className="flex">
+                                            <button type="button"
+                                                    className="bg-yellow-600 p-1.5 font-bold rounded w-10 h-10"
+                                                    onClick={() => setYears(years > 1 ? years - 1 : years)}>
+                                                -
+                                            </button>
+                                            <input id="item_count" type="number" value="1" className="max-w-[100px] font-bold py-1.5 px-2 mx-1.5
+            block border border-gray-300 rounded-md text-sm shadow-sm  placeholder-gray-400 text-center
             focus:outline-none
             focus:border-sky-500
             focus:ring-1
             focus:ring-sky-500
-            focus:invalid:border-red-500  focus:invalid:ring-red-500" disabled={true}/>
+            focus:invalid:border-red-500  focus:invalid:ring-red-500" disabled={true} min={1} max={5} value={years}/>
 
-                                        <button type="button"
-                                                className="bg-green-600 p-1.5 font-bold rounded w-10 h-10">
-                                            +
-                                        </button>
+                                            <button type="button"
+                                                    className="bg-green-600 p-1.5 font-bold rounded w-10 h-10"
+                                                    onClick={() => setYears(years < 5 ? years + 1 : years)}>
+                                                +
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            <button
-                            onClick={() => setShowLicenseCard(true)}
-                            className="px-4 py-1.5 rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
-                            type="button">
-                            Sepete Ekle
-                            </button>
-                             </Fragment>)
+                                    <button
+                                        onClick={() => addCart()}
+                                        className="px-4 py-1.5 rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
+                                        type="button">
+                                        Sepete Ekle
+                                    </button>
+                                </Fragment>)
                         }
 
                     </form>
