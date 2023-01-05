@@ -5,6 +5,7 @@ import React, {useEffect, useState} from "react";
 import {Button} from "flowbite-react";
 import LicensesTable from "../components/LicensesTable";
 import LicenseRenewModal from "../components/LicenseRenewModal";
+import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
 
 const Dashboard = ()  => {
 
@@ -16,7 +17,7 @@ const Dashboard = ()  => {
     const [openUpgradeLicenseModal, setOpenUpgradeLicenseModal] = useState(false);
     const showUpgradeLicenseModal = ()=>{
 
-        setOpenUpgradeLicenseModal(!openNewLicenseModal);
+        setOpenUpgradeLicenseModal(!openUpgradeLicenseModal);
     }
     const [openRenewLicenseModal, setRenewLicenseModal] = useState(false);
     const showRenewLicenseModal = ()=>{
@@ -30,6 +31,9 @@ const Dashboard = ()  => {
             <BuyLicenseModal showModal={openNewLicenseModal} closeModal={showNewLicenseModal}></BuyLicenseModal>
 
             <LicenseRenewModal showModal={openRenewLicenseModal} closeModal={showRenewLicenseModal}></LicenseRenewModal>
+
+            <UpgradeLicenseModal showModal={openUpgradeLicenseModal} closeModal={showUpgradeLicenseModal}></UpgradeLicenseModal>
+
             <Navbar/>
 
             <div className="flex justify-end ">

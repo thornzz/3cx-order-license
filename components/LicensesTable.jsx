@@ -14,19 +14,25 @@ const LicensesTable = () => {
     const [isLoading, setIsLoading] = useState(true);
     const columns = [
         {
+            name: 'Fatura ID',
+            selector: row => row.InvoiceId,
+        },
+        {
             name: 'Bayi',
             selector: row => row.ResellerName,
             sortable: true,
             grow: 1.2,
             filter: true
         },
-        {
-            name: 'Tarih',
-            selector: row => row.DateTime,
-        },
+
         {
             name: 'End user',
             selector: row => row.endUser,
+            sortable: true
+        },
+        {
+            name: 'İşlem Türü',
+            selector: row => row.Type === 'NewLicense' ? 'Yeni Lisans' : row.Type === 'RenewAnnual' ? 'Lisans Yenileme' : 'Lisans Yükseltme',
             sortable: true
         },
         {
@@ -43,6 +49,15 @@ const LicensesTable = () => {
             selector: row => row.SimultaneousCalls,
             sortable: true
         },
+        {
+            name: 'Tarih',
+            selector: row => row.DateTime,
+        },
+        {
+            name: 'Düzenle',
+            selector: null,
+        }
+
     ];
     const handleSearch = event => {
         setSearchText(event.target.value);

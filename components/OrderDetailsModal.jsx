@@ -1,7 +1,14 @@
 import {Modal} from "flowbite-react";
-import React, {Fragment, useEffect, useState} from "react";
+import React, {Fragment} from "react";
 import {useRecoilState, useRecoilValue} from "recoil";
-import {cart, cartDetail, cartDetailDiscountTotal, cartDetailSubTotal, cartLength} from "../atoms/shoppingCartAtom";
+import {
+    cart,
+    cartDetail,
+    cartDetailDiscountTotal,
+    cartDetailSubTotal,
+    cartLength,
+    partners
+} from "../atoms/shoppingCartAtom";
 import {toast} from "react-toastify";
 import PostData from "../utility/HttpPostUtility";
 import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
@@ -9,15 +16,37 @@ import {db} from '../firebase/index';
 import {addDoc, collection} from "firebase/firestore";
 import mergeJSONObjects from "../utility/MergeJSONObjects";
 import {licenses} from "../atoms/fireStoreDataAtom";
+import Select from "react-select";
+
 function OrderDetailsModal(props) {
 
     const [cartState, setCartState] = useRecoilState(cart);
+    const [getPartners, setPartners] = useRecoilState(partners);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const subTotal = useRecoilValue(cartDetailSubTotal);
     const cartLengthState = useRecoilValue(cartLength);
     const discountTotal = useRecoilValue(cartDetailDiscountTotal);
     const [licenseState, setLicenseState] = useRecoilState(licenses);
-    const CompleteOrder = async () => {
+
+    const getOptions = getPartners.map(partner => ({
+            value: partner.PartnerId,
+            label: partner.CompanyName,
+        })
+    );
+    const getLicenseTypeAndSimcalls = (param) => {
+        if (param === undefined)
+            return
+
+        const elementToSplit = param.split('\n')[1];
+        // Use the match method to extract the values
+        const [, , , , type , simcall] = elementToSplit.match(/\w+/g);
+
+        return {
+            licenseType: type,
+            simCall: simcall
+        }
+    }
+    const CompleteOrder = async (props) => {
 
 
         const postData = {
@@ -27,8 +56,9 @@ function OrderDetailsModal(props) {
             Lines: cartState
         };
 
-        try {
+        console.log('asd',cartState)
 
+        try {
             const tcxResponses = await PostData('/api/newlicense', JSON.stringify(postData));
             addRandomLicenseKey(tcxResponses)
 
@@ -42,24 +72,8 @@ function OrderDetailsModal(props) {
                 progress: undefined,
                 theme: "dark",
             });
-            // const addtoFirestoreData = {
-            //     Items: responseData.Items.map(item => ({
-            //         ResellerName: item.ProductDescription.split('For:')[1].split('\n')[0].trim(),
-            //         ResellerId:item.ResellerId,
-            //         Date:new Date(),
-            //         LicenseKeys: item.LicenseKeys.map(licenseKey => ({
-            //             LicenseKey: licenseKey.LicenseKey,
-            //             SimultaneousCalls: licenseKey.SimultaneousCalls,
-            //             Edition: licenseKey.Edition
-            //         })),
-            //     }))
-            // };
-
 
             mergeJSONObjects(cartDetailState, tcxResponses);
-
-            //const now = new Date();
-            //const datetime = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
 
             await addDoc(collection(db, "licenses"), {tcxResponses});
             //refresh firestore data
@@ -139,20 +153,57 @@ function OrderDetailsModal(props) {
     }
 
     const orderDetails = cartState.map((item, index) => {
-
-
+        console.log('cartstate', item)
+        console.log('cardetail', cartDetailState[index]?.Items[0])
         return (
             <tr key={index}>
-                <td className="p-4 px-6 text-center whitespace-nowrap">{cartDetailState[index]?.Items[0].ResellerName}</td>
+                <td className="text-center">{item.Type === 'NewLicense' ? cartDetailState[index]?.Items[0].ResellerName
+
+                    : (
+                        <Fragment>
+                            <Select options={getOptions}
+                                    className="w-auto"
+                                    isLoading={false}
+                                    isClearable={true}
+                                    noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
+                                    placeholder="Bayi seçimi yapınız"
+                                    onChange={(data, opt) => {
+
+                                        setDetailCartState((prevCartDetail) => {
+                                            const newCartDetail = [...prevCartDetail];
+                                            newCartDetail[index] = {
+                                                ...newCartDetail[index],
+                                                Items: [
+                                                    {
+                                                        ...newCartDetail[index].Items[0],
+                                                        ResellerName: data?.label,
+                                                        ResellerId: data?.value,
+                                                        endUser: 'Test asdasd'
+                                                    },
+                                                ],
+                                            };
+                                            return newCartDetail;
+                                        });
+                                    }}>
+                            </Select>
+                        </Fragment>
+                    )
+
+                }</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">{cartDetailState[index]?.Items[0].endUser}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">
                     <div className="flex flex-col items-center justify-center">
-                        <h3>{item.Edition}</h3>
+                        <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
                     </div>
                 </td>
-                <td className="p-4 px-6 text-center whitespace-nowrap">{item.SimultaneousCalls}</td>
-                <td className="p-4 px-6 text-center whitespace-nowrap">{item.Quantity}</td>
-                <td className="p-4 px-6 text-center whitespace-nowrap">{item.AdditionalInsuranceYears}</td>
+                <td className="p-4 px-6 text-center whitespace-nowrap">
+                    <div className="flex flex-col items-center justify-center">
+                        <h3>{item.Type === 'NewLicense' ? 'Yeni Lisans' : item.Type === 'RenewAnnual' ? 'Lisans Yenileme' : 'Lisans Yükseltme'}</h3>
+                    </div>
+                </td>
+                <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type === 'NewLicense' ? item.SimultaneousCalls : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].SimultaneousCalls : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.simCall}</td>
+                <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type !== 'NewLicense' ? 1 : item.Quantity}</td>
+                <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type !== 'NewLicense' ? 0 : item.AdditionalInsuranceYears}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">${cartDetailState[index]?.Items[0].UnitPrice * cartDetailState[index]?.Items[0].Quantity}</td>
                 <td className="p-4 px-6 text-center whitespace-nowrap">
                     <button onClick={async () => {
@@ -200,7 +251,7 @@ function OrderDetailsModal(props) {
         <Fragment>
             <Modal
                 show={props.showModal}
-                size="6xl"
+                size="7xl"
                 popup={true}
                 onClose={() => props.closeModal()}>
                 <Modal.Header/>
@@ -210,12 +261,13 @@ function OrderDetailsModal(props) {
                             <div className="my-2">
                                 <h3 className="text-xl font-bold tracking-wider">Sipariş Detayları</h3>
                             </div>
-                            <table className="w-full shadow-inner">
+                            <table className="max-w-full shadow-inner">
                                 <thead>
                                 <tr className="bg-gray-100">
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Bayi</th>
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">End User</th>
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Lisans Tipi</th>
+                                    <th className="px-6 py-3 font-bold whitespace-nowrap">İşlem</th>
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Kanal Sayısı</th>
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Adet</th>
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Ek (Yıl)</th>
@@ -223,7 +275,7 @@ function OrderDetailsModal(props) {
                                     <th className="px-6 py-3 font-bold whitespace-nowrap">Ürün Sil</th>
                                 </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="w-full">
                                 {orderDetails}
                                 </tbody>
                             </table>

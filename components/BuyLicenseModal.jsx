@@ -3,7 +3,7 @@ import {Modal} from "flowbite-react";
 import Select from 'react-select'
 import PostData from "../utility/HttpPostUtility";
 import {useRecoilState} from "recoil";
-import {cart, cartDetail} from "../atoms/shoppingCartAtom";
+import {cart, cartDetail, partners} from "../atoms/shoppingCartAtom";
 import { toast } from "react-toastify";
 const BuyLicenseModal = (props) => {
 
@@ -13,10 +13,10 @@ const BuyLicenseModal = (props) => {
     const [additionalYear, setAdditionalYear] = useState(0)
     const [licenseType, setLicenseType] = useState('Professional')
     const [simCall, setSimCall] = useState(8)
-    const [options, setOptions] = useState([]);
     const [cartState, setCartState] = useRecoilState(cart);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
-
+    const [getPartners, setPartners] = useRecoilState(partners);
+    const [options, setOptions] = useState([]);
     useEffect(() => {
         const getPartners = async () => {
             const response = await fetch('/api/getpartners');
@@ -28,10 +28,9 @@ const BuyLicenseModal = (props) => {
                     label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
                 })
             );
-            console.log('partnerdata',filteredData)
-            setOptions(filteredData); // Update the options state with the filtered data
+            setOptions(filteredData)
+            setPartners(data); // Update the options state with the filtered data
         }
-
         getPartners();
     }, []); // Call the getPartners function only once when the component mounts
 
@@ -55,8 +54,6 @@ const BuyLicenseModal = (props) => {
         setDetailCartState([...cartDetailState, res]);
 
 
-        console.log('cart detail state',res);
-
         toast.info('Ürün sepete eklendi.', {
             position: "top-right",
             autoClose: 2000,
@@ -72,18 +69,11 @@ const BuyLicenseModal = (props) => {
 
     const PostJsonData = async (data) => {
 
-        const renewAnnual = {
-            "Type": "RenewAnnual",
-            "UpgradeKey": "6I7I-EIMB-ILRM-OBS7",
-            "Quantity": 1,
-            "ResellerId": null
-        }
         const postData = {
             PO: "MYPO123",
             SalesCode: "",
             Notes: "",
-            //Lines: [data]
-            Lines:[renewAnnual]
+            Lines: [data]
         };
 
 

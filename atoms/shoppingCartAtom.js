@@ -14,6 +14,11 @@ const cartDetail = atom({
     effects_UNSTABLE: [persistAtom]
 });
 
+const partners = atom({
+    key: 'partners',
+    default: []
+});
+
 const cartDetailSubTotal = selector({
     key:'cartDetailSubTotal',
     get:({get}) => {
@@ -38,4 +43,4 @@ const cartLength = selector({
     }
 })
 
-export {cart,cartLength,cartDetail,cartDetailSubTotal,cartDetailDiscountTotal}
+export {cart,cartLength,cartDetail,cartDetailSubTotal,cartDetailDiscountTotal,partners}

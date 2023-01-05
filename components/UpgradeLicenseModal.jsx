@@ -1,22 +1,21 @@
 import React, {Fragment, useEffect, useState} from 'react';
-import {Modal} from "flowbite-react";
-import {GrLicense} from "react-icons/gr";
-import {TbLicense, TbSquareMinus, TbSquarePlus} from "react-icons/tb";
-import PostData from "../utility/HttpPostUtility";
-import {toast} from "react-toastify";
 import {useRecoilState} from "recoil";
 import {cart, cartDetail} from "../atoms/shoppingCartAtom";
+import PostData from "../utility/HttpPostUtility";
+import {Modal} from "flowbite-react";
+import {GrLicense} from "react-icons/gr";
+import {TbLicense} from "react-icons/tb";
+import {toast} from "react-toastify";
+function UpgradeLicenseModal(props) {
 
-
-const LicenseRenewModal = props => {
-
-    const [showLicenseCard, setShowLicenseCard] = useState(false);
-    const [years, setYears] = useState(1);
+    const [showLicenseCard, setShowLicenseCard] = useState(true);
     const [licenseKey, setLicenseKey] = useState('');
     const [licenseKeyData, setLicenseKeyData] = useState(null);
     const [formattedLicenseKey, setFormattedLicenseKey] = useState('');
     const [cartState, setCartState] = useRecoilState(cart);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
+    const [licenseType, setLicenseType] = useState('Professional')
+    const [simCall, setSimCall] = useState(64)
 
     useEffect(() => {
         // Update formattedLicenseKey when licenseKey changes
@@ -29,7 +28,7 @@ const LicenseRenewModal = props => {
     useEffect(() => {
         if (licenseKey.length === 16) {
             const fetchData = async () => {
-                const response = await getRenewLicenseData(formattedLicenseKey, years)
+                const response = await getUpgradeLicenseData(formattedLicenseKey,licenseType,simCall)
                 if (response.status === 200) {
                     const json = await response.json();
                     setLicenseKeyData(json)
@@ -49,17 +48,17 @@ const LicenseRenewModal = props => {
 
     const addCart = async () => {
 
-        const renewAnnual = {
-            "Type": "RenewAnnual",
+        const upgradeLicense = {
+            "Type": "Upgrade",
             "UpgradeKey": formattedLicenseKey,
-            "Quantity": years,
-            "ResellerId": null
+            "Edition": licenseType,
+            "SimultaneousCalls": simCall,
+            "ResellerId": null,
+            "AddHosting": false
         }
 
-        setCartState([...cartState, renewAnnual]);
-        const res = await PostJsonData(renewAnnual);
-        res.Items[0].endUser='';
-        res.Items[0].ResellerName='';
+        setCartState([...cartState, upgradeLicense]);
+        const res = await PostJsonData(upgradeLicense);
         setDetailCartState([...cartDetailState, res]);
 
         toast.info('Ürün sepete eklendi.', {
@@ -81,11 +80,8 @@ const LicenseRenewModal = props => {
             PO: "MYPO123",
             SalesCode: "",
             Notes: "",
-            //Lines: [data]
-            Lines:[data]
+            Lines: [data]
         };
-
-
         try {
             const responseData = await PostData('/api/newlicense', JSON.stringify(postData));
             console.log(responseData);
@@ -95,8 +91,8 @@ const LicenseRenewModal = props => {
         }
     }
 
-    const getRenewLicenseData = async (lic, year) => {
-        const response = await fetch(`/api/renew/${lic}/${year}`)
+    const getUpgradeLicenseData = async (licenseKey,toEdition, toSimCalls) => {
+        const response = await fetch(`/api/upgrade/${licenseKey}/${toEdition}/${toSimCalls}`)
         return response
     }
     const handleLicenseKeyChange = async (event) => {
@@ -131,7 +127,7 @@ const LicenseRenewModal = props => {
 
                     <form className="flex flex-col justify-center">
                         <label className="block text-gray-700 text-md text-center font-bold mb-2" htmlFor="select1">
-                            Lisans Yenileme
+                            Lisans Yükseltme
                         </label>
                         <label className="text-md font-medium">Lisans Anahtarı</label>
 
@@ -150,33 +146,66 @@ const LicenseRenewModal = props => {
                         {
                             showLicenseCard && (
                                 <Fragment>
+                                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="select1">
+                                        Geçerli Lisans Bilgisi
+                                    </label>
                                     <div className="flex justify-between items-center mb-3">
+
                                         <div className="inline-flex items-center self-start">
 
                                             <TbLicense
                                                 className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100"/>
                                             <span
-                                                className="font-bold text-gray-900">{licenseKeyData && `${licenseKeyData.Edition} Sürüm / ${licenseKeyData.SimultaneousCalls} Kanal`}</span>
+                                                className="font-bold text-gray-900">{licenseKeyData && `${licenseKeyData.FromEdition} Sürüm / ${licenseKeyData.FromSimultaneousCalls} Kanal`}</span>
                                         </div>
-                                        <div className="flex">
-                                            <button type="button"
-                                                    className="bg-yellow-600 p-1.5 font-bold rounded w-10 h-10"
-                                                    onClick={() => setYears(years > 1 ? years - 1 : years)}>
-                                                -
-                                            </button>
-                                            <input id="item_count" type="number" value="1" className="max-w-[100px] font-bold py-1.5 px-2 mx-1.5
-            block border border-gray-300 rounded-md text-sm shadow-sm  placeholder-gray-400 text-center
-            focus:outline-none
-            focus:border-sky-500
-            focus:ring-1
-            focus:ring-sky-500
-            focus:invalid:border-red-500  focus:invalid:ring-red-500" disabled={true} min={1} max={5} value={years}/>
 
-                                            <button type="button"
-                                                    className="bg-green-600 p-1.5 font-bold rounded w-10 h-10"
-                                                    onClick={() => setYears(years < 5 ? years + 1 : years)}>
-                                                +
-                                            </button>
+                                    </div>
+                                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="select1">
+                                        Yükseltilecek Lisans Bilgileri
+                                    </label>
+                                    <div className="relative rounded-md shadow-sm">
+                                        <select
+                                            id="select1"
+                                            className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
+                                            value={licenseType}
+                                            onChange={(event) => setLicenseType(event.target.value)}
+                                        >
+                                            <option value="">Lisans Tipini Seçiniz</option>
+                                            <option value="Professional">Professional</option>
+                                            <option value="Enterprise">Enterprise</option>
+                                        </select>
+                                        <div
+                                            className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        </div>
+                                    </div>
+
+                                    <label className="block text-gray-700 text-sm font-bold mb-2 mt-2" htmlFor="select2">
+                                        Kanal Sayısı
+                                    </label>
+                                    <div className="relative rounded-md shadow-sm mb-3">
+                                        <select
+                                            id="select2"
+                                            className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
+                                            value=""
+                                            value={simCall}
+                                            onChange={(event) => setSimCall(event.target.value)}
+                                        >
+                                            <option value="">Kanal sayısını seçiniz</option>
+                                            <option value="8">8</option>
+                                            <option value="16">16</option>
+                                            <option value="24">24</option>
+                                            <option value="32">32</option>
+                                            <option value="48">48</option>
+                                            <option value="64">64</option>
+                                            <option value="96">96</option>
+                                            <option value="128">128</option>
+                                            <option value="192">192</option>
+                                            <option value="256">256</option>
+                                            <option value="512">512</option>
+                                            <option value="1024">1024</option>
+                                        </select>
+                                        <div
+                                            className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                         </div>
                                     </div>
                                     <button
@@ -194,6 +223,6 @@ const LicenseRenewModal = props => {
             </Modal>
         </Fragment>
     );
-};
+}
 
-export default LicenseRenewModal;
+export default UpgradeLicenseModal;
