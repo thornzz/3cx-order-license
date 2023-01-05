@@ -1,11 +1,12 @@
 import {useState} from 'react';
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {auth} from "../firebase";
+import {useRouter} from "next/router";
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const router = useRouter()
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -22,7 +23,7 @@ const Login = () => {
 
                 console.log(`${errorCode} ${errorMessage} ${email}`)
             });
-
+       await router.push('/dashboard')
     }
     return (
         <div className="w-screen h-screen flex justify-center items-center

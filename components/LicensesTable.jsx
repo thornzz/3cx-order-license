@@ -21,7 +21,7 @@ const LicensesTable = () => {
             name: 'Bayi',
             selector: row => row.ResellerName,
             sortable: true,
-            grow: 1.2,
+            grow: 2,
             filter: true
         },
 
@@ -38,6 +38,7 @@ const LicensesTable = () => {
         {
             name: 'Lisans Anahtarı',
             selector: row => row.LicenseKey,
+            grow: 2,
         },
         {
             name: 'Lisans Tipi',
@@ -45,7 +46,7 @@ const LicensesTable = () => {
             sortable: true
         },
         {
-            name: 'Kanal Sayısı',
+            name: 'Kanal',
             selector: row => row.SimultaneousCalls,
             sortable: true
         },
