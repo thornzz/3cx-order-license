@@ -133,7 +133,7 @@ const BuyLicenseModal = (props) => {
                                     onChange={(event) => setLicenseType(event.target.value)}
                                 >
                                     <option value="">Lisans Tipini Seçiniz</option>
-                                    <option value="Professional" selected>Professional</option>
+                                    <option value="Professional">Professional</option>
                                     <option value="Enterprise">Enterprise</option>
                                 </select>
                                 <div
@@ -149,7 +149,6 @@ const BuyLicenseModal = (props) => {
                                     id="select2"
                                     className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
                                     value={simCall}
-
                                     onChange={(event) => setSimCall(event.target.value)}
                                 >
                                     <option value="">Kanal sayısını seçiniz</option>

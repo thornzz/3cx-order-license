@@ -19,6 +19,7 @@ import Select from "react-select";
 import Navbar from "../components/Navbar";
 import {useRouter} from "next/router";
 import Head from "next/head";
+import {RiDeleteBin5Line} from "react-icons/ri";
 
 const Cart = (props) => {
 
@@ -31,12 +32,26 @@ const Cart = (props) => {
     const [getPartners, setPartners] = useRecoilState(partners);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [license, setLicenseState] = useRecoilState(licenses);
-    const router = useRouter();
+    const [options, setOptions] = useState([]);
+    const router = useRouter()
 
     useEffect(() => {
         setSubTotals(subTotal)
         setDiscountTotals(discountTotal)
+        const getPartners = async () => {
+            const response = await fetch('/api/getpartners');
+            const data = await response.json();
 
+            // Extract only the PartnerId and CompanyName fields from each object in the array
+            const filteredData = data.map(partner => ({
+                    value: partner.PartnerId,
+                    label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+                })
+            );
+            setOptions(filteredData)
+            setPartners(data); // Update the options state with the filtered data
+        }
+        getPartners();
         setOrderDetails(cartState.map((item, index) => {
             return (
                 <tr key={index}>
@@ -44,7 +59,7 @@ const Cart = (props) => {
 
                         : (
                             <Fragment>
-                                <Select options={getOptions}
+                                <Select options={options}
                                         className="w-auto"
                                         isLoading={false}
                                         isClearable={true}
@@ -109,38 +124,21 @@ const Cart = (props) => {
                             });
                         }
                         }>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-6 h-6 text-red-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                            </svg>
+                          <RiDeleteBin5Line className="w-5 h-5 text-red-500"/>
                         </button>
                     </td>
                 </tr>
             );
         }))
 
-    }, [cartDetailState]);
+    }, [cartDetailState,getPartners]);
 
     const [openEndUserModal, setOpenEndUserModal] = useState(false);
     const closeEndUserModal = () => {
 
         setOpenEndUserModal(!openEndUserModal);
     }
-    const getOptions = getPartners.map(partner => ({
-            value: partner.PartnerId,
-            label: partner.CompanyName,
-        })
-    );
+
     const getLicenseTypeAndSimcalls = (param) => {
         if (param === undefined)
             return
