@@ -6,8 +6,13 @@ import {Button} from "flowbite-react";
 import LicensesTable from "../components/LicensesTable";
 import LicenseRenewModal from "../components/LicenseRenewModal";
 import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
+import {useSession} from "next-auth/react";
 
 const Dashboard = ()  => {
+
+    const {data:session} = useSession()
+
+    console.log('session',session)
 
     const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
     const showNewLicenseModal = ()=>{

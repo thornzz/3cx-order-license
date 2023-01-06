@@ -35,15 +35,16 @@ const Cart = (props) => {
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [license, setLicenseState] = useRecoilState(licenses);
     const [openEndUserModal, setOpenEndUserModal] = useState(false);
-
-    const showEndUserModal = ()=>{
-
+    const [selectedIndex,setSelectedIndex] = useState(0)
+    const showEndUserModal = (index)=>{
+        setSelectedIndex(index)
         setOpenEndUserModal(!openEndUserModal);
     }
-
+    console.log('cart')
     const router = useRouter()
 
     useEffect(() => {
+        console.log('use effect')
         setSubTotals(subTotal)
         setDiscountTotals(discountTotal)
 
@@ -83,7 +84,7 @@ const Cart = (props) => {
                         )
 
                     }</td>
-                    <td className="p-4 px-6 flex justify-center"><button onClick={showEndUserModal}><AiOutlineEye className="w-7 h-7 text-red-500"/></button></td>
+                    <td className="p-4 px-6 flex justify-center"><button onClick={()=>{showEndUserModal(index)}}><AiOutlineEye className="w-7 h-7 text-red-500"/></button></td>
                     <td className="p-4 px-6 text-center">
                         <div className="flex flex-col items-center justify-center">
                             <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
@@ -250,7 +251,7 @@ const Cart = (props) => {
 
         <div className="bg-gray-900 h-screen">
         <Navbar/>
-            <EndUserModal showModal={openEndUserModal} closeModal={showEndUserModal}/>
+            <EndUserModal selectedIndex={selectedIndex} showModal={openEndUserModal} closeModal={showEndUserModal}/>
             <Head>
                 <title>Sipariş Detayları</title>
                 <meta name="description" content="3CX Order License" />
@@ -332,13 +333,13 @@ export default Cart;
 export async function getServerSideProps(context) {
 
     const response = await getPartners()
-
+    const options =[]
     // Extract only the PartnerId and CompanyName fields from each object in the array
-    const options = response.map(partner => ({
-            value: partner.PartnerId,
-            label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
-        })
-    );
+    // const options = response.map(partner => ({
+    //         value: partner.PartnerId,
+    //         label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+    //     })
+    // );
 
     return {
         props: {options}, // will be passed to the page component as props

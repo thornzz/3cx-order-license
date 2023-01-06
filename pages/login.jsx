@@ -1,7 +1,9 @@
+"use client";
 import {useState} from 'react';
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {auth} from "../firebase";
 import {useRouter} from "next/router";
+import {signIn} from "next-auth/react";
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -10,21 +12,29 @@ const Login = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        signInWithEmailAndPassword(auth, email, password)
-            .then((result) => {
-                //const user = result.user;
-            })
-            .catch((error) => {
-                // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // The email of the user's account used.
-                const email = error.customData.email;
+        const result = await signIn("credentials", {
+            username: email,
+            password: password,
+            redirect: true,
+            callbackUrl: "/dashboard",
+        });
+        console.log('result',result)
+    };
+        // signInWithEmailAndPassword(auth, email, password)
+        //     .then((result) => {
+        //         //const user = result.user;
+        //     })
+        //     .catch((error) => {
+        //         // Handle Errors here.
+        //         const errorCode = error.code;
+        //         const errorMessage = error.message;
+        //         // The email of the user's account used.
+        //         const email = error.customData.email;
+        //
+        //         console.log(`${errorCode} ${errorMessage} ${email}`)
+        //     });
+       //await router.push('/dashboard')
 
-                console.log(`${errorCode} ${errorMessage} ${email}`)
-            });
-       await router.push('/dashboard')
-    }
     return (
         <div className="w-screen h-screen flex justify-center items-center
     bg-gradient-to-br from-purple-700 to-amber-700">
