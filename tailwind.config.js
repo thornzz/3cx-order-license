@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   content: [
     "./node_modules/flowbite-react/**/*.js",
@@ -6,7 +7,9 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: { fontFamily: {
+        'ubuntu': ['"Ubuntu"', 'cursive'],
+      },},
   },
   plugins: [require("flowbite/plugin")],
 }

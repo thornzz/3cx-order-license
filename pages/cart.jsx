@@ -20,6 +20,9 @@ import Navbar from "../components/Navbar";
 import {useRouter} from "next/router";
 import Head from "next/head";
 import {RiDeleteBin5Line} from "react-icons/ri";
+import {getPartners} from "./api/getpartners";
+import EndUserModal from "../components/EndUserModal";
+import {AiOutlineEye} from "react-icons/ai";
 
 const Cart = (props) => {
 
@@ -29,29 +32,21 @@ const Cart = (props) => {
     const [subTotals, setSubTotals] = useState(null);
     const [discountTotals, setDiscountTotals] = useState(null);
     const [cartState, setCartState] = useRecoilState(cart);
-    const [getPartners, setPartners] = useRecoilState(partners);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [license, setLicenseState] = useRecoilState(licenses);
-    const [options, setOptions] = useState([]);
+    const [openEndUserModal, setOpenEndUserModal] = useState(false);
+
+    const showEndUserModal = ()=>{
+
+        setOpenEndUserModal(!openEndUserModal);
+    }
+
     const router = useRouter()
 
     useEffect(() => {
         setSubTotals(subTotal)
         setDiscountTotals(discountTotal)
-        const getPartners = async () => {
-            const response = await fetch('/api/getpartners');
-            const data = await response.json();
 
-            // Extract only the PartnerId and CompanyName fields from each object in the array
-            const filteredData = data.map(partner => ({
-                    value: partner.PartnerId,
-                    label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
-                })
-            );
-            setOptions(filteredData)
-            setPartners(data); // Update the options state with the filtered data
-        }
-        getPartners();
         setOrderDetails(cartState.map((item, index) => {
             return (
                 <tr key={index}>
@@ -59,7 +54,7 @@ const Cart = (props) => {
 
                         : (
                             <Fragment>
-                                <Select options={options}
+                                <Select options={props.options}
                                         className="w-auto"
                                         isLoading={false}
                                         isClearable={true}
@@ -88,8 +83,8 @@ const Cart = (props) => {
                         )
 
                     }</td>
-                    <td className="p-4 px-6 text-center whitespace-nowrap">{cartDetailState[index]?.Items[0].endUser}</td>
-                    <td className="p-4 px-6 text-center whitespace-nowrap">
+                    <td className="p-4 px-6 flex justify-center"><button onClick={showEndUserModal}><AiOutlineEye className="w-7 h-7 text-red-500"/></button></td>
+                    <td className="p-4 px-6 text-center">
                         <div className="flex flex-col items-center justify-center">
                             <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
                         </div>
@@ -113,9 +108,9 @@ const Cart = (props) => {
                             updatedDetailCartState.splice(index, 1);
                             setDetailCartState(updatedDetailCartState)
                             toast.error('Ürün sepetten çıkarıldı', {
-                                position: "top-right",
+                                position: "top-center",
                                 autoClose: 2000,
-                                hideProgressBar: true,
+                                hideProgressBar: false,
                                 closeOnClick: true,
                                 pauseOnHover: true,
                                 draggable: true,
@@ -131,13 +126,7 @@ const Cart = (props) => {
             );
         }))
 
-    }, [cartDetailState,getPartners]);
-
-    const [openEndUserModal, setOpenEndUserModal] = useState(false);
-    const closeEndUserModal = () => {
-
-        setOpenEndUserModal(!openEndUserModal);
-    }
+    }, [cartDetailState]);
 
     const getLicenseTypeAndSimcalls = (param) => {
         if (param === undefined)
@@ -168,9 +157,9 @@ const Cart = (props) => {
             addRandomLicenseKey(tcxResponses)
 
             toast.success('Sipariş başarıyla oluşturuldu.', {
-                position: "top-right",
+                position: "top-center",
                 autoClose: 2000,
-                hideProgressBar: true,
+                hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
@@ -258,17 +247,20 @@ const Cart = (props) => {
     }
 
     return (
-        <div>
+
+        <div className="bg-gray-900 h-screen">
         <Navbar/>
+            <EndUserModal showModal={openEndUserModal} closeModal={showEndUserModal}/>
             <Head>
-                <title>Lisans Portal Sipariş Detayları</title>
+                <title>Sipariş Detayları</title>
                 <meta name="description" content="3CX Order License" />
             </Head>
-        <div>
+        <div >
+            <div className="container mx-auto w-full bg-white p-5 mt-5 shadow-lg rounded-lg">
             <div className="my-2">
                 <h3 className="text-xl font-bold tracking-wider">Sipariş Detayları</h3>
             </div>
-            <table className="table-fixed">
+            <table className="table-auto w-full">
                 <thead>
                 <tr className="bg-gray-100">
                     <th className="px-6 py-3 font-bold w-1/4">Bayi</th>
@@ -315,24 +307,40 @@ const Cart = (props) => {
                     </div>
                 </div>
             </div>
-            <div className="mt-4">
+            <div className="flex flex-row-reverse mt-4" >
                 <button onClick={CompleteOrder}
                         className="
-              w-full
-              py-2
+
+              p-4
               text-center text-white
               bg-gray-900
               rounded-md
               shadow
-              hover:bg-blue-500
-            "
-                >
+              hover:bg-blue-500 ease-in duration-300
+            ">
                     Siparişi Tamamla
                 </button>
             </div>
+        </div>
         </div>
         </div>
     );
 }
 
 export default Cart;
+
+export async function getServerSideProps(context) {
+
+    const response = await getPartners()
+
+    // Extract only the PartnerId and CompanyName fields from each object in the array
+    const options = response.map(partner => ({
+            value: partner.PartnerId,
+            label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+        })
+    );
+
+    return {
+        props: {options}, // will be passed to the page component as props
+    }
+}

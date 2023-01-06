@@ -81,7 +81,7 @@ const LicensesTable = () => {
                 setLicenseState(data)
                 const timer = setTimeout(() => {
                     setIsLoading(false);
-                }, 3000);
+                }, 1000);
                 return () => clearTimeout(timer);
             } catch (e) {
                 console.log(e)

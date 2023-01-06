@@ -63,7 +63,7 @@ const LicenseRenewModal = props => {
         setDetailCartState([...cartDetailState, res]);
 
         toast.info('Ürün sepete eklendi.', {
-            position: "top-right",
+            position: "top-center",
             autoClose: 1000,
             hideProgressBar: true,
             closeOnClick: true,
