@@ -29,25 +29,30 @@ const Cart = (props) => {
     const [orderDetails, setOrderDetails] = useState(null);
     const subTotal = useRecoilValue(cartDetailSubTotal);
     const discountTotal = useRecoilValue(cartDetailDiscountTotal);
+    const cartLengthState = useRecoilValue(cartLength);
     const [subTotals, setSubTotals] = useState(null);
+    const [cartLenghtStates, setCartLength] = useState(null);
     const [discountTotals, setDiscountTotals] = useState(null);
     const [cartState, setCartState] = useRecoilState(cart);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [license, setLicenseState] = useRecoilState(licenses);
     const [openEndUserModal, setOpenEndUserModal] = useState(false);
-    const [selectedIndex,setSelectedIndex] = useState(0)
-    const showEndUserModal = (index)=>{
+    const [selectedIndex, setSelectedIndex] = useState(0)
+    const router = useRouter()
+    const showEndUserModal = (index) => {
         setSelectedIndex(index)
         setOpenEndUserModal(!openEndUserModal);
     }
     console.log('cart')
-    const router = useRouter()
 
     useEffect(() => {
+        if (cartLengthState === 0)
+            router.push('/dashboard')
+
         console.log('use effect')
         setSubTotals(subTotal)
         setDiscountTotals(discountTotal)
-
+        setCartLength(cartLengthState)
         setOrderDetails(cartState.map((item, index) => {
             return (
                 <tr key={index}>
@@ -72,7 +77,7 @@ const Cart = (props) => {
                                                             ...newCartDetail[index].Items[0],
                                                             ResellerName: data?.label,
                                                             ResellerId: data?.value,
-                                                            endUser: 'Test asdasd'
+
                                                         },
                                                     ],
                                                 };
@@ -84,7 +89,11 @@ const Cart = (props) => {
                         )
 
                     }</td>
-                    <td className="p-4 px-6 flex justify-center"><button onClick={()=>{showEndUserModal(index)}}><AiOutlineEye className="w-7 h-7 text-red-500"/></button></td>
+                    <td className="p-4 px-6 flex justify-center">
+                        <button onClick={() => {
+                            showEndUserModal(index)
+                        }}><AiOutlineEye className="w-7 h-7 text-red-500"/></button>
+                    </td>
                     <td className="p-4 px-6 text-center">
                         <div className="flex flex-col items-center justify-center">
                             <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
@@ -120,7 +129,7 @@ const Cart = (props) => {
                             });
                         }
                         }>
-                          <RiDeleteBin5Line className="w-5 h-5 text-red-500"/>
+                            <RiDeleteBin5Line className="w-5 h-5 text-red-500"/>
                         </button>
                     </td>
                 </tr>
@@ -175,10 +184,8 @@ const Cart = (props) => {
             const firestoreData = await fetch('/api/getfirestoredata');
             const data = await firestoreData.json();
             setLicenseState(data)
-
             setCartState([]);
             setDetailCartState([])
-            await router.push('/')
 
         } catch (error) {
             console.error(error);
@@ -250,50 +257,50 @@ const Cart = (props) => {
     return (
 
         <div className="bg-gray-900 h-screen">
-        <Navbar/>
+            <Navbar/>
             <EndUserModal selectedIndex={selectedIndex} showModal={openEndUserModal} closeModal={showEndUserModal}/>
             <Head>
                 <title>Sipariş Detayları</title>
-                <meta name="description" content="3CX Order License" />
+                <meta name="description" content="3CX Order License"/>
             </Head>
-        <div >
-            <div className="container mx-auto w-full bg-white p-5 mt-5 shadow-lg rounded-lg">
-            <div className="my-2">
-                <h3 className="text-xl font-bold tracking-wider">Sipariş Detayları</h3>
-            </div>
-            <table className="table-auto w-full">
-                <thead>
-                <tr className="bg-gray-100">
-                    <th className="px-6 py-3 font-bold w-1/4">Bayi</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">End User</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Lisans Tipi</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">İşlem</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Kanal Sayısı</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Adet</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Ek (Yıl)</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Fiyat</th>
-                    <th className="px-6 py-3 font-bold whitespace-nowrap">Ürün Sil</th>
-                </tr>
-                </thead>
-                <tbody className="w-full">
-                {orderDetails}
-                </tbody>
-            </table>
-
-            <div className="mt-4">
-                <div className="py-4 rounded-md shadow">
-                    <h3 className="text-xl font-bold text-blue-600">Sipariş Özeti</h3>
-                    <div className="flex justify-between px-4">
-                        <span className="font-bold">Ara Toplam</span>
-                        <span className="font-bold">${subTotals}</span>
+            <div>
+                <div className="container mx-auto w-full bg-white p-5 mt-5 shadow-lg rounded-lg">
+                    <div className="my-2">
+                        <h3 className="text-xl font-bold tracking-wider">Sipariş Detayları</h3>
                     </div>
-                    <div className="flex justify-between px-4">
-                        <span className="font-bold">İndirim</span>
-                        <span className="font-bold text-red-600">- {discountTotals}$</span>
-                    </div>
+                    <table className="table-auto w-full">
+                        <thead>
+                        <tr className="bg-gray-100">
+                            <th className="px-6 py-3 font-bold w-1/4">Bayi</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">End User</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Lisans Tipi</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">İşlem</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Kanal Sayısı</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Adet</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Ek (Yıl)</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Fiyat</th>
+                            <th className="px-6 py-3 font-bold whitespace-nowrap">Ürün Sil</th>
+                        </tr>
+                        </thead>
+                        <tbody className="w-full">
+                        {orderDetails}
+                        </tbody>
+                    </table>
 
-                    <div
-                        className="
+                    <div className="mt-4">
+                        <div className="py-4 rounded-md shadow">
+                            <h3 className="text-xl font-bold text-blue-600">Sipariş Özeti</h3>
+                            <div className="flex justify-between px-4">
+                                <span className="font-bold">Ara Toplam</span>
+                                <span className="font-bold">${subTotals}</span>
+                            </div>
+                            <div className="flex justify-between px-4">
+                                <span className="font-bold">İndirim</span>
+                                <span className="font-bold text-red-600">- {discountTotals}$</span>
+                            </div>
+
+                            <div
+                                className="
                 flex
                 items-center
                 justify-between
@@ -302,15 +309,15 @@ const Cart = (props) => {
                 mt-3
                 border-t-2
               "
-                    >
-                        <span className="text-xl font-bold">Toplam</span>
-                        <span className="text-2xl font-bold">${subTotals - discountTotals}</span>
+                            >
+                                <span className="text-xl font-bold">Toplam</span>
+                                <span className="text-2xl font-bold">${subTotals - discountTotals}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div className="flex flex-row-reverse mt-4" >
-                <button onClick={CompleteOrder}
-                        className="
+                    <div className="flex flex-row-reverse mt-4">
+                        <button onClick={CompleteOrder}
+                                className="
 
               p-4
               text-center text-white
@@ -319,11 +326,11 @@ const Cart = (props) => {
               shadow
               hover:bg-blue-500 ease-in duration-300
             ">
-                    Siparişi Tamamla
-                </button>
+                            Siparişi Tamamla
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        </div>
         </div>
     );
 }
@@ -333,13 +340,13 @@ export default Cart;
 export async function getServerSideProps(context) {
 
     const response = await getPartners()
-    const options =[]
-    // Extract only the PartnerId and CompanyName fields from each object in the array
-    // const options = response.map(partner => ({
-    //         value: partner.PartnerId,
-    //         label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
-    //     })
-    // );
+    //const options = []
+    //Extract only the PartnerId and CompanyName fields from each object in the array
+    const options = response.map(partner => ({
+            value: partner.PartnerId,
+            label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+        })
+    );
 
     return {
         props: {options}, // will be passed to the page component as props

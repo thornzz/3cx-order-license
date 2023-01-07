@@ -19,17 +19,17 @@ const BuyLicenseModal = (props) => {
     const [options, setOptions] = useState([]);
     useEffect(() => {
         const getPartners = async () => {
-            // const response = await fetch('/api/getpartners');
-            // const data = await response.json();
-            //
-            // // Extract only the PartnerId and CompanyName fields from each object in the array
-            // const filteredData = data.map(partner => ({
-            //         value: partner.PartnerId,
-            //         label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
-            //     })
-            // );
-            // setOptions(filteredData)
-            // setPartners(data); // Update the options state with the filtered data
+            const response = await fetch('/api/getpartners');
+            const data = await response.json();
+
+            // Extract only the PartnerId and CompanyName fields from each object in the array
+            const filteredData = data.map(partner => ({
+                    value: partner.PartnerId,
+                    label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+                })
+            );
+            setOptions(filteredData)
+            setPartners(data); // Update the options state with the filtered data
         }
         getPartners();
     }, []); // Call the getPartners function only once when the component mounts

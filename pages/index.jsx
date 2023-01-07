@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 import Dashboard from "./dashboard";
 
 export default function Home() {
-    const { user } = useAuth();
+    //const { user } = useAuth();
 
   return (
     <div>
@@ -14,9 +14,7 @@ export default function Home() {
       </Head>
 
       <main>
-          {user && <Dashboard/>}
-
-          {!user && <Login/> }
+<Login></Login>
       </main>
 
 

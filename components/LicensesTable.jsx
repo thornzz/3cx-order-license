@@ -1,9 +1,11 @@
 import DataTable from 'react-data-table-component';
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {tableStyle} from "./styles/tableStyle";
 import {useRecoilState} from "recoil";
 import {licenses} from "../atoms/fireStoreDataAtom";
 import {RotatingSquare} from "react-loader-spinner";
+import {AiOutlineEye} from "react-icons/ai";
+import EndUserModal from "./EndUserModal";
 
 const LicensesTable = () => {
     //const [myData, setData] = useState([])
@@ -12,6 +14,12 @@ const LicensesTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isLoading, setIsLoading] = useState(true);
+    const [openEndUserModal, setOpenEndUserModal] = useState(false);
+    const [enduserData, setendUserData] = useState(null);
+    const showEndUserModal = () => {
+        setOpenEndUserModal(!openEndUserModal);
+    }
+
     const columns = [
         {
             name: 'Fatura ID',
@@ -27,8 +35,15 @@ const LicensesTable = () => {
 
         {
             name: 'End user',
-            selector: row => row.endUser,
-            sortable: true
+            cell: (row) =>
+            <button onClick={()=> {
+                setendUserData(row)
+                showEndUserModal()
+                //console.log(enduserData)
+            }}><AiOutlineEye className="w-7 h-7 text-red-500"/></button>,
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
         },
         {
             name: 'İşlem Türü',
@@ -59,7 +74,7 @@ const LicensesTable = () => {
             selector: null,
         }
 
-    ];
+    ]
     const handleSearch = event => {
         setSearchText(event.target.value);
     };
@@ -94,6 +109,7 @@ const LicensesTable = () => {
 
     return (
         <div>
+            <EndUserModal tableData={enduserData} showModal={openEndUserModal} closeModal={showEndUserModal}/>
             {isLoading ? (
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <RotatingSquare

@@ -5,15 +5,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import {ToastContainer} from 'react-toastify';
 import {SessionProvider} from "next-auth/react";
 
-function MyApp({Component, pageProps:{session,...pageProps}}) {
+function MyApp({Component, pageProps }) {
     return (
-        <SessionProvider session={session}>
             <RecoilRoot>
+                <SessionProvider session={pageProps.session}>
                 <Component {...pageProps} />
+                </SessionProvider>
                 <ToastContainer/>
             </RecoilRoot>
-        </SessionProvider>
+
     )
 }
-
 export default MyApp

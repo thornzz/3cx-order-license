@@ -6,6 +6,7 @@ import {cart} from "../atoms/shoppingCartAtom";
 import {useRecoilState} from "recoil";
 import Link from "next/link";
 import {useRouter} from "next/router";
+import {signOut} from "next-auth/react";
 
 
 function Navbar() {
@@ -13,9 +14,10 @@ function Navbar() {
     const [resetCartState,setResetCartState] = useRecoilState(cart)
     const router = useRouter()
     const Logout = async () => {
-        await auth.signOut();
-        await router.push('/')
-        setResetCartState([]);
+        // await auth.signOut();
+        // await router.push('/')
+        // setResetCartState([]);
+        await signOut()
     }
     return (
         <nav className="flex items-center justify-between bg-gray-900 shadow shadow-xl">
@@ -27,7 +29,7 @@ function Navbar() {
                     width={140}
                     height={90}
                 />
-                <span className="font-semibold text-xl tracking-tight"><Link href='/'>Lisans Portal </Link></span>
+                <span className="font-semibold text-xl tracking-tight"><Link href='/dashboard'>Lisans Portal </Link></span>
             </div>
 
             <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto mt-2">

@@ -15,29 +15,31 @@ export const authOptions = {
             // e.g. domain, username, password, 2FA token, etc.
             // You can pass any HTML attribute to the <input> tag through the object.
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" },
+                username: {label: "Username", type: "text", placeholder: "jsmith"},
+                password: {label: "Password", type: "password"},
             },
             async authorize(credentials, req) {
-                const { username, password } = credentials
+                try {
+                    const data = await signInWithEmailAndPassword(auth, credentials?.username || '', credentials?.password || '')
+                    return ({
+                        ...data.user,
+                        id: data.user.uid
+                    })
+                    console.log('firestore user', data.user)
+                } catch (error) {
+                    return null
+                }
 
-               const user = await signInWithEmailAndPassword(auth, username, password)
-
-                console.log('firestore user',user)
-
-                if (user) {
-                    return user;
-                } else return null;
             },
         }),
     ],
 
     session: {
-        strategy: "jwt",
+        strategy: "jwt"
     },
-
+    secret: process.env.NEXTAUTH_SECRET,
     pages: {
-        signIn: "/auth/login",
+        signIn: "/login",
     },
 };
 
