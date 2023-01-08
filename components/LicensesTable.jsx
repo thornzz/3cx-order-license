@@ -28,6 +28,7 @@ const LicensesTable = () => {
     const [openLicenseUpgradeModal, setlicenseUpgradeModal] = useState(null);
     const [invoiceId, setInvoiceId] = useState('');
     const [selectedRow, setSelectedRow] = useState('');
+
     const updateInvoiceIdInItemObject = async (invoiceId, documentId, itemLine) => {
         try {
             const licensesDocRef = doc(db, "licenses", documentId);
@@ -40,9 +41,7 @@ const LicensesTable = () => {
                 }
                 return item;
             });
-            await updateDoc(licensesDocRef, {tcxResponses: {Items: updatedItems}}).then((res) => {
-                console.log('updated', res)
-            });
+            await updateDoc(licensesDocRef, {tcxResponses: {Items: updatedItems}})
         } catch (error) {
             console.error('Error updating invoice ID in Item object: ', error);
         }
@@ -60,30 +59,24 @@ const LicensesTable = () => {
     const columns = [
         {
             name: 'Fatura ID',
-
             selector: (row, index) => {
 
                 if (selectedRow === index) {
                     // Render an input field when the row is selected
                     return (
-
                         <input className="w-[100px] p-1 bg-blue-500 text-white border-white border-2"
                                type="text"
                                onChange={(event) => {
                                    // Update the value of the 'InvoiceId' field when the input value changes
                                    setInvoiceId(event.target.value)
                                }}
-                               onBlur={() => {
-                                   console.log('blur tetiklendi')
-                                   updateInvoiceIdInItemObject(invoiceId, row.objectId, row.Line).then((res) => {
-                                       console.log('firestore res', res)
-                                   })
+                               onBlur={async () => {
+                                       await updateInvoiceIdInItemObject(invoiceId, row.objectId, row.Line)
+                                       await getFireStoreData()
                                    // Save the updated value to the database and exit edit mode when the input field loses focus
                                    setSelectedRow(null);
                                }}
                         />
-
-
                     );
                 } else {
                     // Render the 'InvoiceId' value as text when the row is not selected
@@ -196,12 +189,17 @@ const LicensesTable = () => {
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
+
+    const getFireStoreData = async ()=> {
+
+        const firestoreData = await fetch('/api/getfirestoredata');
+        const data = await firestoreData.json();
+        setLicenseState(data)
+    }
     useEffect(() => {
         (async () => {
             try {
-                const firestoreData = await fetch('/api/getfirestoredata');
-                const data = await firestoreData.json();
-                setLicenseState(data)
+                await getFireStoreData()
                 const timer = setTimeout(() => {
                     setIsLoading(false);
                 }, 1000);
@@ -209,7 +207,6 @@ const LicensesTable = () => {
             } catch (e) {
                 console.log(e)
             }
-
         })();
 
     }, [])
