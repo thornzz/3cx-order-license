@@ -9,7 +9,6 @@ const BuyLicenseModal = (props) => {
 
     const [quantity, setQuantity] = useState(1)
     const [partnerId, setPartnerId] = useState('')
-    const [endUser, setEndUser] = useState('')
     const [additionalYear, setAdditionalYear] = useState(0)
     const [licenseType, setLicenseType] = useState('Professional')
     const [simCall, setSimCall] = useState(8)
@@ -49,7 +48,7 @@ const BuyLicenseModal = (props) => {
         // storeWithObject.addLine(prevLines => [...prevLines, ...newLine])
         setCartState([...cartState, newLine]);
         const res = await PostJsonData(newLine);
-        res.Items[0].endUser=endUser;
+        res.Items[0].endUser={};
         res.Items[0].ResellerName=res.Items[0].ProductDescription.split('For:')[1].split('\n')[0].trim();
         setDetailCartState([...cartDetailState, res]);
 

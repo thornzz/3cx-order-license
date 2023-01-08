@@ -17,6 +17,35 @@ function UpgradeLicenseModal(props) {
     const [licenseType, setLicenseType] = useState('Professional')
     const [simCall, setSimCall] = useState(64)
 
+    const [preformattedUpgradeLicenseKey, setpreFormattedUpgradeLicenseKey] = useState(null);
+    const [preFormattedUpgradeModalIsActive, setPreFormattedUpgradeModalIsActive] = useState(false);
+
+    useEffect(() => {
+        if (props.upgradeLicenseKey !== null && props.upgradeLicenseKey !== undefined && props.showModal) {
+            setpreFormattedUpgradeLicenseKey(props.upgradeLicenseKey)
+            setPreFormattedUpgradeModalIsActive(true)
+        }
+    });
+    useEffect(() => {
+        if (preformattedUpgradeLicenseKey?.length === 19 && preFormattedUpgradeModalIsActive) {
+            console.log('upgrade license modal düzenle')
+           setFormattedLicenseKey(preformattedUpgradeLicenseKey)
+            const fetchData = async () => {
+                const response = await getUpgradeLicenseData(preformattedUpgradeLicenseKey,licenseType,simCall)
+                if (response.status === 200) {
+                    const json = await response.json();
+                    setLicenseKeyData(json)
+                    setShowLicenseCard(true)
+                } else {
+                    setShowLicenseCard(false)
+                    setLicenseKeyData(undefined)
+                }
+            }
+            fetchData()
+        }
+
+    }, [preFormattedUpgradeModalIsActive, preformattedUpgradeLicenseKey]);
+
     useEffect(() => {
         // Update formattedLicenseKey when licenseKey changes
         setFormattedLicenseKey(
@@ -27,6 +56,7 @@ function UpgradeLicenseModal(props) {
 
     useEffect(() => {
         if (licenseKey.length === 16) {
+            console.log('renew license modal regular')
             const fetchData = async () => {
                 const response = await getUpgradeLicenseData(formattedLicenseKey,licenseType,simCall)
                 if (response.status === 200) {
@@ -39,7 +69,6 @@ function UpgradeLicenseModal(props) {
                 }
             }
             fetchData()
-            console.log(licenseKeyData)
         } else {
             setShowLicenseCard(false)
             setLicenseKeyData(undefined)
@@ -59,6 +88,8 @@ function UpgradeLicenseModal(props) {
 
         setCartState([...cartState, upgradeLicense]);
         const res = await PostJsonData(upgradeLicense);
+        res.Items[0].endUser = {};
+        res.Items[0].ResellerName = '';
         setDetailCartState([...cartDetailState, res]);
 
         toast.info('Ürün sepete eklendi.', {
@@ -113,6 +144,8 @@ function UpgradeLicenseModal(props) {
     const closeModal = () => {
         setLicenseKey('')
         setLicenseKeyData(undefined)
+        setPreFormattedUpgradeModalIsActive(false)
+        setpreFormattedUpgradeLicenseKey('')
         props.closeModal()
     }
     return (

@@ -43,13 +43,12 @@ const Cart = (props) => {
         setSelectedIndex(index)
         setOpenEndUserModal(!openEndUserModal);
     }
-    console.log('cart')
 
     useEffect(() => {
         if (cartLengthState === 0)
             router.push('/dashboard')
 
-        console.log('use effect')
+        console.log('use effect cart')
         setSubTotals(subTotal)
         setDiscountTotals(discountTotal)
         setCartLength(cartLengthState)
@@ -179,6 +178,7 @@ const Cart = (props) => {
 
             mergeJSONObjects(cartDetailState, tcxResponses);
 
+            console.log('tcx',tcxResponses)
             await addDoc(collection(db, "licenses"), {tcxResponses});
             //refresh firestore data
             const firestoreData = await fetch('/api/getfirestoredata');
@@ -344,7 +344,7 @@ export async function getServerSideProps(context) {
     //Extract only the PartnerId and CompanyName fields from each object in the array
     const options = response.map(partner => ({
             value: partner.PartnerId,
-            label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+            label: partner.CompanyName,
         })
     );
 

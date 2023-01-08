@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
         const collectionRef = collection(db, 'licenses');
         const querySnapshot = await getDocs(collectionRef)
-        const arr = querySnapshot.docs.map((d) => ({...d.data()}))
+        const arr = querySnapshot.docs.map((d) => ({objectId:d.id,...d.data()}))
         const convertedArr = await extractData(arr)
         res.status(200).json(convertedArr);
 

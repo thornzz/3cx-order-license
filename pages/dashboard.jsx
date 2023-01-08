@@ -10,9 +10,6 @@ import Footer from "../components/Footer";
 
 const Dashboard = () => {
 
-    const {data: session} = useSession()
-
-    console.log(session)
     const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
     const showNewLicenseModal = () => {
 

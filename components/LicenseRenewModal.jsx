@@ -8,16 +8,43 @@ import {useRecoilState} from "recoil";
 import {cart, cartDetail} from "../atoms/shoppingCartAtom";
 
 
-const LicenseRenewModal = props => {
+const LicenseRenewModal = (props) => {
 
     const [showLicenseCard, setShowLicenseCard] = useState(false);
     const [years, setYears] = useState(1);
     const [licenseKey, setLicenseKey] = useState('');
-    const [licenseKeyData, setLicenseKeyData] = useState(null);
+    const [licenseKeyData, setLicenseKeyData] = useState('');
     const [formattedLicenseKey, setFormattedLicenseKey] = useState('');
     const [cartState, setCartState] = useRecoilState(cart);
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
+    const [preFormattedRenewalKey, setpreFormattedRenewalKey] = useState(null);
+    const [preFormattedRenewalModalIsActive, setPreFormattedRenewalModalIsActive] = useState(false);
 
+    useEffect(() => {
+        if (props.renewalLicenseKey !== null && props.renewalLicenseKey !== undefined && props.showModal) {
+            setpreFormattedRenewalKey(props.renewalLicenseKey)
+            setPreFormattedRenewalModalIsActive(true)
+        }
+    });
+    useEffect(() => {
+        if (preFormattedRenewalKey?.length === 19 && preFormattedRenewalModalIsActive) {
+            console.log('renew license modal düzenle')
+          setFormattedLicenseKey(preFormattedRenewalKey)
+            const fetchData = async () => {
+                const response = await getRenewLicenseData(preFormattedRenewalKey, years)
+                if (response.status === 200) {
+                    const json = await response.json();
+                    setLicenseKeyData(json)
+                    setShowLicenseCard(true)
+                } else {
+                    setShowLicenseCard(false)
+                    setLicenseKeyData(undefined)
+                }
+            }
+            fetchData()
+        }
+
+    }, [preFormattedRenewalModalIsActive, preFormattedRenewalKey]);
     useEffect(() => {
         // Update formattedLicenseKey when licenseKey changes
         setFormattedLicenseKey(
@@ -25,9 +52,9 @@ const LicenseRenewModal = props => {
         );
 
     }, [licenseKey]);
-
     useEffect(() => {
         if (licenseKey.length === 16) {
+            console.log('renew license modal regular')
             const fetchData = async () => {
                 const response = await getRenewLicenseData(formattedLicenseKey, years)
                 if (response.status === 200) {
@@ -48,7 +75,6 @@ const LicenseRenewModal = props => {
     }, [formattedLicenseKey]);
 
     const addCart = async () => {
-
         const renewAnnual = {
             "Type": "RenewAnnual",
             "UpgradeKey": formattedLicenseKey,
@@ -58,8 +84,8 @@ const LicenseRenewModal = props => {
 
         setCartState([...cartState, renewAnnual]);
         const res = await PostJsonData(renewAnnual);
-        res.Items[0].endUser='';
-        res.Items[0].ResellerName='';
+        res.Items[0].endUser = {};
+        res.Items[0].ResellerName = '';
         setDetailCartState([...cartDetailState, res]);
 
         toast.info('Ürün sepete eklendi.', {
@@ -82,7 +108,7 @@ const LicenseRenewModal = props => {
             SalesCode: "",
             Notes: "",
             //Lines: [data]
-            Lines:[data]
+            Lines: [data]
         };
 
 
@@ -117,6 +143,8 @@ const LicenseRenewModal = props => {
     const closeModal = () => {
         setLicenseKey('')
         setLicenseKeyData(undefined)
+        setPreFormattedRenewalModalIsActive(false)
+        setpreFormattedRenewalKey('')
         props.closeModal()
     }
     return (
