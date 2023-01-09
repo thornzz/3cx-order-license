@@ -50,25 +50,24 @@ function EndUserModal(props) {
 
     useEffect(() => {
 
-        if (props.expiringKeysData !== undefined && props.expiringKeysData !== null) {
+        if (props.expiringKeysData === undefined || props.expiringKeysData === null) {
+            setCompanyName('')
+            setAddress('')
+            setEmail('')
+            setTelephone('')
+            setOther('')
+        } else {
 
-            if (Object.keys(props.expiringKeysData.endUser).length === 0) {
-                setCompanyName('')
-                setAddress('')
-                setEmail('')
-                setTelephone('')
-                setOther('')
-            } else {
+            if (Object.keys(props.expiringKeysData.endUser).length !== 0) {
                 setCompanyName(props?.expiringKeysData?.endUser?.companyName)
                 setAddress(props.expiringKeysData?.endUser?.address)
                 setEmail(props.expiringKeysData?.endUser?.email)
                 setTelephone(props.expiringKeysData?.endUser?.telephone)
                 setOther(props.expiringKeysData?.endUser?.other)
             }
-
-
         }
-    },[props.expiringKeysData])
+
+    }, [props.expiringKeysData])
 
     useEffect(() => {
 
@@ -90,7 +89,7 @@ function EndUserModal(props) {
 
 
         }
-    },[props.tableData])
+    }, [props.tableData])
     const closeModal = () => {
         props.closeModal()
     }
@@ -176,7 +175,7 @@ function EndUserModal(props) {
                                         Adı
                                     </label>
                                     <input className="border py-2 px-3 text-grey-800" type="text" name="company_name"
-
+                                           disabled={props.expiringKeysData}
                                            id="company_name" value={companyName}
                                            onChange={(event) => setCompanyName(event.target.value)}/>
                                 </div>
@@ -184,7 +183,7 @@ function EndUserModal(props) {
                                     <label className="mb-2 font-bold text-lg text-sky-900" htmlFor="address">Adres
                                     </label>
                                     <input className="border py-2 px-3 text-grey-800" type="text" name="address"
-
+                                           disabled={props.expiringKeysData}
                                            id="address" value={address}
                                            onChange={(event) => setAddress(event.target.value)}/>
                                 </div>
@@ -192,14 +191,14 @@ function EndUserModal(props) {
                                     <label className="mb-2 font-bold text-lg text-sky-900"
                                            htmlFor="email">Email</label>
                                     <input className="border py-2 px-3 text-grey-800" type="email" name="email"
-
+                                           disabled={props.expiringKeysData}
                                            id="email" value={email} onChange={(event) => setEmail(event.target.value)}/>
                                 </div>
                                 <div className="flex flex-col mb-4">
                                     <label className="mb-2 font-bold text-lg text-sky-900"
                                            htmlFor="other">Telefon</label>
                                     <input className="border py-2 px-3 text-grey-800" type="text" name="other"
-
+                                           disabled={props.expiringKeysData}
                                            id="other" value={telephone}
                                            onChange={(event) => setTelephone(event.target.value)}/>
                                 </div>
@@ -207,22 +206,24 @@ function EndUserModal(props) {
                                     <label className="mb-2 font-bold text-lg text-sky-900"
                                            htmlFor="other">Açıklama</label>
                                     <textarea className="border py-2 px-3 text-grey-800" name="other"
-
+                                              disabled={props.expiringKeysData}
                                               id="other" value={other}
                                               onChange={(event) => setOther(event.target.value)}/>
                                 </div>
 
-                                {!props?.tableData ? (
-                                    <button
-                                        className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
-                                        type="button" onClick={setCartDetail}>Bilgileri Kaydet
-                                    </button>
-                                ) : (
-                                    <button
-                                        className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
-                                        type="button" onClick={updateFirestoreEndUser}>Bilgileri Güncelle
-                                    </button>
-                                )}
+                                {props.expiringKeysData !== null && props.expiringKeysData !== undefined ? null :
+                                    props.tableData ? (
+                                        <button
+                                            className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
+                                            type="button" onClick={setCartDetail}>Bilgileri Kaydet
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
+                                            type="button" onClick={updateFirestoreEndUser}>Bilgileri Güncelle
+                                        </button>
+                                    )
+                                }
 
                             </form>
 

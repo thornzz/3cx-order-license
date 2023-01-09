@@ -12,6 +12,7 @@ import {collection, getDocs} from "firebase/firestore";
 import {db} from "../firebase";
 
 const ExpiringKeys = (props) => {
+
     const [searchText, setSearchText] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -37,16 +38,18 @@ const ExpiringKeys = (props) => {
         try {
             const collectionRef = collection(db, 'licenses');
             const querySnapshot = await getDocs(collectionRef)
-            const data = querySnapshot.docs.map((d) => ({objectId:d.id,...d.data()}))
+            const data = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
 
-            return getEndUserByLicenseKey(data, licenseKey)
+            const endUserData = await getEndUserByLicenseKey(data, licenseKey)
+            return endUserData
 
         } catch (error) {
             console.error('Error getting Item object: ', error);
         }
     };
 
-    function getEndUserByLicenseKey(data, licenseKey) {
+    async function getEndUserByLicenseKey(data, licenseKey) {
+
         const tcxResponses = data.map(d => d.tcxResponses);
         const items = tcxResponses.flatMap(response => response.Items);
         const filteredItems = items.filter(item => {
@@ -56,29 +59,24 @@ const ExpiringKeys = (props) => {
         if (filteredItems.length === 0) {
             return undefined;
         }
-
+console.log('filtered items',filteredItems)
         const newLicenseItem = filteredItems.find(item => item.Type === 'NewLicense');
         if (newLicenseItem) {
-            return newLicenseItem.endUser;
-        }
-
-        const upgradeLicenseItem = filteredItems.find(item => item.Type === 'Upgrade');
-        if (upgradeLicenseItem) {
-            return upgradeLicenseItem.endUser;
-        }
-
-        const renewLicenseItem = filteredItems.find(item => item.Type === 'RenewLicense');
-        if (renewLicenseItem) {
-            return renewLicenseItem.endUser;
+            return {endUser: newLicenseItem.endUser};
         }
 
         const renewAnnualLicenseItem = filteredItems.find(item => item.Type === 'RenewAnnual');
         if (renewAnnualLicenseItem) {
-            return renewAnnualLicenseItem.endUser;
+            return {endUser: renewAnnualLicenseItem.endUser};
+        }
+        const upgradeLicenseItem = filteredItems.find(item => item.Type === 'Upgrade');
+        if (upgradeLicenseItem) {
+            return {endUser: upgradeLicenseItem.endUser};
         }
 
         return undefined;
     }
+
     const columns = [
 
         {
@@ -104,8 +102,8 @@ const ExpiringKeys = (props) => {
         {
             name: 'End user',
             cell: (row) =>
-                <button onClick={() => {
-                    setendUserData(getEndUserFromFireStore(row.LicenseKey))
+                <button onClick={async () => {
+                    setendUserData(await getEndUserFromFireStore(row.LicenseKey))
                     showEndUserModal()
                     //console.log(enduserData)
                 }}><AiOutlineEye className="w-7 h-7 text-red-500"/></button>,
@@ -115,8 +113,8 @@ const ExpiringKeys = (props) => {
             reorder: true
         },
         {
-            name:'Zamanaşımına Kalan (Gün)',
-            selector: row=> {
+            name: 'Zamanaşımına Kalan (Gün)',
+            selector: row => {
                 // Convert the string to a Date object
                 const targetDate = new Date(row.ExpiryDate);
                 // Get the current date
@@ -128,7 +126,7 @@ const ExpiringKeys = (props) => {
             },
             reorder: true,
             sortable: true,
-            center:true
+            center: true
         },
         {
             name: 'Expiry Date',
@@ -150,6 +148,13 @@ const ExpiringKeys = (props) => {
                 return `${formattedDate} ${formattedTime}`
             },
             reorder: true
+        },
+        {
+            name: 'Sürüm',
+            selector: row => {return(row.IsPerpetual ? 'Perpetual' : 'Annual')},
+            sortable: true,
+            reorder: true,
+            center:true
         },
         {
             name: 'Kanal Sayısı',
@@ -227,7 +232,7 @@ const ExpiringKeys = (props) => {
                     onChangePage={setCurrentPage}
                     paginationServer
                     paginationTotalRows={filteredData.length}
-                    paginationRowsPerPageOptions={[10, 25, 50]}
+                    paginationRowsPerPageOptions={[10, 25, 50,100,250,500]}
                 />
             )}
             <Footer/>
