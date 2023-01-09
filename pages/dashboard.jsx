@@ -5,7 +5,7 @@ import {Button} from "flowbite-react";
 import LicensesTable from "../components/LicensesTable";
 import LicenseRenewModal from "../components/LicenseRenewModal";
 import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
-import {useSession} from "next-auth/react";
+
 import Footer from "../components/Footer";
 
 const Dashboard = () => {

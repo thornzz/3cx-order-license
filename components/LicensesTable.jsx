@@ -1,5 +1,5 @@
 import DataTable from 'react-data-table-component';
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {tableStyle} from "./styles/tableStyle";
 import {useRecoilState} from "recoil";
 import {licenses} from "../atoms/fireStoreDataAtom";
@@ -12,7 +12,7 @@ import {HiOutlineKey} from "react-icons/hi";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import {db} from "../firebase";
-import {doc, setDoc, getDoc, updateDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc} from "firebase/firestore";
 
 const LicensesTable = () => {
     //const [myData, setData] = useState([])
@@ -58,7 +58,23 @@ const LicensesTable = () => {
 
     const columns = [
         {
+            width:'50px',
+            cell: (row, index) => {
+                return (
+                    <button type="button"
+                            onClick={() => {
+                                setSelectedRow(index);
+                            }
+                            }
+                            className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <FaEdit/>
+                    </button>)
+            }
+        },
+        {
             name: 'Fatura ID',
+            center:true,
+            sortable: true,
             selector: (row, index) => {
 
                 if (selectedRow === index) {
@@ -71,8 +87,8 @@ const LicensesTable = () => {
                                    setInvoiceId(event.target.value)
                                }}
                                onBlur={async () => {
-                                       await updateInvoiceIdInItemObject(invoiceId, row.objectId, row.Line)
-                                       await getFireStoreData()
+                                   await updateInvoiceIdInItemObject(invoiceId, row.objectId, row.Line)
+                                   await getFireStoreData()
                                    // Save the updated value to the database and exit edit mode when the input field loses focus
                                    setSelectedRow(null);
                                }}
@@ -138,7 +154,8 @@ const LicensesTable = () => {
             reorder: true
         },
         {
-            name: 'Düzenle',
+            name: 'Lisans İşlemleri',
+            center: true,
             cell: (row, index) => {
 
                 return (
@@ -160,15 +177,7 @@ const LicensesTable = () => {
                                 className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <HiOutlineKey/>
                         </button>
-                        <button type="button"
-                                onClick={() => {
 
-                                    setSelectedRow(index);
-                                }
-                                }
-                                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <FaEdit/>
-                        </button>
                     </div>
                 )
             },
@@ -190,7 +199,7 @@ const LicensesTable = () => {
         currentPage * rowsPerPage
     );
 
-    const getFireStoreData = async ()=> {
+    const getFireStoreData = async () => {
 
         const firestoreData = await fetch('/api/getfirestoredata');
         const data = await firestoreData.json();

@@ -6,6 +6,7 @@ import PostData from "../utility/HttpPostUtility";
 import {toast} from "react-toastify";
 import {useRecoilState} from "recoil";
 import {cart, cartDetail} from "../atoms/shoppingCartAtom";
+import {useRouter} from "next/router";
 
 
 const LicenseRenewModal = (props) => {
@@ -19,6 +20,7 @@ const LicenseRenewModal = (props) => {
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [preFormattedRenewalKey, setpreFormattedRenewalKey] = useState(null);
     const [preFormattedRenewalModalIsActive, setPreFormattedRenewalModalIsActive] = useState(false);
+    const router = useRouter()
 
     useEffect(() => {
         if (props.renewalLicenseKey !== null && props.renewalLicenseKey !== undefined && props.showModal) {
@@ -98,7 +100,6 @@ const LicenseRenewModal = (props) => {
             progress: undefined,
             theme: "dark",
         });
-
     }
 
     const PostJsonData = async (data) => {
@@ -207,12 +208,22 @@ const LicenseRenewModal = (props) => {
                                             </button>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => addCart()}
-                                        className="px-4 py-1.5 rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
-                                        type="button">
-                                        Sepete Ekle
-                                    </button>
+                                    <div className="flex w-full justify-between">
+                                        <button
+                                            onClick={() => addCart()}
+                                            className="px-4 py-2 py-1.5 mr-2 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
+                                            type="button">
+                                            Sepete Ekle
+                                        </button>
+
+                                        <button
+                                            onClick={async () => await router.push('/cart')}
+                                            className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300"
+                                            type="button">
+                                            Sepete Git
+                                        </button>
+                                    </div>
+
                                 </Fragment>)
                         }
 

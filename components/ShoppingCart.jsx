@@ -26,10 +26,7 @@ const ShoppingCart = () => {
                     {getCartLengthState}
                 </div>
                 <button>
-                    {getCartLengthState > 0 ?
-                        <Link href="/cart"><FaShoppingCart className="text-white hover:text-gray-200 w-[20px]"/></Link>
-                        : <FaShoppingCart className="text-white hover:text-gray-200 w-[20px]"/>
-                    }
+                         <FaShoppingCart className="text-red  w-[15px]"/>
                 </button>
             </div>
         </Fragment>

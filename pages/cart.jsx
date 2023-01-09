@@ -150,6 +150,21 @@ const Cart = (props) => {
             simCall: simcall
         }
     }
+    const cancelOrder = () => {
+        setCartState([]);
+        setDetailCartState([])
+        toast.error('Sipariş iptal edildi', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+        });
+        router.push('/dashboard')
+    }
     const CompleteOrder = async (props) => {
 
 
@@ -178,7 +193,8 @@ const Cart = (props) => {
 
             mergeJSONObjects(cartDetailState, tcxResponses);
 
-            console.log('tcx',tcxResponses)
+            console.log(tcxResponses)
+
             await addDoc(collection(db, "licenses"), {tcxResponses});
             //refresh firestore data
             const firestoreData = await fetch('/api/getfirestoredata');
@@ -315,16 +331,31 @@ const Cart = (props) => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-row-reverse mt-4">
+                    <div className="flex flex-row-reverse mt-4  ">
+
+                        <button onClick={cancelOrder}
+                                className="
+
+              p-4
+              text-center text-white
+              bg-red-500
+              rounded-md
+              shadow
+              hover:bg-blue-500 ease-in duration-300
+
+            ">
+                           Siparişi İptal Et
+                        </button>
                         <button onClick={CompleteOrder}
                                 className="
 
               p-4
               text-center text-white
-              bg-gray-900
+              bg-green-500
               rounded-md
               shadow
               hover:bg-blue-500 ease-in duration-300
+              mr-2
             ">
                             Siparişi Tamamla
                         </button>

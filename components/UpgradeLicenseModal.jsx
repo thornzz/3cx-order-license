@@ -6,6 +6,7 @@ import {Modal} from "flowbite-react";
 import {GrLicense} from "react-icons/gr";
 import {TbLicense} from "react-icons/tb";
 import {toast} from "react-toastify";
+import {useRouter} from "next/router";
 function UpgradeLicenseModal(props) {
 
     const [showLicenseCard, setShowLicenseCard] = useState(true);
@@ -16,7 +17,7 @@ function UpgradeLicenseModal(props) {
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [licenseType, setLicenseType] = useState('Professional')
     const [simCall, setSimCall] = useState(64)
-
+    const router = useRouter()
     const [preformattedUpgradeLicenseKey, setpreFormattedUpgradeLicenseKey] = useState(null);
     const [preFormattedUpgradeModalIsActive, setPreFormattedUpgradeModalIsActive] = useState(false);
 
@@ -241,12 +242,21 @@ function UpgradeLicenseModal(props) {
                                             className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => addCart()}
-                                        className="px-4 py-1.5 rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
-                                        type="button">
-                                        Sepete Ekle
-                                    </button>
+                                    <div className="flex w-full justify-between">
+                                        <button
+                                            onClick={() => addCart()}
+                                            className="px-4 py-2 py-1.5 mr-2 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
+                                            type="button">
+                                            Sepete Ekle
+                                        </button>
+
+                                        <button
+                                            onClick={async () => await router.push('/cart')}
+                                            className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300"
+                                            type="button">
+                                            Sepete Git
+                                        </button>
+                                    </div>
                                 </Fragment>)
                         }
 

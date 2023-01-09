@@ -25,7 +25,7 @@ export const authOptions = {
                         ...data.user,
                         id: data.user.uid
                     })
-                    console.log('firestore user', data.user)
+
                 } catch (error) {
                     return null
                 }
