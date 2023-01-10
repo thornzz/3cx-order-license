@@ -125,7 +125,7 @@ const LicensesTable = () => {
         },
         {
             name: 'İşlem Türü',
-            selector: row => row.Type === 'NewLicense' ? 'Yeni Lisans' : row.Type === 'RenewAnnual' ? 'Lisans Yenileme' : 'Lisans Yükseltme',
+            selector: row => row.Type === 'NewLicense' ? 'Yeni Lisans' : row.Type === 'RenewAnnual' ? 'Lisans Yenileme' : row.Type === 'Maintenance' ? 'Maintenance' : 'Lisans Yükseltme',
             sortable: true,
             reorder: true
 
@@ -143,10 +143,18 @@ const LicensesTable = () => {
             reorder: true
         },
         {
+            name: 'Sürüm',
+            selector: row => {return(row.IsPerpetual ? 'Perpetual' : 'Annual')},
+            sortable: true,
+            reorder: true,
+            center:true
+        },
+        {
             name: 'Kanal',
             selector: row => row.SimultaneousCalls,
             sortable: true,
-            reorder: true
+            reorder: true,
+            center:true
         },
         {
             name: 'Tarih',

@@ -36,6 +36,7 @@ const LicenseRenewModal = (props) => {
                 const response = await getRenewLicenseData(preFormattedRenewalKey, years)
                 if (response.status === 200) {
                     const json = await response.json();
+                    console.log(json)
                     setLicenseKeyData(json)
                     setShowLicenseCard(true)
                 } else {
@@ -77,15 +78,18 @@ const LicenseRenewModal = (props) => {
     }, [formattedLicenseKey]);
 
     const addCart = async () => {
-        const renewAnnual = {
-            "Type": "RenewAnnual",
+
+        const renewAnnualorPerpetual = {
+            "Type": licenseKeyData.IsPerpetual ? "Maintenance":"RenewAnnual",
             "UpgradeKey": formattedLicenseKey,
             "Quantity": years,
             "ResellerId": null
         }
 
-        setCartState([...cartState, renewAnnual]);
-        const res = await PostJsonData(renewAnnual);
+        console.log('renewAnnual',renewAnnualorPerpetual)
+
+        setCartState([...cartState, renewAnnualorPerpetual]);
+        const res = await PostJsonData(renewAnnualorPerpetual);
         res.Items[0].endUser = {};
         res.Items[0].ResellerName = '';
         setDetailCartState([...cartDetailState, res]);
@@ -114,6 +118,7 @@ const LicenseRenewModal = (props) => {
 
 
         try {
+
             const responseData = await PostData('/api/newlicense', JSON.stringify(postData));
             console.log(responseData);
             return responseData;

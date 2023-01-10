@@ -95,15 +95,15 @@ const Cart = (props) => {
                     </td>
                     <td className="p-4 px-6 text-center">
                         <div className="flex flex-col items-center justify-center">
-                            <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
+                            <h3>{item.Type === 'NewLicense' ? item.Edition : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : item.Type === 'Maintenance' ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.licenseType}</h3>
                         </div>
                     </td>
                     <td className="p-4 px-6 text-center whitespace-nowrap">
                         <div className="flex flex-col items-center justify-center">
-                            <h3>{item.Type === 'NewLicense' ? 'Yeni Lisans' : item.Type === 'RenewAnnual' ? 'Lisans Yenileme' : 'Lisans Yükseltme'}</h3>
+                            <h3>{item.Type === 'NewLicense' ? 'Yeni Lisans' : item.Type === 'RenewAnnual' ? 'Lisans Yenileme' : item.Type === 'Upgrade' ? 'Lisans Yükseltme' : 'Maintenance'}</h3>
                         </div>
                     </td>
-                    <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type === 'NewLicense' ? item.SimultaneousCalls : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].SimultaneousCalls : getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.simCall}</td>
+                    <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type === 'NewLicense' ? item.SimultaneousCalls : item.Type === 'RenewAnnual' ? cartDetailState[index]?.Items[0].LicenseKeys[0].SimultaneousCalls : item.Type === 'Maintenance' ? cartDetailState[index]?.Items[0].LicenseKeys[0].SimultaneousCalls :  getLicenseTypeAndSimcalls(cartDetailState[index]?.Items[0]?.ProductDescription)?.simCall}</td>
                     <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type === 'Upgrade' ? 1 : item.Quantity}</td>
                     <td className="p-4 px-6 text-center whitespace-nowrap">{item.Type !== 'NewLicense' ? 0 : item.AdditionalInsuranceYears}</td>
                     <td className="p-4 px-6 text-center whitespace-nowrap">${cartDetailState[index]?.Items[0].UnitPrice * cartDetailState[index]?.Items[0].Quantity}</td>
@@ -177,7 +177,9 @@ const Cart = (props) => {
 
 
         try {
+            console.log('postdata',postData)
             const tcxResponses = await PostData('/api/newlicense', JSON.stringify(postData));
+            console.log('tcxresponses 181',tcxResponses)
             addRandomLicenseKey(tcxResponses)
 
             toast.success('Sipariş başarıyla oluşturuldu.', {

@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         if (licensekey.length == 18) {
             return res.status(400).json()
         } else {
-            const response = await fetch(`https://api.3cx.com/public/v1/order/LicenseUpgradePrice?licensekey=${licensekey}&toEdition=${toEdition}&toSimCalls=${toSimCalls}`, {
+            const response = await fetch(`https://api.3cx.com/public/v1/order/LicenseUpgradePrices?licensekey=${licensekey}`, {
                 headers: {
                     'Authorization': `Basic ${basicAuth}`
                 }

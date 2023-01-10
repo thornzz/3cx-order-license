@@ -59,9 +59,10 @@ function UpgradeLicenseModal(props) {
         if (licenseKey.length === 16) {
             console.log('renew license modal regular')
             const fetchData = async () => {
-                const response = await getUpgradeLicenseData(formattedLicenseKey,licenseType,simCall)
+                const response = await getUpgradeLicenseData(formattedLicenseKey)
                 if (response.status === 200) {
                     const json = await response.json();
+                    console.log(json)
                     setLicenseKeyData(json)
                     setShowLicenseCard(true)
                 } else {
@@ -123,8 +124,8 @@ function UpgradeLicenseModal(props) {
         }
     }
 
-    const getUpgradeLicenseData = async (licenseKey,toEdition, toSimCalls) => {
-        const response = await fetch(`/api/upgrade/${licenseKey}/${toEdition}/${toSimCalls}`)
+    const getUpgradeLicenseData = async (licenseKey) => {
+        const response = await fetch(`/api/upgrade/${licenseKey}`)
         return response
     }
     const handleLicenseKeyChange = async (event) => {
@@ -190,7 +191,7 @@ function UpgradeLicenseModal(props) {
                                             <TbLicense
                                                 className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100"/>
                                             <span
-                                                className="font-bold text-gray-900">{licenseKeyData && `${licenseKeyData.FromEdition} Sürüm / ${licenseKeyData.FromSimultaneousCalls} Kanal`}</span>
+                                                className="font-bold text-gray-900">{licenseKeyData && `${licenseKeyData[0]?.FromEdition} Sürüm / ${licenseKeyData[0]?.FromSimultaneousCalls} Kanal`}</span>
                                         </div>
 
                                     </div>
@@ -205,7 +206,7 @@ function UpgradeLicenseModal(props) {
                                             onChange={(event) => setLicenseType(event.target.value)}
                                         >
                                             <option value="">Lisans Tipini Seçiniz</option>
-                                            <option value="Professional">Professional</option>
+                                            {licenseKeyData && licenseKeyData[0]?.FromEdition !== 'Enterprise' ? <option value="Professional">Professional</option> : null}
                                             <option value="Enterprise">Enterprise</option>
                                         </select>
                                         <div

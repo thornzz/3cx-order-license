@@ -50,13 +50,7 @@ function EndUserModal(props) {
 
     useEffect(() => {
 
-        if (props.expiringKeysData === undefined || props.expiringKeysData === null) {
-            setCompanyName('')
-            setAddress('')
-            setEmail('')
-            setTelephone('')
-            setOther('')
-        } else {
+          if(props.expiringKeysData=== undefined || props.expiringKeysData=== null) return
 
             if (Object.keys(props.expiringKeysData.endUser).length !== 0) {
                 setCompanyName(props?.expiringKeysData?.endUser?.companyName)
@@ -65,7 +59,14 @@ function EndUserModal(props) {
                 setTelephone(props.expiringKeysData?.endUser?.telephone)
                 setOther(props.expiringKeysData?.endUser?.other)
             }
-        }
+            else{
+                setCompanyName('')
+                setAddress('')
+                setEmail('')
+                setTelephone('')
+                setOther('')
+            }
+
 
     }, [props.expiringKeysData])
 
@@ -212,7 +213,7 @@ function EndUserModal(props) {
                                 </div>
 
                                 {props.expiringKeysData !== null && props.expiringKeysData !== undefined ? null :
-                                    props.tableData ? (
+                                    !props.tableData ? (
                                         <button
                                             className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
                                             type="button" onClick={setCartDetail}>Bilgileri Kaydet

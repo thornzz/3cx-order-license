@@ -57,7 +57,7 @@ const ExpiringKeys = (props) => {
         });
 
         if (filteredItems.length === 0) {
-            return undefined;
+            return {endUser:{}}
         }
 console.log('filtered items',filteredItems)
         const newLicenseItem = filteredItems.find(item => item.Type === 'NewLicense');
@@ -73,7 +73,10 @@ console.log('filtered items',filteredItems)
         if (upgradeLicenseItem) {
             return {endUser: upgradeLicenseItem.endUser};
         }
-
+        const maintanenceLicenseItem = filteredItems.find(item => item.Type === 'Maintenance');
+        if (maintanenceLicenseItem) {
+            return {endUser: maintanenceLicenseItem.endUser};
+        }
         return undefined;
     }
 

@@ -1,8 +1,8 @@
 function addRandomLicenseKey(json) {
     for (const item of json.Items) {
         const quantity = item.Quantity;
-
-        if (item.Type === 'RenewAnnual' || item.Type === 'Upgrade')
+console.log('item',item)
+        if (item.Type === 'RenewAnnual' || item.Type === 'Upgrade' || item.Type === 'Maintenance')
             continue
 
         for (let i = 0; i < quantity; i++) {

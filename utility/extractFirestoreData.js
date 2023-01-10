@@ -6,9 +6,9 @@ const extractData = async (arr) => {
     for (const obj of arr) {
         let {objectId} = obj
         for (const item of obj.tcxResponses.Items) {
-            const { ResellerName, endUser, Type, DateTime, InvoiceId,Line} = item;
+            const { ResellerName, endUser, Type, DateTime, InvoiceId,  Line} = item;
             for (const license of item.LicenseKeys) {
-                let { Edition, LicenseKey, SimultaneousCalls } = license;
+                let { Edition, LicenseKey, SimultaneousCalls, IsPerpetual } = license;
 
                 if (item.Type === 'Upgrade') {
                     const elementToSplit = item.ProductDescription.split('\n')[1];
@@ -18,7 +18,7 @@ const extractData = async (arr) => {
                     SimultaneousCalls = simcall
                 }
 
-                result.push({ objectId, Line, InvoiceId, ResellerName, endUser, Type, DateTime: LuxonDateTime.fromSeconds(DateTime.seconds).toFormat('dd.MM.yyyy'), Edition, LicenseKey, SimultaneousCalls });
+                result.push({ objectId, Line, InvoiceId, ResellerName, endUser, Type, DateTime: LuxonDateTime.fromSeconds(DateTime.seconds).toFormat('dd.MM.yyyy'), Edition, LicenseKey, SimultaneousCalls,IsPerpetual });
             }
         }
     }
