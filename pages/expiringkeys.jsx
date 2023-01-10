@@ -8,8 +8,10 @@ import Footer from "../components/Footer";
 import {tableStyle} from "../components/styles/tableStyle";
 import EndUserModal from "../components/EndUserModal";
 import {AiOutlineEye} from "react-icons/ai";
-import {collection, getDocs} from "firebase/firestore";
+import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
+import {FaBook} from "react-icons/fa";
+import CustomerInfoModal from "../components/CustomerInfoModal";
 
 const ExpiringKeys = (props) => {
 
@@ -18,12 +20,15 @@ const ExpiringKeys = (props) => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isLoading, setIsLoading] = useState(true);
     const [openEndUserModal, setOpenEndUserModal] = useState(false);
+    const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
     const [enduserData, setendUserData] = useState(null);
-
+    const [customerInfo, setCustomerInfo] = useState(null);
     const showEndUserModal = () => {
         setOpenEndUserModal(!openEndUserModal);
     }
-
+    const showCustomerInfoModal = () => {
+        setCustomerInfoModal(!openCustomerInfoModal);
+    }
     useEffect(() => {
 
         const timer = setTimeout(() => {
@@ -48,6 +53,19 @@ const ExpiringKeys = (props) => {
         }
     };
 
+    const getCustomerInfoFromFirestore = async (licenseKey) => {
+        try {
+            const collectionRef = collection(db, 'expiringkeys');
+            const q = query(collectionRef, where("licenseKey", "==", licenseKey));
+            const querySnapshot = await getDocs(q);
+            const [customerInfoData] = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
+            return customerInfoData
+
+        } catch (error) {
+            console.error('Error getting Item object: ', error);
+        }
+    };
+
     async function getEndUserByLicenseKey(data, licenseKey) {
 
         const tcxResponses = data.map(d => d.tcxResponses);
@@ -57,9 +75,9 @@ const ExpiringKeys = (props) => {
         });
 
         if (filteredItems.length === 0) {
-            return {endUser:{}}
+            return {endUser: {}}
         }
-console.log('filtered items',filteredItems)
+
         const newLicenseItem = filteredItems.find(item => item.Type === 'NewLicense');
         if (newLicenseItem) {
             return {endUser: newLicenseItem.endUser};
@@ -81,7 +99,27 @@ console.log('filtered items',filteredItems)
     }
 
     const columns = [
+        {
+            width: '50px',
+            cell: (row, index) => {
+                return (
+                    <button type="button"
+                            onClick={async () => {
+                                const customerInfoData = await getCustomerInfoFromFirestore(row.LicenseKey)
 
+                                if (customerInfoData === undefined)
+                                    setCustomerInfo({ licenseKey: row.LicenseKey})
+                                else
+                                    setCustomerInfo(customerInfoData)
+
+                                showCustomerInfoModal()
+                            }
+                            }
+                            className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <FaBook/>
+                    </button>)
+            }
+        },
         {
             name: 'Lisans Anahtarı',
             selector: row => row.LicenseKey,
@@ -154,10 +192,12 @@ console.log('filtered items',filteredItems)
         },
         {
             name: 'Sürüm',
-            selector: row => {return(row.IsPerpetual ? 'Perpetual' : 'Annual')},
+            selector: row => {
+                return (row.IsPerpetual ? 'Perpetual' : 'Annual')
+            },
             sortable: true,
             reorder: true,
-            center:true
+            center: true
         },
         {
             name: 'Kanal Sayısı',
@@ -191,6 +231,9 @@ console.log('filtered items',filteredItems)
         <div className="bg-gray-900 h-screen">
             <Navbar/>
             <EndUserModal expiringKeysData={enduserData} showModal={openEndUserModal} closeModal={showEndUserModal}/>
+            <CustomerInfoModal data={customerInfo} showModal={openCustomerInfoModal}
+                               closeModal={showCustomerInfoModal}/>
+
             {isLoading ? (
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <RotatingSquare
@@ -235,7 +278,7 @@ console.log('filtered items',filteredItems)
                     onChangePage={setCurrentPage}
                     paginationServer
                     paginationTotalRows={filteredData.length}
-                    paginationRowsPerPageOptions={[10, 25, 50,100,250,500]}
+                    paginationRowsPerPageOptions={[10, 25, 50, 100, 250, 500]}
                 />
             )}
             <Footer/>

@@ -12,7 +12,8 @@ import {HiOutlineKey} from "react-icons/hi";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import {db} from "../firebase";
-import {doc, getDoc, updateDoc} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, updateDoc, onSnapshot, query} from "firebase/firestore";
+import extractData from "../utility/extractFirestoreData";
 
 const LicensesTable = () => {
     //const [myData, setData] = useState([])
@@ -208,10 +209,15 @@ const LicensesTable = () => {
     );
 
     const getFireStoreData = async () => {
+        // const firestoreData = await fetch('/api/getfirestoredata');
+        // const data = await firestoreData.json();
+        const q = query(collection(db, "licenses"));
+        const unsubscribe = onSnapshot(q,async (querySnapshot)  => {
+            const arr = querySnapshot.docs.map((d) => ({objectId:d.id,...d.data()}))
+            const data = await extractData(arr)
+            setLicenseState(data)
+        });
 
-        const firestoreData = await fetch('/api/getfirestoredata');
-        const data = await firestoreData.json();
-        setLicenseState(data)
     }
     useEffect(() => {
         (async () => {

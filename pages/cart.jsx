@@ -195,13 +195,11 @@ const Cart = (props) => {
 
             mergeJSONObjects(cartDetailState, tcxResponses);
 
-            console.log(tcxResponses)
-
             await addDoc(collection(db, "licenses"), {tcxResponses});
             //refresh firestore data
-            const firestoreData = await fetch('/api/getfirestoredata');
-            const data = await firestoreData.json();
-            setLicenseState(data)
+            // const firestoreData = await fetch('/api/getfirestoredata');
+            // const data = await firestoreData.json();
+           // setLicenseState(data)
             setCartState([]);
             setDetailCartState([])
 
