@@ -14,6 +14,7 @@ import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import {db} from "../firebase";
 import {collection, doc, getDoc, getDocs, updateDoc, onSnapshot, query} from "firebase/firestore";
 import extractData from "../utility/extractFirestoreData";
+import {Tooltip} from "flowbite-react";
 
 const LicensesTable = () => {
     //const [myData, setData] = useState([])
@@ -59,23 +60,24 @@ const LicensesTable = () => {
 
     const columns = [
         {
-            width:'50px',
+            width: '50px',
             cell: (row, index) => {
                 return (
-                    <button type="button"
-                            onClick={() => {
-                                setSelectedRow(index);
-                            }
-                            }
-                            title="Fatura ID Düzenle"
-                            className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        <FaEdit/>
-                    </button>)
+                    <Tooltip content="Fatura Düzenle" className="font-sm w-[125px]" animation="duration-1000">
+                        <button type="button"
+                                onClick={() => {
+                                    setSelectedRow(index);
+                                }
+                                }
+                                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            <FaEdit/>
+                        </button>
+                    </Tooltip>)
             }
         },
         {
             name: 'Fatura ID',
-            center:true,
+            center: true,
             sortable: true,
             selector: (row, index) => {
 
@@ -146,21 +148,23 @@ const LicensesTable = () => {
         },
         {
             name: 'Sürüm',
-            selector: row => {return(row.IsPerpetual ? 'Perpetual' : 'Annual')},
+            selector: row => {
+                return (row.IsPerpetual ? 'Perpetual' : 'Annual')
+            },
             sortable: true,
             reorder: true,
-            center:true
+            center: true
         },
         {
             name: 'Kanal',
             selector: row => row.SimultaneousCalls,
             sortable: true,
             reorder: true,
-            center:true
+            center: true
         },
         {
             name: 'Tarih',
-            selector: row =>  row.DateTime,
+            selector: row => row.DateTime,
             reorder: true,
             sortable: true
         },
@@ -170,27 +174,35 @@ const LicensesTable = () => {
             cell: (row, index) => {
 
                 return (
-                    <div>
-                        <button type="button" onClick={() => {
-                            setLicenseKey(row.LicenseKey)
-                            showLicenseRenewModal()
-                        }
-                        }
-                                title="Lisans Yenileme"
-                                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <TbLicense/>
-                        </button>
-                        <button type="button"
-                                onClick={() => {
-                                    setLicenseKey(row.LicenseKey)
-                                    showUpgradeModal()
-                                }
-                                }
-                                title="Lisans Yükseltme"
-                                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            <HiOutlineKey/>
-                        </button>
+                    <div className="flex">
+                        <Tooltip content="Lisans Yenileme" className="font-sm" animation="duration-1000">
+                            <button type="button" onClick={() => {
+                                setLicenseKey(row.LicenseKey)
+                                showLicenseRenewModal()
+                            }
+                            }
+                                    className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <TbLicense/>
+                            </button>
 
+                        </Tooltip>
+
+                        <Tooltip
+                            content="Lisans Yükseltme"
+                            style="dark"
+                            className="font-sm" animation="duration-1000"
+                        >
+                            <button type="button"
+                                    onClick={() => {
+                                        setLicenseKey(row.LicenseKey)
+                                        showUpgradeModal()
+                                    }
+                                    }
+
+                                    className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <HiOutlineKey/>
+                            </button>
+                        </Tooltip>
                     </div>
                 )
             },
@@ -216,8 +228,8 @@ const LicensesTable = () => {
         // const firestoreData = await fetch('/api/getfirestoredata');
         // const data = await firestoreData.json();
         const q = query(collection(db, "licenses"));
-        const unsubscribe = onSnapshot(q,async (querySnapshot)  => {
-            const arr = querySnapshot.docs.map((d) => ({objectId:d.id,...d.data()}))
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            const arr = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
             const data = await extractData(arr)
             setLicenseState(data)
         });
@@ -261,8 +273,8 @@ const LicensesTable = () => {
                 </div>
             ) : (
                 <DataTable
-                   defaultSortFieldId={10}
-                   defaultSortAsc={false}
+                    defaultSortFieldId={10}
+                    defaultSortAsc={false}
                     columns={columns}
                     data={paginatedData}
                     customStyles={tableStyle}

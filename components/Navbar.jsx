@@ -41,14 +41,13 @@ function Navbar() {
             <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto mt-2">
                 <div className="text-md lg:flex-grow">
                     <a href="#responsive-header"
-                       className="block mt-4 lg:inline-block lg:mt-0 text-gray-400 hover:text-white mr-4">
+                       className="block mt-4 lg:inline-block lg:mt-0 text-gray-400 hover:text-white mr-2">
                     </a>
 
                 </div>
 
-
                 <div className="flex items-center w-[110px]">
-                    <Dropdown label="Menü" className="text-red-500 w-[250px]">
+                    <Dropdown label="Menü" className="w-[250px]" trigger={"hover"}>
                         <Dropdown.Header>
                             <span className="block text-sm font-medium truncate">{session?.user?.email}</span>
                         </Dropdown.Header>
@@ -70,6 +69,7 @@ function Navbar() {
                 </div>
             </div>
         </nav>
+
 
 
     );

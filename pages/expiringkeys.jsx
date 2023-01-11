@@ -311,13 +311,13 @@ export async function getServerSideProps(context) {
         const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
         const tcxResponses = data.map(d => d.tcxResponses);
         const items = tcxResponses.flatMap(response => response.Items);
-        for (let i = 0; i < items.length; i++) {
-            for (let j = 0; j < expiringKeysResponse.length; j++) {
-                if (items[i].LicenseKeys.some(key => key.LicenseKey === expiringKeysResponse[j].LicenseKey)) {
-                    expiringKeysResponse[j].endUser = items[i].endUser;
+        items.forEach(item => {
+            expiringKeysResponse.forEach(keyResponse => {
+                if (item.LicenseKeys.some(key => key.LicenseKey === keyResponse.LicenseKey)) {
+                    keyResponse.endUser = item.endUser;
                 }
-            }
-        }
+            });
+        });
 
     }
     await getFirestoreDataAndMerge()
