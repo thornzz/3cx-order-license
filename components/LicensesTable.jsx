@@ -67,6 +67,7 @@ const LicensesTable = () => {
                                 setSelectedRow(index);
                             }
                             }
+                            title="Fatura ID Düzenle"
                             className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <FaEdit/>
                     </button>)
@@ -159,8 +160,9 @@ const LicensesTable = () => {
         },
         {
             name: 'Tarih',
-            selector: row => row.DateTime,
-            reorder: true
+            selector: row =>  row.DateTime,
+            reorder: true,
+            sortable: true
         },
         {
             name: 'Lisans İşlemleri',
@@ -174,6 +176,7 @@ const LicensesTable = () => {
                             showLicenseRenewModal()
                         }
                         }
+                                title="Lisans Yenileme"
                                 className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <TbLicense/>
                         </button>
@@ -183,6 +186,7 @@ const LicensesTable = () => {
                                     showUpgradeModal()
                                 }
                                 }
+                                title="Lisans Yükseltme"
                                 className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <HiOutlineKey/>
                         </button>
@@ -257,6 +261,8 @@ const LicensesTable = () => {
                 </div>
             ) : (
                 <DataTable
+                   defaultSortFieldId={10}
+                   defaultSortAsc={false}
                     columns={columns}
                     data={paginatedData}
                     customStyles={tableStyle}

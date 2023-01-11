@@ -56,6 +56,12 @@ function UpgradeLicenseModal(props) {
     }, [licenseKey]);
 
     useEffect(() => {
+        if(licenseKeyData!== null && licenseKeyData!==undefined)
+        setLicenseType(licenseKeyData[0]?.FromEdition)
+
+    }, [licenseKeyData]);
+
+    useEffect(() => {
         if (licenseKey.length === 16) {
             console.log('renew license modal regular')
             const fetchData = async () => {
@@ -252,10 +258,13 @@ function UpgradeLicenseModal(props) {
                                         </button>
 
                                         <button
-                                            onClick={async () => await router.push('/cart')}
+                                            onClick={async () =>{
+                                                addCart()
+                                                await router.push('/cart')}
+                                            }
                                             className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300"
                                             type="button">
-                                            Sepete Git
+                                            Sepete Ekle/Git
                                         </button>
                                     </div>
                                 </Fragment>)

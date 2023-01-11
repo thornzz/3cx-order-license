@@ -5,6 +5,7 @@ import PostData from "../utility/HttpPostUtility";
 import {useRecoilState} from "recoil";
 import {cart, cartDetail, partners} from "../atoms/shoppingCartAtom";
 import { toast } from "react-toastify";
+import {useRouter} from "next/router";
 const BuyLicenseModal = (props) => {
 
     const [quantity, setQuantity] = useState(1)
@@ -16,6 +17,7 @@ const BuyLicenseModal = (props) => {
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
     const [getPartners, setPartners] = useRecoilState(partners);
     const [options, setOptions] = useState([]);
+    const router = useRouter()
     useEffect(() => {
         const getPartners = async () => {
             const response = await fetch('/api/getpartners');
@@ -217,10 +219,16 @@ const BuyLicenseModal = (props) => {
                         <div className="flex items-center justify-between">
 
                             <button onClick={addLine}
-                                    className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
                                     type="button"
                             >
                                 SEPETE EKLE
+                            </button>
+                            <button onClick={()=> router.push('/cart')}
+                                    className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="button"
+                            >
+                                SEPETE GİT
                             </button>
                         </div>
                     </form>

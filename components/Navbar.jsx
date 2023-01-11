@@ -27,8 +27,14 @@ function Navbar() {
                     alt="K2M Bilişim Logo"
                     width={140}
                     height={90}
-                />
-                <span className="font-semibold text-xl tracking-tight"><Link
+                    className="mt-2 hover:cursor-pointer"
+                    onClick={()=> router.push('/dashboard')}
+                >
+
+                </Image>
+                <span className="font-semibold text-xl tracking-tight">
+
+                    <Link
                     href='/dashboard'>Lisans Portal </Link></span>
             </div>
 

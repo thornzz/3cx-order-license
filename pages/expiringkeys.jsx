@@ -12,6 +12,7 @@ import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
 import {FaBook} from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
+import {useCollection} from "react-firebase-hooks/firestore";
 
 const ExpiringKeys = (props) => {
 
@@ -23,6 +24,7 @@ const ExpiringKeys = (props) => {
     const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
     const [enduserData, setendUserData] = useState(null);
     const [customerInfo, setCustomerInfo] = useState(null);
+
     const showEndUserModal = () => {
         setOpenEndUserModal(!openEndUserModal);
     }
@@ -30,7 +32,6 @@ const ExpiringKeys = (props) => {
         setCustomerInfoModal(!openCustomerInfoModal);
     }
     useEffect(() => {
-
         const timer = setTimeout(() => {
             setIsLoading(false);
         }, 1000);
@@ -45,8 +46,7 @@ const ExpiringKeys = (props) => {
             const querySnapshot = await getDocs(collectionRef)
             const data = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
 
-            const endUserData = await getEndUserByLicenseKey(data, licenseKey)
-            return endUserData
+            return await getEndUserByLicenseKey(data, licenseKey)
 
         } catch (error) {
             console.error('Error getting Item object: ', error);
@@ -104,6 +104,7 @@ const ExpiringKeys = (props) => {
             cell: (row, index) => {
                 return (
                     <button type="button"
+                            title="Müşteri Bilgileri"
                             onClick={async () => {
                                 const customerInfoData = await getCustomerInfoFromFirestore(row.LicenseKey)
 
@@ -124,7 +125,8 @@ const ExpiringKeys = (props) => {
             name: 'Lisans Anahtarı',
             selector: row => row.LicenseKey,
             filter: true,
-            reorder: true
+            reorder: true,
+            grow:1
         },
 
         {
@@ -138,8 +140,10 @@ const ExpiringKeys = (props) => {
                 }
             },
             sortable: true,
-            reorder: true
+            reorder: true,
+            grow:1
         },
+
         {
             name: 'End user',
             cell: (row) =>
@@ -154,7 +158,18 @@ const ExpiringKeys = (props) => {
             reorder: true
         },
         {
-            name: 'Zamanaşımına Kalan (Gün)',
+            name:'Şirket',
+            selector:row => row?.endUser?.companyName,
+            grow:1
+        },
+        {
+            name:'Telefon',
+            selector:row => row?.endUser?.telephone,
+            width: '100px'
+
+        },
+        {
+            name: 'Kalan (Gün)',
             selector: row => {
                 // Convert the string to a Date object
                 const targetDate = new Date(row.ExpiryDate);
@@ -167,7 +182,7 @@ const ExpiringKeys = (props) => {
             },
             reorder: true,
             sortable: true,
-            center: true
+            center: true,
         },
         {
             name: 'Expiry Date',
@@ -218,9 +233,9 @@ const ExpiringKeys = (props) => {
     };
 
     const filteredData = props.expiringKeys.filter(item =>
-        [item.LicenseKey]
-            .map(val => val.toLowerCase())
-            .some(val => val.includes(searchText.toLowerCase()))
+        [item.LicenseKey,item?.endUser?.companyName]
+            .map(val => val?.toLowerCase())
+            .some(val => val?.includes(searchText.toLowerCase()))
     );
     const paginatedData = filteredData.slice(
         (currentPage - 1) * rowsPerPage,
@@ -289,16 +304,31 @@ const ExpiringKeys = (props) => {
 export default ExpiringKeys
 
 export async function getServerSideProps(context) {
-
     const expiringKeysResponse = await getExpiringKeys()
-    const getPartnersResponse = await getPartners()
+    const getFirestoreDataAndMerge = async ()=> {
+        const collectionRef = collection(db, 'licenses');
+        const querySnapshot = await getDocs(query(collectionRef));
+        const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
+        const tcxResponses = data.map(d => d.tcxResponses);
+        const items = tcxResponses.flatMap(response => response.Items);
+        for (let i = 0; i < items.length; i++) {
+            for (let j = 0; j < expiringKeysResponse.length; j++) {
+                if (items[i].LicenseKeys.some(key => key.LicenseKey === expiringKeysResponse[j].LicenseKey)) {
+                    expiringKeysResponse[j].endUser = items[i].endUser;
+                }
+            }
+        }
 
+    }
+    await getFirestoreDataAndMerge()
+
+    const getPartnersResponse = await getPartners()
     const getPartnersResponseFilter = getPartnersResponse.map(partner => ({
             value: parseInt(partner.PartnerId, 10),
             label: partner.CompanyName,
         })
     );
     return {
-        props: {expiringKeys: expiringKeysResponse, partners: getPartnersResponseFilter}, // will be passed to the page component as props
+        props: {expiringKeys: expiringKeysResponse,  partners: getPartnersResponseFilter}, // will be passed to the page component as props
     }
 }
