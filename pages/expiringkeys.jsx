@@ -12,6 +12,7 @@ import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
 import {FaBook} from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
+import {Progress} from "flowbite-react";
 
 const ExpiringKeys = (props) => {
 
@@ -23,7 +24,7 @@ const ExpiringKeys = (props) => {
     const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
     const [enduserData, setendUserData] = useState(null);
     const [customerInfo, setCustomerInfo] = useState(null);
-
+    const [customerInfoAll, setCustomerInfoAll] = useState(null);
     const showEndUserModal = () => {
         setOpenEndUserModal(!openEndUserModal);
     }
@@ -31,13 +32,13 @@ const ExpiringKeys = (props) => {
         setCustomerInfoModal(!openCustomerInfoModal);
     }
     useEffect(() => {
+
         const timer = setTimeout(() => {
             setIsLoading(false);
         }, 1000);
         return () => clearTimeout(timer);
 
     }, [])
-
 
     const getEndUserFromFireStore = async (licenseKey) => {
         try {
@@ -96,6 +97,22 @@ const ExpiringKeys = (props) => {
         }
         return undefined;
     }
+    function countCheckedPercentage(obj) {
+        let count = 0;
+        let total = 0;
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                const element = obj[key];
+                if (element.hasOwnProperty("checked")) {
+                    total++;
+                    if(element.checked === true)
+                        count++;
+                }
+            }
+        }
+        return (count / total * 100).toFixed(2);
+    }
+
 
     const columns = [
         {
@@ -142,7 +159,27 @@ const ExpiringKeys = (props) => {
             reorder: true,
             grow:1
         },
+        {
+            name: 'Tamamlandı',
+            center:true,
+            selector: (row, index) => {
+                let percentage=0
+               const item = props.customerInfoDataAll.find(key=> key.licenseKey === row.LicenseKey)
+                if (item)
+                 percentage=Number(countCheckedPercentage(item.customerInfo))
+                return (
+                    <Progress className="w-20"
+                        progress={percentage}
+                        labelPosition="outside"
+                        label={" "}
+                              color={"purple"}
+                        labelProgress={true}
+                        size={"md"}
+                    />
+                )
 
+            }
+        },
         {
             name: 'End user',
             cell: (row) =>
@@ -303,22 +340,34 @@ const ExpiringKeys = (props) => {
 export default ExpiringKeys
 
 export async function getServerSideProps(context) {
-    const expiringKeysResponse = await getExpiringKeys()
+    let expiringKeysResponse = await getExpiringKeys()
     const getFirestoreDataAndMerge = async ()=> {
         const collectionRef = collection(db, 'licenses');
-        const querySnapshot = await getDocs(query(collectionRef));
-        const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
-        const tcxResponses = data.map(d => d.tcxResponses);
-        const items = tcxResponses.flatMap(response => response.Items);
-        items.forEach(item => {
-            expiringKeysResponse.forEach(keyResponse => {
-                if (item.LicenseKeys.some(key => key.LicenseKey === keyResponse.LicenseKey)) {
-                    keyResponse.endUser = item.endUser;
-                }
-            });
+        //long version
+        //const querySnapshot = await getDocs(query(collectionRef));
+        //const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
+        const data = await getDocs(query(collectionRef)).then(snapshot => snapshot.docs.map(d => ({objectId: d.id, ...d.data()})));
+        // const tcxResponses = data.map(d => d.tcxResponses);
+        // const items = tcxResponses.flatMap(response => response.Items);
+        const items = data.flatMap(d => d.tcxResponses?.Items || []);
+
+        expiringKeysResponse = expiringKeysResponse.map(keyResponse => {
+            let item = items.find(item => item.LicenseKeys.some(key => key.LicenseKey === keyResponse.LicenseKey));
+            if (item) keyResponse.endUser = item.endUser;
+            return keyResponse;
         });
 
     }
+    const getCustomerInfoAllData = async () =>{
+        const collectionRef = collection(db, 'expiringkeys');
+        const q = query(collectionRef);
+        const querySnapshot = await getDocs(q);
+        const customerInfoAllData = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
+
+        return customerInfoAllData
+    }
+    const customerDataAll = await getCustomerInfoAllData()
+
     await getFirestoreDataAndMerge()
 
     const getPartnersResponse = await getPartners()
@@ -328,6 +377,6 @@ export async function getServerSideProps(context) {
         })
     );
     return {
-        props: {expiringKeys: expiringKeysResponse,  partners: getPartnersResponseFilter}, // will be passed to the page component as props
+        props: {expiringKeys: expiringKeysResponse,  partners: getPartnersResponseFilter, customerInfoDataAll:customerDataAll}, // will be passed to the page component as props
     }
 }

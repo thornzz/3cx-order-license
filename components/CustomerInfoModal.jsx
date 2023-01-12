@@ -29,6 +29,7 @@ function CustomerInfoModal(props) {
                 setNewRecord(true)
             } else {
                 setNewRecord(false)
+                console.log(props.data.customerInfo)
                 setResellerEmail(props.data.customerInfo.resellerEmail.checked)
                 setResellerCall(props.data.customerInfo.resellerCall.checked)
                 setEndUserEmail(props.data.customerInfo.endUserEmail.checked)
@@ -60,12 +61,7 @@ function CustomerInfoModal(props) {
 
     const addFirestoreCustomerInfo = async () => {
         console.log(props.data.customerInfo)
-
-        //
-        // console.log(`New Record : ${newRecord}, End User Email : ${endUserCall} End User call User : ${props.data?.customerInfo?.endUserCall.user}`)
-
         const customerInfo = {}
-
         // EndUserEmail kontrolü
 
         if (newRecord && endUserEmail) {
@@ -104,39 +100,33 @@ function CustomerInfoModal(props) {
                 datetime: null
             }
         }
-
         // EndUserCall kontrolü
 
         if (newRecord && endUserCall) {
-            console.log('70')
             customerInfo.endUserCall = {
                 user: session.user.email.split('@')[0],
                 checked: endUserCall,
                 datetime: getCurrentDateTime()
             }
         } else if (newRecord && !endUserCall) {
-            console.log('77')
             customerInfo.endUserCall = {
                 user: null,
                 checked: endUserCall,
                 datetime: null
             }
         } else if (!newRecord && endUserCall && props.data.customerInfo.endUserCall.user !== null) {
-            console.log('84')
             customerInfo.endUserCall = {
                 user: props.data.customerInfo.endUserCall.user,
                 checked: endUserEmail,
                 datetime: props.data.customerInfo.endUserCall.datetime
             }
         } else if (!newRecord && endUserCall && props.data.customerInfo.endUserCall.user === null) {
-            console.log('91')
             customerInfo.endUserCall = {
                 user: session.user.email.split('@')[0],
                 checked: endUserCall,
                 datetime: getCurrentDateTime()
             }
         } else {
-            console.log('else girdi')
             customerInfo.endUserCall = {
                 user: null,
                 checked: false,
@@ -147,35 +137,30 @@ function CustomerInfoModal(props) {
         // resellerEmail kontrolü
 
         if (newRecord && resellerEmail) {
-            console.log('70')
             customerInfo.resellerEmail = {
                 user: session.user.email.split('@')[0],
                 checked: resellerEmail,
                 datetime: getCurrentDateTime()
             }
         } else if (newRecord && !resellerEmail) {
-            console.log('77')
             customerInfo.resellerEmail = {
                 user: null,
                 checked: resellerEmail,
                 datetime: null
             }
         } else if (!newRecord && resellerEmail && props.data.customerInfo.resellerEmail.user !== null) {
-            console.log('84')
             customerInfo.resellerEmail = {
                 user: props.data.customerInfo.resellerEmail.user,
                 checked: resellerEmail,
                 datetime: props.data.customerInfo.resellerEmail.datetime
             }
         } else if (!newRecord && resellerEmail && props.data.customerInfo.resellerEmail.user === null) {
-            console.log('91')
             customerInfo.resellerEmail = {
                 user: session.user.email.split('@')[0],
                 checked: resellerEmail,
                 datetime: getCurrentDateTime()
             }
         } else {
-            console.log('else girdi')
             customerInfo.resellerEmail = {
                 user: null,
                 checked: false,
@@ -186,35 +171,30 @@ function CustomerInfoModal(props) {
         // resellerCall kontrolü
 
         if (newRecord && resellerCall) {
-            console.log('70')
             customerInfo.resellerCall = {
                 user: session.user.email.split('@')[0],
                 checked: resellerCall,
                 datetime: getCurrentDateTime()
             }
         } else if (newRecord && !resellerCall) {
-            console.log('77')
             customerInfo.resellerCall = {
                 user: null,
                 checked: resellerCall,
                 datetime: null
             }
         } else if (!newRecord && resellerCall && props.data.customerInfo.resellerCall.user !== null) {
-            console.log('84')
             customerInfo.resellerCall = {
                 user: props.data.customerInfo.resellerCall.user,
                 checked: resellerEmail,
                 datetime: props.data.customerInfo.resellerCall.datetime
             }
         } else if (!newRecord && resellerCall && props.data.customerInfo.resellerCall.user === null) {
-            console.log('91')
             customerInfo.resellerCall = {
                 user: session.user.email.split('@')[0],
                 checked: resellerCall,
                 datetime: getCurrentDateTime()
             }
         } else {
-            console.log('else girdi')
             customerInfo.resellerCall = {
                 user: null,
                 checked: false,
@@ -223,33 +203,6 @@ function CustomerInfoModal(props) {
         }
         customerInfo.other = other
 
-
-
-        // const customerInfo = {
-        //
-        //     endUserEmail: {
-        //         user: newRecord && endUserEmail ? session.user.email.split('@')[0] : !newRecord && endUserEmail && props.data?.customerInfo.endUserEmail!==null ? props.data?.customerInfo.endUserEmail.user  : !newRecord && !endUserEmail   ? null: !newRecord && endUserEmail && props.data?.customerInfo.endUserEmail===null ? session.user.name : null,
-        //         checked: endUserEmail,
-        //         datetime: endUserEmail ? (newRecord ? getCurrentDateTime(): props.data.customerInfo.endUserEmail.datetime):'',
-        //     },
-        //     endUserCall: {
-        //         user: newRecord && endUserCall ? session.user.email.split('@')[0] : !newRecord && endUserCall && props.data?.customerInfo.endUserCall!==null ? props.data?.customerInfo.endUserCall.user  : !newRecord && !endUserCall   ? null: !newRecord && endUserCall && props.data?.customerInfo.endUserCall===null ? session.user.name : null,
-        //         checked: endUserCall,
-        //         datetime: endUserCall ? (newRecord ? getCurrentDateTime(): props.data.customerInfo.endUserCall.datetime):'',
-        //     },
-        //     resellerEmail: {
-        //         user: newRecord && resellerEmail ? session.user.email.split('@')[0] : !newRecord && resellerEmail && props.data?.customerInfo.resellerEmail!==null ? props.data?.customerInfo.resellerEmail.user  : !newRecord && !resellerEmail   ? null: !newRecord && resellerEmail && props.data?.customerInfo.resellerEmail===null ? session.user.name : null,
-        //         checked: resellerEmail,
-        //         datetime: resellerEmail ? (newRecord ? getCurrentDateTime(): props.data.customerInfo.resellerEmail.datetime):'',
-        //     },
-        //     resellerCall: {
-        //
-        //         user: newRecord && resellerCall ? session.user.email.split('@')[0] : !newRecord && resellerCall && props.data?.customerInfo.resellerCall!==null ? props.data?.customerInfo.resellerCall.user  : !newRecord && !resellerCall   ? null: !newRecord && resellerCall && props.data?.customerInfo.resellerCall===null ? session.user.name : null,
-        //         checked: resellerCall,
-        //         datetime: resellerCall ? (newRecord ? getCurrentDateTime(): props.data.customerInfo.resellerCall.datetime):'',
-        //     },
-        //     other: other
-        // }
         try {
             if (newRecord) {
                 await addDoc(collection(db, "expiringkeys"), {
