@@ -120,14 +120,16 @@ const ExpiringKeys = (props) => {
                             className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <FaBook/>
                     </button>)
-            }
+            },
+            hide: 'sm'
         },
         {
             name: 'Lisans Anahtarı',
             selector: row => row.LicenseKey,
             filter: true,
             reorder: true,
-            grow:1
+            grow:1,
+            hide:'sm'
         },
 
         {
@@ -163,7 +165,7 @@ const ExpiringKeys = (props) => {
                     />
                 )
             },
-
+            hide:'md'
         },
         {
             name: 'End user',
@@ -176,31 +178,56 @@ const ExpiringKeys = (props) => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            reorder: true
+            reorder: true,
+
         },
         {
             name:'Şirket',
             selector:row => row?.endUser?.companyName,
-            grow:1.5
+            grow:1.5,
+            hide:'md'
         },
         {
             name:'Telefon',
             selector:row => row?.endUser?.telephone,
-            width: '100px'
+            width: '100px',
+            hide:'md'
 
         },
         {
             name: 'Kalan (Gün)',
-            selector: row => {
-                // Convert the string to a Date object
-                const targetDate = new Date(row.ExpiryDate);
-                // Get the current date
-                const currentDate = new Date();
-                // Calculate the difference in milliseconds between the current date and the target date
-                const timeDifference = targetDate.getTime() - currentDate.getTime();
-                // Calculate the number of days remaining by dividing the time difference by the number of milliseconds in a day
-                return Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
-            },
+            selector: row => row.remainingDay,
+            conditionalCellStyles: [
+                {
+                    when: row => row.remainingDay < 31,
+                    style: {
+                        backgroundColor: 'red',
+                        color: 'white',
+                        '&:hover': {
+                            cursor: 'pointer',
+                        },
+                    },
+                },{
+                    when: row => row.remainingDay > 31,
+                    style: {
+                        backgroundColor: 'orange',
+                        color: 'white',
+                        '&:hover': {
+                            cursor: 'pointer',
+                        },
+                    },
+                },
+                {
+                    when: row => row.remainingDay > 60,
+                    style: {
+                        backgroundColor: 'green',
+                        color: 'white',
+                        '&:hover': {
+                            cursor: 'pointer',
+                        },
+                    },
+                }
+            ],
             reorder: true,
             sortable: true,
             center: true,
@@ -225,7 +252,8 @@ const ExpiringKeys = (props) => {
                 // Concatenate the formatted date and time and return
                 return `${formattedDate} ${formattedTime}`
             },
-            reorder: true
+            reorder: true,
+            hide:'md'
         },
         {
             name: 'Sürüm',
@@ -234,19 +262,22 @@ const ExpiringKeys = (props) => {
             },
             sortable: true,
             reorder: true,
-            center: true
+            center: true,
+            hide:'md'
         },
         {
             name: 'Kanal Sayısı',
             selector: row => row.SimultaneousCalls,
             sortable: true,
-            reorder: true
+            reorder: true,
+            hide:'sm'
         },
         {
             name: 'Lisans Tipi',
             selector: row => row.Type,
             sortable: true,
-            reorder: true
+            reorder: true,
+            hide:'md'
         }
 
     ]
@@ -338,8 +369,18 @@ export async function getServerSideProps(context) {
         const items = data.flatMap(d => d.tcxResponses?.Items || []);
 
         expiringKeysResponse = expiringKeysResponse.map(keyResponse => {
+            // add remainingDay field
+            const targetDate = new Date(keyResponse.ExpiryDate);
+            // Get the current date
+            const currentDate = new Date();
+            // Calculate the difference in milliseconds between the current date and the target date
+            const timeDifference = targetDate.getTime() - currentDate.getTime();
+            // Calculate the number of days remaining by dividing the time difference by the number of milliseconds in a day
+            keyResponse.remainingDay = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
+
             let item = items.find(item => item.LicenseKeys.some(key => key.LicenseKey === keyResponse.LicenseKey));
             if (item) keyResponse.endUser = item.endUser;
+
             return keyResponse;
         });
 

@@ -86,7 +86,8 @@ const LicensesTable = () => {
                             <FaEdit/>
                         </button>
                     </Tooltip>)
-            }
+            },
+            hide:'sm'
         },
         {
             name: 'Fatura ID',
@@ -116,6 +117,7 @@ const LicensesTable = () => {
                     return row.InvoiceId;
                 }
             },
+            hide:'sm'
 
         },
         {
@@ -138,13 +140,15 @@ const LicensesTable = () => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            reorder: true
+            reorder: true,
+            hide:'sm'
         },
         {
             name: 'İşlem Türü',
             selector: row => row.Type === 'NewLicense' ? 'Yeni Lisans' : row.Type === 'RenewAnnual' ? 'Lisans Yenileme' : row.Type === 'Maintenance' ? 'Maintenance' : 'Lisans Yükseltme',
             sortable: true,
-            reorder: true
+            reorder: true,
+            hide:'md'
 
         },
         {
@@ -157,7 +161,8 @@ const LicensesTable = () => {
             name: 'Lisans Tipi',
             selector: row => row.Edition,
             sortable: true,
-            reorder: true
+            reorder: true,
+            hide:'md'
         },
         {
             name: 'Sürüm',
@@ -166,21 +171,24 @@ const LicensesTable = () => {
             },
             sortable: true,
             reorder: true,
-            center: true
+            center: true,
+            hide:'md'
         },
         {
             name: 'Kanal',
             selector: row => row.SimultaneousCalls,
             sortable: true,
             reorder: true,
-            center: true
+            center: true,
+            hide:'md'
         },
         {
             name: 'Tarih',
             selector: row => row.DateTime,
             reorder: true,
             sortable: true,
-           sortFunction:sortDateTime
+           sortFunction:sortDateTime,
+            hide:'md'
         },
         {
             name: 'Lisans İşlemleri',
@@ -220,7 +228,8 @@ const LicensesTable = () => {
                     </div>
                 )
             },
-            grow: 1.4
+            grow: 1.4,
+            hide:'md'
         }
 
     ]
