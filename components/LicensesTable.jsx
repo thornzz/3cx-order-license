@@ -57,6 +57,19 @@ const LicensesTable = () => {
     const showLicenseRenewModal = () => {
         setlicenseRenewModal(!openLicenseRenewModal);
     }
+    const sortDateTime = (rowA,rowB) => {
+        // Split the date strings into an array of [day, month, year]
+        const a = rowA.DateTime.toLowerCase();
+        const b = rowB.DateTime.toLowerCase();
+        const date1 = a.split('.');
+        const date2 = b.split('.');
+        // Create new Date object with the year, month, day
+        const newDate1 = new Date(date1[2],date1[1]-1,date1[0]);
+        const newDate2 = new Date(date2[2],date2[1]-1,date2[0]);
+        // Compare the two dates
+        return newDate1 - newDate2;
+    }
+
 
     const columns = [
         {
@@ -166,7 +179,8 @@ const LicensesTable = () => {
             name: 'Tarih',
             selector: row => row.DateTime,
             reorder: true,
-            sortable: true
+            sortable: true,
+           sortFunction:sortDateTime
         },
         {
             name: 'Lisans İşlemleri',

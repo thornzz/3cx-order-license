@@ -53,19 +53,6 @@ const ExpiringKeys = (props) => {
         }
     };
 
-    const getCustomerInfoFromFirestore = async (licenseKey) => {
-        try {
-            const collectionRef = collection(db, 'expiringkeys');
-            const q = query(collectionRef, where("licenseKey", "==", licenseKey));
-            const querySnapshot = await getDocs(q);
-            const [customerInfoData] = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
-            return customerInfoData
-
-        } catch (error) {
-            console.error('Error getting Item object: ', error);
-        }
-    };
-
     async function getEndUserByLicenseKey(data, licenseKey) {
 
         const tcxResponses = data.map(d => d.tcxResponses);
@@ -122,13 +109,11 @@ const ExpiringKeys = (props) => {
                     <button type="button"
                             title="Müşteri Bilgileri"
                             onClick={async () => {
-                                const customerInfoData = await getCustomerInfoFromFirestore(row.LicenseKey)
-
-                                if (customerInfoData === undefined)
+                                const item = props.customerInfoDataAll.find(key=> key.licenseKey === row.LicenseKey)
+                                if (item)
+                                    setCustomerInfo(item)
+                               else
                                     setCustomerInfo({ licenseKey: row.LicenseKey})
-                                else
-                                    setCustomerInfo(customerInfoData)
-
                                 showCustomerInfoModal()
                             }
                             }
@@ -172,13 +157,13 @@ const ExpiringKeys = (props) => {
                         progress={percentage}
                         labelPosition="outside"
                         label={" "}
-                              color={"purple"}
+                              color={"blue"}
                         labelProgress={true}
                         size={"md"}
                     />
                 )
+            },
 
-            }
         },
         {
             name: 'End user',
@@ -196,7 +181,7 @@ const ExpiringKeys = (props) => {
         {
             name:'Şirket',
             selector:row => row?.endUser?.companyName,
-            grow:1
+            grow:1.5
         },
         {
             name:'Telefon',
@@ -219,6 +204,7 @@ const ExpiringKeys = (props) => {
             reorder: true,
             sortable: true,
             center: true,
+            width: '150px'
         },
         {
             name: 'Expiry Date',
