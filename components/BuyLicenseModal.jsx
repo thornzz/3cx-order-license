@@ -224,11 +224,12 @@ const BuyLicenseModal = (props) => {
                             >
                                 SEPETE EKLE
                             </button>
-                            <button onClick={()=> router.push('/cart')}
+                            <button onClick={()=> {addLine()
+                                router.push('/cart')}}
                                     className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                     type="button"
                             >
-                                SEPETE GİT
+                                SEPETE EKLE/GİT
                             </button>
                         </div>
                     </form>
