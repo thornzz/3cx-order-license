@@ -12,7 +12,6 @@ import {collection, getDocs, query, where} from "firebase/firestore";
 import {db} from "../firebase";
 import {FaBook} from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
-import {useCollection} from "react-firebase-hooks/firestore";
 
 const ExpiringKeys = (props) => {
 
