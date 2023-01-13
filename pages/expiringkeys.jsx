@@ -40,6 +40,15 @@ const ExpiringKeys = (props) => {
 
     }, [])
 
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timer);
+
+    }, [])
+    
     const getEndUserFromFireStore = async (licenseKey) => {
         try {
             const collectionRef = collection(db, 'licenses');
@@ -372,6 +381,7 @@ export default ExpiringKeys
 
 export async function getServerSideProps(context) {
     let expiringKeysResponse = await getExpiringKeys()
+
     const getFirestoreDataAndMerge = async ()=> {
         const collectionRef = collection(db, 'licenses');
         //long version

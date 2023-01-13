@@ -27,6 +27,7 @@ async function PostData(url = '', data = {}) {
     }).catch((error) => {
         console.log(error)
     });
+    
     return response.json();
 }
 
