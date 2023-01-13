@@ -53,6 +53,19 @@ const ExpiringKeys = (props) => {
         }
     };
 
+    const getCustomerInfoFromFirestore = async (licenseKey) => {
+        try {
+            const collectionRef = collection(db, 'expiringkeys');
+            const q = query(collectionRef, where("licenseKey", "==", licenseKey));
+            const querySnapshot = await getDocs(q);
+            const [customerInfoData] = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
+            return customerInfoData
+
+        } catch (error) {
+            console.error('Error getting Item object: ', error);
+        }
+    };
+
     async function getEndUserByLicenseKey(data, licenseKey) {
 
         const tcxResponses = data.map(d => d.tcxResponses);
@@ -107,13 +120,14 @@ const ExpiringKeys = (props) => {
             cell: (row, index) => {
                 return (
                     <button type="button"
-                            title="Müşteri Bilgileri"
                             onClick={async () => {
-                                const item = props.customerInfoDataAll.find(key=> key.licenseKey === row.LicenseKey)
-                                if (item)
-                                    setCustomerInfo(item)
-                               else
+                                const customerInfoData = await getCustomerInfoFromFirestore(row.LicenseKey)
+
+                                if (customerInfoData === undefined)
                                     setCustomerInfo({ licenseKey: row.LicenseKey})
+                                else
+                                    setCustomerInfo(customerInfoData)
+
                                 showCustomerInfoModal()
                             }
                             }
