@@ -117,7 +117,7 @@ function CustomerInfoModal(props) {
         } else if (!newRecord && endUserCall && props.data.customerInfo.endUserCall.user !== null) {
             customerInfo.endUserCall = {
                 user: props.data.customerInfo.endUserCall.user,
-                checked: endUserEmail,
+                checked: endUserCall,
                 datetime: props.data.customerInfo.endUserCall.datetime
             }
         } else if (!newRecord && endUserCall && props.data.customerInfo.endUserCall.user === null) {
@@ -185,7 +185,7 @@ function CustomerInfoModal(props) {
         } else if (!newRecord && resellerCall && props.data.customerInfo.resellerCall.user !== null) {
             customerInfo.resellerCall = {
                 user: props.data.customerInfo.resellerCall.user,
-                checked: resellerEmail,
+                checked: resellerCall,
                 datetime: props.data.customerInfo.resellerCall.datetime
             }
         } else if (!newRecord && resellerCall && props.data.customerInfo.resellerCall.user === null) {
