@@ -1,4 +1,4 @@
-import { getApps, initializeApp } from "firebase/app";
+import { getApps, getApp,initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -12,7 +12,8 @@ export const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig,'order-api');
+
+const app = initializeApp(firebaseConfig)
 const auth = getAuth(app);
 const db = getFirestore(app);
 

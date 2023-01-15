@@ -3,7 +3,6 @@ import {FaShoppingCart} from 'react-icons/fa'
 import {useRecoilValue} from "recoil";
 import {cartLength} from "../atoms/shoppingCartAtom";
 import Link from "next/link";
-
 const ShoppingCart = () => {
     const [showModal, setShowModal] = useState(false)
     const cartLengthState = useRecoilValue(cartLength);
