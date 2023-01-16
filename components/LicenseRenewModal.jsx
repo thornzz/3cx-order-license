@@ -32,7 +32,7 @@ const LicenseRenewModal = (props) => {
       props.renewalLicenseKey !== undefined &&
       props.showModal
     ) {
-      setpreFormattedRenewalKey(props.renewalLicenseKey);
+      setpreFormattedRenewalKey(props.renewalLicenseKey.licenseKey);
       setPreFormattedRenewalModalIsActive(true);
     }
   });
@@ -167,6 +167,9 @@ const LicenseRenewModal = (props) => {
     setLicenseKeyDetail(null);
     setPreFormattedRenewalModalIsActive(false);
     setpreFormattedRenewalKey("");
+    setFormattedLicenseKey("")
+    props.renewalLicenseKey.setLicenseKey("")
+
     props.closeModal();
   };
   
