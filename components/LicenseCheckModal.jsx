@@ -9,60 +9,19 @@ import { cart, cartDetail } from "../atoms/shoppingCartAtom";
 import { useRouter } from "next/router";
 import { getLicenceKeyInfo } from "../pages/api/licenseinfo/[...slug]";
 
-const LicenseRenewModal = (props) => {
- 
+const LicenseCheckModal = (props) => {
   const [showLicenseCard, setShowLicenseCard] = useState(false);
   const [years, setYears] = useState(1);
   const [licenseKey, setLicenseKey] = useState("");
   const [licenseKeyData, setLicenseKeyData] = useState("");
-  const [licenseKeyDetail,setLicenseKeyDetail] = useState(null);
+  const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
   const [formattedLicenseKey, setFormattedLicenseKey] = useState("");
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
-  const [preFormattedRenewalKey, setpreFormattedRenewalKey] = useState(null);
-  const [
-    preFormattedRenewalModalIsActive,
-    setPreFormattedRenewalModalIsActive,
-  ] = useState(false);
+
   const router = useRouter();
 
-  useEffect(() => {
-    if (
-      props.renewalLicenseKey !== null &&
-      props.renewalLicenseKey !== undefined &&
-      props.showModal
-    ) {
-      setpreFormattedRenewalKey(props.renewalLicenseKey);
-      setPreFormattedRenewalModalIsActive(true);
-    }
-  });
-  useEffect(() => {
-    if (
-      preFormattedRenewalKey?.length === 19 &&
-      preFormattedRenewalModalIsActive
-    ) {
-      console.log("renew license modal düzenle");
-      setFormattedLicenseKey(preFormattedRenewalKey);
-      const fetchData = async () => {
-        const response = await getRenewLicenseData(
-          preFormattedRenewalKey,
-          years
-        );
-        if (response.status === 200) {
-          const json = await response.json();
-        
-          setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${json.IsPerpetual}`).then((res) => res.json());
-          setLicenseKeyDetail(licenseKeyInfo);
-          setShowLicenseCard(true);
-        } else {
-          setShowLicenseCard(false);
-          setLicenseKeyData(undefined);
-        }
-      };
-      fetchData();
-    }
-  }, [preFormattedRenewalModalIsActive, preFormattedRenewalKey]);
+  console.log(props.licenseModalInfo)
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
     setFormattedLicenseKey(
@@ -77,50 +36,22 @@ const LicenseRenewModal = (props) => {
         if (response.status === 200) {
           const json = await response.json();
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(
+            `/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`
+          ).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
-      
         } else {
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);
         }
       };
       fetchData();
-      
     } else {
       setShowLicenseCard(false);
       setLicenseKeyData(undefined);
     }
   }, [formattedLicenseKey]);
-
-  const addCart = async () => {
-    const renewAnnualorPerpetual = {
-      Type: licenseKeyData.IsPerpetual ? "Maintenance" : "RenewAnnual",
-      UpgradeKey: formattedLicenseKey,
-      Quantity: years,
-      ResellerId: null,
-    };
-
-  
-
-    setCartState([...cartState, renewAnnualorPerpetual]);
-    const res = await PostJsonData(renewAnnualorPerpetual);
-    res.Items[0].endUser = {};
-    res.Items[0].ResellerName = "";
-    setDetailCartState([...cartDetailState, res]);
-
-    toast.info("Ürün sepete eklendi.", {
-      position: "top-center",
-      autoClose: 1000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-  };
 
   const PostJsonData = async (data) => {
     const postData = {
@@ -136,7 +67,7 @@ const LicenseRenewModal = (props) => {
         "/api/newlicense",
         JSON.stringify(postData)
       );
-     
+
       return responseData;
     } catch (error) {
       console.error(error);
@@ -147,7 +78,7 @@ const LicenseRenewModal = (props) => {
     const response = await fetch(`/api/renew/${lic}/${year}`);
     return response;
   };
-  
+
   const handleLicenseKeyChange = async (event) => {
     let value = event.target.value;
     // Only allow digits, letters, and hyphens
@@ -161,15 +92,21 @@ const LicenseRenewModal = (props) => {
     }
   };
 
+  const openLicenseUpgradeModal = () => {
+    props.closeModal();
+
+  };
+  const openLicenseRenewalModal = () => {
+    props.closeModal();
+  };
+
   const closeModal = () => {
     setLicenseKey("");
     setLicenseKeyData(undefined);
     setLicenseKeyDetail(null);
-    setPreFormattedRenewalModalIsActive(false);
-    setpreFormattedRenewalKey("");
+
     props.closeModal();
   };
-  
   return (
     <Fragment>
       <Modal
@@ -185,7 +122,7 @@ const LicenseRenewModal = (props) => {
               className="block text-gray-700 text-md text-center font-bold mb-2"
               htmlFor="select1"
             >
-              Lisans Yenileme
+              Lisans Sorgulama
             </label>
             <label className="text-md font-medium">Lisans Anahtarı</label>
 
@@ -209,7 +146,7 @@ const LicenseRenewModal = (props) => {
                     <div className="px-2 py-3 sm:px-4 flex items-center">
                       <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
                       <h3 class="text-md font-medium leading-6 text-gray-900">
-                    Lisans Bilgileri
+                        Lisans Bilgileri
                       </h3>
                     </div>
                     <div class="border-t border-gray-200">
@@ -219,7 +156,7 @@ const LicenseRenewModal = (props) => {
                             Lisans Sürümü
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                           {licenseKeyDetail?.Edition}
+                            {licenseKeyDetail?.Edition}
                           </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -227,7 +164,9 @@ const LicenseRenewModal = (props) => {
                             Lisans Tipi
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.IsPerpetual ? "Perpetual" : "Annual"}
+                            {licenseKeyDetail?.IsPerpetual
+                              ? "Perpetual"
+                              : "Annual"}
                           </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -235,7 +174,7 @@ const LicenseRenewModal = (props) => {
                             Lisans Aktif mi?
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.IsActive ? "Evet" : "Hayır"}
+                            {licenseKeyDetail?.IsActive ? "Evet" : "Hayır"}
                           </dd>
                         </div>
                         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -243,7 +182,7 @@ const LicenseRenewModal = (props) => {
                             Expiry Tarihi
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.MaintenanceDate}
+                            {licenseKeyDetail?.MaintenanceDate}
                           </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -251,7 +190,7 @@ const LicenseRenewModal = (props) => {
                             Kanal Sayısı
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.SimultaneousCalls}
+                            {licenseKeyDetail?.SimultaneousCalls}
                           </dd>
                         </div>
                         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -259,7 +198,7 @@ const LicenseRenewModal = (props) => {
                             Kalan Gün
                           </dt>
                           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.RemainingDays}
+                            {licenseKeyDetail?.RemainingDays}
                           </dd>
                         </div>
                       </dl>
@@ -300,22 +239,21 @@ const LicenseRenewModal = (props) => {
                 </div>
                 <div className="flex w-full justify-between">
                   <button
-                    onClick={() => addCart()}
+                    onClick={() => openLicenseRenewalModal()}
                     className="px-4 py-2 py-1.5 mr-2 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
                     type="button"
                   >
-                    Sepete Ekle
+                    Lisans Yenileme
                   </button>
 
                   <button
                     onClick={async () => {
-                      addCart();
-                      await router.push("/cart");
+                      openLicenseUpgradeModal();
                     }}
                     className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300"
                     type="button"
                   >
-                    Sepete Ekle/Git
+                    Lisans Yükseltme
                   </button>
                 </div>
               </Fragment>
@@ -327,4 +265,4 @@ const LicenseRenewModal = (props) => {
   );
 };
 
-export default LicenseRenewModal;
+export default LicenseCheckModal;

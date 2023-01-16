@@ -32,8 +32,10 @@ import {
   Center,
   Badge,
   Avatar,
+  HStack,
   Spacer,
 } from "@chakra-ui/react";
+import { Container } from "postcss";
 
 function Navbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -59,6 +61,8 @@ function Navbar() {
         placement="right"
         onClose={onClose}
         finalFocusRef={btnRef}
+        size="xs"
+        m="0"
       >
         <DrawerOverlay />
         <DrawerContent>
@@ -69,7 +73,6 @@ function Navbar() {
             <VStack align={"flex-start"} spacing={5}>
               <Box ml={1}>
                 <Link href={"/dashboard"}>
-                  {" "}
                   <Icon as={HiViewGrid} w="7" h="8" /> Dashboard
                 </Link>
               </Box>
@@ -92,20 +95,25 @@ function Navbar() {
                 </Link>
               </Flex>
             </VStack>
+            
           </DrawerBody>
 
           <DrawerFooter>
-            <Flex gap={2}>
-              <Avatar bg="red.500" icon={<AiOutlineUser fontSize="1.2rem" />} />
-              <Box w="150px" as={"span"}>
-                {" "}
-                {session?.user?.email}
-              </Box>
-
-              <Button p={3} colorScheme="blue" onClick={Logout}>
-                Çıkış
-              </Button>
-            </Flex>
+            <Box className="flex flex-auto items-center justify-items-stretch">
+              <Avatar
+                mr={1}
+                size="sm"
+                bg="red.500"
+                icon={<AiOutlineUser fontSize="1.2rem" />}
+              />
+              <Text mr="1">{session?.user?.email}</Text>
+            
+             
+            </Box>
+  <Button colorScheme="blue" onClick={Logout}>
+              Çıkış
+            </Button>
+         
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

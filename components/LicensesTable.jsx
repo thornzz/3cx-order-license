@@ -327,7 +327,7 @@ const LicensesTable = () => {
                     onChangePage={setCurrentPage}
                     paginationServer
                     paginationTotalRows={filteredData.length}
-                    paginationRowsPerPageOptions={[10, 25, 50]}
+                    paginationRowsPerPageOptions={[50,100,250,500]}
                 />
             )}
         </div>

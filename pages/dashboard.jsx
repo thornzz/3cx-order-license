@@ -7,6 +7,7 @@ import LicenseRenewModal from "../components/LicenseRenewModal";
 import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
 
 import Footer from "../components/Footer";
+import LicenseCheckModal from "../components/LicenseCheckModal";
 
 const Dashboard = () => {
 
@@ -25,6 +26,20 @@ const Dashboard = () => {
 
         setRenewLicenseModal(!openRenewLicenseModal);
     }
+
+
+    const [licenseModalInfo, setLicenseModalInfo] = useState(null);
+    
+    const showLicenseCheckModal = () => {
+        setLicenseModalInfo({
+            "licenseRenew":openRenewLicenseModal,
+            "licenseUpgrade":openUpgradeLicenseModal,
+
+        });
+        setLicenseCheckModal(!openLicenseCheckModal);
+    }
+    const [openLicenseCheckModal,setLicenseCheckModal] = useState(false);
+
     return (
 
         <div className="bg-gray-900 h-screen">
@@ -32,7 +47,7 @@ const Dashboard = () => {
             <BuyLicenseModal showModal={openNewLicenseModal} closeModal={showNewLicenseModal}></BuyLicenseModal>
 
             <LicenseRenewModal showModal={openRenewLicenseModal} closeModal={showRenewLicenseModal}></LicenseRenewModal>
-
+            <LicenseCheckModal showModal={openLicenseCheckModal} closeModal={showLicenseCheckModal} licenseModalInfo={licenseModalInfo}></LicenseCheckModal>
             <UpgradeLicenseModal showModal={openUpgradeLicenseModal}
                                  closeModal={showUpgradeLicenseModal}></UpgradeLicenseModal>
 
@@ -49,6 +64,9 @@ const Dashboard = () => {
                 </Button>
                 <Button onClick={showUpgradeLicenseModal} className="bg-green-500 px-4 w-35 mb-2 mt-2 mr-2">
                     Lisans Yükseltme
+                </Button>
+                <Button onClick={showLicenseCheckModal} className="bg-indigo-500 px-4 w-35 mb-2 mt-2 mr-2">
+                    Lisans Sorgulama
                 </Button>
             </div>
 
