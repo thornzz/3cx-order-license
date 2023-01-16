@@ -21,7 +21,7 @@ const LicenseCheckModal = (props) => {
 
   const router = useRouter();
 
-  console.log(props.licenseModalInfo)
+console.log(props)
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
     setFormattedLicenseKey(
@@ -97,6 +97,8 @@ const LicenseCheckModal = (props) => {
 
   };
   const openLicenseRenewalModal = () => {
+    props.showRenewModal();
+    
     props.closeModal();
   };
 

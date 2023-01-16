@@ -47,7 +47,7 @@ const Dashboard = () => {
             <BuyLicenseModal showModal={openNewLicenseModal} closeModal={showNewLicenseModal}></BuyLicenseModal>
 
             <LicenseRenewModal showModal={openRenewLicenseModal} closeModal={showRenewLicenseModal}></LicenseRenewModal>
-            <LicenseCheckModal showModal={openLicenseCheckModal} closeModal={showLicenseCheckModal} licenseModalInfo={licenseModalInfo}></LicenseCheckModal>
+            <LicenseCheckModal showModal={openLicenseCheckModal} closeModal={showLicenseCheckModal} showRenewModal={showRenewLicenseModal} licenseModalInfo={licenseModalInfo}></LicenseCheckModal>
             <UpgradeLicenseModal showModal={openUpgradeLicenseModal}
                                  closeModal={showUpgradeLicenseModal}></UpgradeLicenseModal>
 
