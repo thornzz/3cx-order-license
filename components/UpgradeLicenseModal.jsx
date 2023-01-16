@@ -16,6 +16,7 @@ function UpgradeLicenseModal(props) {
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [licenseType, setLicenseType] = useState("Professional");
   const [simCall, setSimCall] = useState(64);
+  const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
   const router = useRouter();
   const [preformattedUpgradeLicenseKey, setpreFormattedUpgradeLicenseKey] =
     useState(null);
@@ -50,6 +51,8 @@ function UpgradeLicenseModal(props) {
         if (response.status === 200) {
           const json = await response.json();
           setLicenseKeyData(json);
+          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${false}`).then((res) => res.json());
+          setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         } else {
           setShowLicenseCard(false);
@@ -79,7 +82,11 @@ function UpgradeLicenseModal(props) {
         const response = await getUpgradeLicenseData(formattedLicenseKey);
         if (response.status === 200) {
           const json = await response.json();
-          console.log(json);
+          const licenseKeyInfo = await fetch(
+            `/api/licenseinfo/${formattedLicenseKey}/${false}`
+          ).then((res) => res.json());
+          setLicenseKeyDetail(licenseKeyInfo);
+
           setLicenseKeyData(json);
           setShowLicenseCard(true);
         } else {
@@ -194,14 +201,13 @@ function UpgradeLicenseModal(props) {
                 placeholder="Lisans anahtarını giriniz..."
                 type="text"
                 name="licenseKey"
-                type="text"
                 value={formattedLicenseKey}
                 onChange={handleLicenseKeyChange}
               />
             </label>
             {showLicenseCard && (
               <Fragment>
-                <label
+                      <label
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="select1"
                 >
@@ -211,8 +217,7 @@ function UpgradeLicenseModal(props) {
                   <div className="inline-flex items-center self-start">
                     <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
                     <span className="font-bold text-gray-900">
-                      {licenseKeyData &&
-                        `${licenseKeyData[0]?.FromEdition} Sürüm / ${licenseKeyData[0]?.FromSimultaneousCalls} Kanal`}
+                      {`${licenseKeyDetail?.Edition} Sürüm / ${licenseKeyDetail?.SimultaneousCalls} Kanal / ${licenseKeyDetail?.RemainingDays} Gün`}
                     </span>
                   </div>
                 </div>
@@ -249,7 +254,6 @@ function UpgradeLicenseModal(props) {
                   <select
                     id="select2"
                     className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
-                    value=""
                     value={simCall}
                     onChange={(event) => setSimCall(event.target.value)}
                   >

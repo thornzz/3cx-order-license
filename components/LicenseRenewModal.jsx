@@ -207,68 +207,21 @@ const LicenseRenewModal = (props) => {
             </label>
             {showLicenseCard && (
               <Fragment>
-                <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
-                  <div class="overflow-hidden bg-white shadow sm:rounded-lg">
-                    <div className="px-2 py-3 sm:px-4 flex items-center">
-                      <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
-                      <h3 class="text-md font-medium leading-6 text-gray-900">
-                    Lisans Bilgileri
-                      </h3>
-                    </div>
-                    <div class="border-t border-gray-200">
-                      <dl>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Sürümü
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                           {licenseKeyDetail?.Edition}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Tipi
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.IsPerpetual ? "Perpetual" : "Annual"}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Aktif mi?
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.IsActive ? "Evet" : "Hayır"}
-                          </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Expiry Tarihi
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.MaintenanceDate}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Kanal Sayısı
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.SimultaneousCalls}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Kalan Gün
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                          {licenseKeyDetail?.RemainingDays}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
+                 <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="select1"
+                >
+                  Geçerli Lisans Bilgisi
+                </label>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="inline-flex items-center self-start">
+                    <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
+                    <span className="font-bold text-gray-900">
+                      {`${licenseKeyDetail?.Edition} Sürüm / ${licenseKeyDetail?.SimultaneousCalls} Kanal / ${licenseKeyDetail?.RemainingDays} Gün`}
+                    </span>
                   </div>
                 </div>
+             
                 <div className="flex flex-row-reverse mb-2">
                   <button
                     type="button"
