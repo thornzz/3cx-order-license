@@ -6,10 +6,12 @@ import LicensesTable from "../components/LicensesTable";
 import LicenseRenewModal from "../components/LicenseRenewModal";
 import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
 
+
 import Footer from "../components/Footer";
 import LicenseCheckModal from "../components/LicenseCheckModal";
 
 const Dashboard = () => {
+
   const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
   const showNewLicenseModal = () => {
     setOpenNewLicenseModal(!openNewLicenseModal);
@@ -39,7 +41,10 @@ const Dashboard = () => {
 
       <LicenseRenewModal
         showModal={openRenewLicenseModal}
-        renewalLicenseKey={{licenseKey:licenseKey,setLicenseKey:setLicenseKey}}
+        renewalLicenseKey={{
+          licenseKey: licenseKey,
+          setLicenseKey: setLicenseKey,
+        }}
         closeModal={showRenewLicenseModal}
       ></LicenseRenewModal>
       <LicenseCheckModal
@@ -51,7 +56,10 @@ const Dashboard = () => {
       ></LicenseCheckModal>
       <UpgradeLicenseModal
         showModal={openUpgradeLicenseModal}
-        upgradeLicenseKey={{licenseKey:licenseKey,setLicenseKey:setLicenseKey}}
+        upgradeLicenseKey={{
+          licenseKey: licenseKey,
+          setLicenseKey: setLicenseKey,
+        }}
         closeModal={showUpgradeLicenseModal}
       ></UpgradeLicenseModal>
 

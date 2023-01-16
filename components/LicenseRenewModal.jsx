@@ -168,7 +168,7 @@ const LicenseRenewModal = (props) => {
     setPreFormattedRenewalModalIsActive(false);
     setpreFormattedRenewalKey("");
     setFormattedLicenseKey("")
-    props.renewalLicenseKey.setLicenseKey("")
+    if(props.renewalLicenseKey.setLicenseKey!==undefined) props?.renewalLicenseKey?.setLicenseKey("")
 
     props.closeModal();
   };

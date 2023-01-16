@@ -199,7 +199,7 @@ const LicensesTable = () => {
                     <div className="flex">
                         <Tooltip content="Lisans Yenileme" className="font-sm" animation="duration-1000">
                             <button type="button" onClick={() => {
-                                setLicenseKey(row.LicenseKey)
+                                setLicenseKey({licenseKey:row.LicenseKey})
                                 showLicenseRenewModal()
                             }
                             }
@@ -216,7 +216,7 @@ const LicensesTable = () => {
                         >
                             <button type="button"
                                     onClick={() => {
-                                        setLicenseKey(row.LicenseKey)
+                                        setLicenseKey({licenseKey:row.LicenseKey})
                                         showUpgradeModal()
                                     }
                                     }

@@ -51,7 +51,7 @@ function UpgradeLicenseModal(props) {
         if (response.status === 200) {
           const json = await response.json();
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${false}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preformattedUpgradeLicenseKey}/${false}`).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         } else {
@@ -170,7 +170,7 @@ function UpgradeLicenseModal(props) {
     setLicenseKeyData(undefined);
     setpreFormattedUpgradeLicenseKey("");
     setFormattedLicenseKey("");
-    props.upgradeLicenseKey.setLicenseKey("");
+    if(props.upgradeLicenseKey.setLicenseKey!==undefined) props?.upgradeLicenseKey?.setLicenseKey("")
     props.closeModal();
   };
   return (

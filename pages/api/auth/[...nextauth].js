@@ -21,9 +21,14 @@ export const authOptions = {
             async authorize(credentials, req) {
                 try {
                     const data = await signInWithEmailAndPassword(auth, credentials?.username || '', credentials?.password || '')
+                    
+                    const user = {
+                        email: data.user.email,
+                        name:data.user.displayName
+
+                    }
                     return ({
-                        ...data.user,
-                        id: data.user.uid
+                        ...user
                     })
 
                 } catch (error) {
