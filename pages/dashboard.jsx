@@ -68,7 +68,7 @@ const Dashboard = () => {
       <div className="flex justify-end ">
         <Button
           onClick={showNewLicenseModal}
-          className="bg-sky-500 px-9 w-35 mb-2 mt-2 mr-2"
+          className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
         >
           Yeni Lisans
         </Button>
@@ -86,7 +86,7 @@ const Dashboard = () => {
         </Button>
         <Button
           onClick={showLicenseCheckModal}
-          className="bg-indigo-500 px-4 w-35 mb-2 mt-2 mr-2"
+          className="bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2"
         >
           Lisans Sorgulama
         </Button>
