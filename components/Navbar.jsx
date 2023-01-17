@@ -85,9 +85,12 @@ function Navbar() {
               </Box>
 
               <Flex ml={1} alignItems="flex-start">
-                <Badge w="4" variant="solid" colorScheme="red" mr={3} ml={2}>
+                {/* <Badge w="4" variant="solid" colorScheme="red" mr={3} ml={2}>
                   {getCartLengthState}
-                </Badge>
+                </Badge> */}
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-gray-50 mr-2">
+                  {getCartLengthState}
+                </span>
                 <Link href={"/cart"}>
                   <Text fontSize="md" fontWeight="bold">
                     Sepet
@@ -95,7 +98,6 @@ function Navbar() {
                 </Link>
               </Flex>
             </VStack>
-            
           </DrawerBody>
 
           <DrawerFooter>
@@ -107,13 +109,10 @@ function Navbar() {
                 icon={<AiOutlineUser fontSize="1.2rem" />}
               />
               <Text mr="1">{session?.user?.email}</Text>
-            
-             
             </Box>
-  <Button colorScheme="blue" onClick={Logout}>
+            <Button colorScheme="blue" onClick={Logout}>
               Çıkış
             </Button>
-         
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

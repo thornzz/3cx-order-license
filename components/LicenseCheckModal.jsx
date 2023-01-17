@@ -20,8 +20,7 @@ const LicenseCheckModal = (props) => {
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
 
   const router = useRouter();
-
-console.log(props)
+  
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
     setFormattedLicenseKey(
@@ -229,7 +228,8 @@ console.log(props)
                     onClick={async () => {
                       openLicenseUpgradeModal();
                     }}
-                    className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300"
+                    className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300
+                    hover:"
                     type="button"
                   >
                     Lisans Yükseltme
