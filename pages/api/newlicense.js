@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     try {
         if (req.method === 'POST') {
 
-            const data = await PostData('https://api.3cx.com/public/v1/order/?readonly=true', req.body);
-            console.log('upgrade',data)
+            const data = await PostData('https://api.3cx.com/public/v1/order/?readonly=false', req.body);
+           
             return res.status(200).json(data);
         } else {
             return res.status(400).json();
