@@ -151,7 +151,7 @@ const ExpiringKeys = (props) => {
             selector: row => row.LicenseKey,
             filter: true,
             reorder: true,
-            grow:1,
+            grow:1.1,
             hide:'sm'
         },
 
@@ -167,7 +167,7 @@ const ExpiringKeys = (props) => {
             },
             sortable: true,
             reorder: true,
-            grow:1
+            grow:1.3
         },
         {
             name: 'Tamamlandı',
@@ -207,7 +207,7 @@ const ExpiringKeys = (props) => {
         {
             name:'Şirket',
             selector:row => row?.endUser?.companyName,
-            grow:1.5,
+            grow:1.2,
             hide:'md'
         },
         {
