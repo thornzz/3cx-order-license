@@ -3,14 +3,14 @@ import {Modal} from "flowbite-react";
 import {useRecoilState} from "recoil";
 import {cartDetail} from "../atoms/shoppingCartAtom";
 import {SlUser} from "react-icons/sl";
-import {doc, getDoc, updateDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc,setDoc} from "firebase/firestore";
 import {db} from "../firebase";
 import {toast} from "react-toastify";
 
 
 function EndUserModal(props) {
     const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
-
+    const [licenseKey, setLicenseKey] = useState('')
     const [companyName, setCompanyName] = useState('')
     const [email, setEmail] = useState('')
     const [address, setAddress] = useState('')
@@ -18,36 +18,36 @@ function EndUserModal(props) {
     const [other, setOther] = useState('')
     const [defaultSelectedIndex, setDefaultSelectedIndex] = useState(0);
 
-    useEffect(() => {
-        if (defaultSelectedIndex !== undefined && defaultSelectedIndex !== null) {
-            if (cartDetailState[defaultSelectedIndex]?.Items !== undefined) {
+    // useEffect(() => {
+    //     if (defaultSelectedIndex !== undefined && defaultSelectedIndex !== null) {
+    //         if (cartDetailState[defaultSelectedIndex]?.Items !== undefined) {
 
-                const {endUser} = cartDetailState[defaultSelectedIndex].Items[0];
+    //             const {endUser} = cartDetailState[defaultSelectedIndex].Items[0];
 
-                if (Object.keys(endUser).length === 0) {
-                    setCompanyName('')
-                    setAddress('')
-                    setEmail('')
-                    setTelephone('')
-                    setOther('')
-                } else {
-                    setCompanyName(endUser.companyName)
-                    setAddress(endUser.address)
-                    setTelephone(endUser.telephone)
-                    setOther(endUser.other)
-                    setEmail(endUser.email)
-                }
-            }
-        }
-    }, [defaultSelectedIndex])
+    //             if (Object.keys(endUser).length === 0) {
+    //                 setCompanyName('')
+    //                 setAddress('')
+    //                 setEmail('')
+    //                 setTelephone('')
+    //                 setOther('')
+    //             } else {
+    //                 setCompanyName(endUser.companyName)
+    //                 setAddress(endUser.address)
+    //                 setTelephone(endUser.telephone)
+    //                 setOther(endUser.other)
+    //                 setEmail(endUser.email)
+    //             }
+    //         }
+    //     }
+    // }, [defaultSelectedIndex])
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (props.selectedIndex !== undefined)
-            setDefaultSelectedIndex(props.selectedIndex)
-        else
-            setDefaultSelectedIndex(0)
-    })
+    //     if (props.selectedIndex !== undefined)
+    //         setDefaultSelectedIndex(props.selectedIndex)
+    //     else
+    //         setDefaultSelectedIndex(0)
+    // })
 
     useEffect(() => {
 
@@ -76,12 +76,14 @@ function EndUserModal(props) {
         if (props.tableData !== undefined && props.tableData !== null) {
 
             if (Object.keys(props.tableData.endUser).length === 0) {
+                console.log('table data boş end user')
                 setCompanyName('')
                 setAddress('')
                 setEmail('')
                 setTelephone('')
                 setOther('')
             } else {
+                setLicenseKey(props?.tableData?.endUser?.licenseKey)
                 setCompanyName(props?.tableData?.endUser?.companyName)
                 setAddress(props.tableData?.endUser?.address)
                 setEmail(props.tableData?.endUser?.email)
@@ -96,34 +98,76 @@ function EndUserModal(props) {
         props.closeModal()
     }
 
-    const setCartDetail = () => {
+    // const setCartDetail = () => {
 
-        const enduserObject = {
-            companyName: companyName,
-            email: email,
-            address: address,
-            telephone: telephone,
-            other: other
-        }
+    //     const enduserObject = {
+    //         companyName: companyName,
+    //         email: email,
+    //         address: address,
+    //         telephone: telephone,
+    //         other: other
+    //     }
 
-        setDetailCartState((prevCartDetail) => {
-            const newCartDetail = [...prevCartDetail];
-            newCartDetail[props.selectedIndex] = {
-                ...newCartDetail[props.selectedIndex],
-                Items: [
-                    {
-                        ...newCartDetail[props.selectedIndex].Items[0],
-                        endUser: enduserObject
-                    },
-                ],
-            };
-            return newCartDetail;
-        });
-        closeModal()
-    }
+    //     setDetailCartState((prevCartDetail) => {
+    //         const newCartDetail = [...prevCartDetail];
+    //         newCartDetail[props.selectedIndex] = {
+    //             ...newCartDetail[props.selectedIndex],
+    //             Items: [
+    //                 {
+    //                     ...newCartDetail[props.selectedIndex].Items[0],
+    //                     endUser: enduserObject
+    //                 },
+    //             ],
+    //         };
+    //         return newCartDetail;
+    //     });
+    //     closeModal()
+    // }
+
+    // eskisi
+    // const updateFirestoreEndUser = async () => {
+
+    //     const enduserObject = {
+    //         companyName: companyName,
+    //         email: email,
+    //         address: address,
+    //         telephone: telephone,
+    //         other: other
+    //     }
+    //     try {
+    //         const licensesDocRef = doc(db, "licenses", props.tableData.objectId);
+    //         const docSnap = await getDoc(licensesDocRef);
+    //         const data = docSnap.data()
+
+    //         const updatedItems = data.tcxResponses.Items.map((item) => {
+    //             if (item.Line === props.tableData.Line) {
+    //                 return {...item, endUser: enduserObject};
+    //             }
+    //             return item;
+    //         });
+    //         await updateDoc(licensesDocRef, {tcxResponses: {Items: updatedItems}})
+    //         toast.success('Güncelleme işlemi tamamlandı.', {
+    //             position: "top-center",
+    //             autoClose: 1000,
+    //             hideProgressBar: false,
+    //             closeOnClick: true,
+    //             pauseOnHover: true,
+    //             draggable: true,
+    //             progress: undefined,
+    //             theme: "dark",
+    //         });
+    //     } catch (error) {
+    //         console.error('Error updating endUser in Item object: ', error);
+    //     }
+    //     closeModal()
+    // }
+
     const updateFirestoreEndUser = async () => {
+        console.log('updateFirestoreEndUser çalıştı')
+        console.log('licenseKey', licenseKey)
 
         const enduserObject = {
+            licenseKey:licenseKey,
             companyName: companyName,
             email: email,
             address: address,
@@ -131,30 +175,22 @@ function EndUserModal(props) {
             other: other
         }
         try {
-            const licensesDocRef = doc(db, "licenses", props.tableData.objectId);
-            const docSnap = await getDoc(licensesDocRef);
-            const data = docSnap.data()
-
-            const updatedItems = data.tcxResponses.Items.map((item) => {
-                if (item.Line === props.tableData.Line) {
-                    return {...item, endUser: enduserObject};
-                }
-                return item;
+            await setDoc(doc(db, "endusers", licenseKey), {
+              ...enduserObject,
             });
-            await updateDoc(licensesDocRef, {tcxResponses: {Items: updatedItems}})
-            toast.success('Güncelleme işlemi tamamlandı.', {
-                position: "top-center",
-                autoClose: 1000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
+            toast.success("Güncelleme işlemi tamamlandı.", {
+              position: "top-center",
+              autoClose: 1000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
             });
-        } catch (error) {
-            console.error('Error updating endUser in Item object: ', error);
-        }
+          } catch (error) {
+            console.error("Error updating endUser in Item object: ", error);
+          }
         closeModal()
     }
 
@@ -214,17 +250,12 @@ function EndUserModal(props) {
                                 </div>
 
                                 {props.expiringKeysData !== null && props.expiringKeysData !== undefined ? null :
-                                    !props.tableData ? (
-                                        <button
-                                            className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
-                                            type="button" onClick={setCartDetail}>Bilgileri Kaydet
-                                        </button>
-                                    ) : (
+                                    props.tableData ? (
                                         <button
                                             className="flex flex-row-reverse bg-gray-900 hover:bg-blue-500 ease-in duration-300 text-white text-lg mx-auto p-5 rounded-lg"
                                             type="button" onClick={updateFirestoreEndUser}>Bilgileri Güncelle
                                         </button>
-                                    )
+                                    ) : null
                                 }
 
                             </form>

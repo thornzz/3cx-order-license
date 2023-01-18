@@ -20,14 +20,21 @@ import {
   useDisclosure,
   Button,
   ButtonGroup,
-  Box
+  Box,
 } from "@chakra-ui/react";
 
 import { toast } from "react-toastify";
 import PostData from "../utility/HttpPostUtility";
 import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
 import { db } from "../firebase/index";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+} from "firebase/firestore";
 import mergeJSONObjects from "../utility/MergeJSONObjects";
 import { licenses } from "../atoms/fireStoreDataAtom";
 import Select from "react-select";
@@ -41,6 +48,8 @@ import { AiOutlineEye } from "react-icons/ai";
 
 const Cart = (props) => {
   const [orderDetails, setOrderDetails] = useState(null);
+  const [endUserLicenseKey, setendUserLicenseKey] = useState(null);
+
   const subTotal = useRecoilValue(cartDetailSubTotal);
   const discountTotal = useRecoilValue(cartDetailDiscountTotal);
   const cartLengthState = useRecoilValue(cartLength);
@@ -50,7 +59,7 @@ const Cart = (props) => {
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [license, setLicenseState] = useRecoilState(licenses);
-  const [openEndUserModal, setOpenEndUserModal] = useState(false);
+  //const [openEndUserModal, setOpenEndUserModal] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -62,6 +71,7 @@ const Cart = (props) => {
   };
 
   useEffect(() => {
+    console.log(props.endUserDataOptions);
     if (cartLengthState === 0) router.push("/dashboard");
 
     setSubTotals(subTotal);
@@ -103,7 +113,25 @@ const Cart = (props) => {
                 </Fragment>
               )}
             </td>
-            <td className="p-4 px-6 flex justify-center">
+            <td className="text-center">
+              {item.Type !== "NewLicense" ? null : (
+                <Fragment>
+                  <Select
+                    options={props.endUserDataOptions}
+                    className="w-auto"
+                    isLoading={false}
+                    isClearable={true}
+                    noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
+                    placeholder="End User seçimi yapınız"
+                    onChange={async (data, opt) => {
+                      setendUserLicenseKey(data?.value);
+                      
+                    }}
+                  ></Select>
+                </Fragment>
+              )}
+            </td>
+            {/* <td className="p-4 px-6 flex justify-center">
               <button
                 onClick={() => {
                   showEndUserModal(index);
@@ -111,7 +139,8 @@ const Cart = (props) => {
               >
                 <AiOutlineEye className="w-7 h-7 text-red-500" />
               </button>
-            </td>
+            </td> */}
+
             <td className="p-4 px-6 text-center">
               <div className="flex flex-col items-center justify-center">
                 <h3>
@@ -207,6 +236,20 @@ const Cart = (props) => {
       simCall: simcall,
     };
   };
+
+  const getEndUserFromFireStore = async (licenseKey) => {
+    try {
+      const docRef = doc(db, "endusers", licenseKey);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return { endUser: docSnap.data() };
+      }
+    } catch (error) {
+      console.error("Error updating endUser in Item object: ", error);
+    }
+  };
+
   const cancelOrder = () => {
     setCartState([]);
     setDetailCartState([]);
@@ -223,7 +266,13 @@ const Cart = (props) => {
     router.push("/dashboard");
   };
   const CompleteOrder = async (props) => {
+
+    const endUserData = await getEndUserFromFireStore(endUserLicenseKey);
+    
+    // popover kapat
     onToggle();
+
+
     const postData = {
       PO: "MYPO123",
       SalesCode: "",
@@ -237,7 +286,7 @@ const Cart = (props) => {
         JSON.stringify(postData)
       );
       // console.log('tcxresponses 181',tcxResponses)
-      // addRandomLicenseKey(tcxResponses)
+      addRandomLicenseKey(tcxResponses);
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
@@ -324,14 +373,13 @@ const Cart = (props) => {
 
   return (
     <>
-    
       <div className="bg-gray-900 h-screen">
         <Navbar />
-        <EndUserModal
+        {/* <EndUserModal
           selectedIndex={selectedIndex}
           showModal={openEndUserModal}
           closeModal={showEndUserModal}
-        />
+        /> */}
         <Head>
           <title>Sipariş Detayları</title>
           <meta name="description" content="3CX Order License" />
@@ -426,19 +474,18 @@ const Cart = (props) => {
               >
                 Siparişi İptal Et
               </button>
-           
+
               <Popover
-           
-               returnFocusOnClose={false}
-               isOpen={isOpen}
-               onClose={onClose}
-               placement='bottom'
-               closeOnBlur={false}
-               >
-  <PopoverTrigger>
-  <button onClick={onToggle}
-               
-                className="
+                returnFocusOnClose={false}
+                isOpen={isOpen}
+                onClose={onClose}
+                placement="bottom"
+                closeOnBlur={false}
+              >
+                <PopoverTrigger>
+                  <button
+                    onClick={onToggle}
+                    className="
 
               p-4
               text-center text-white
@@ -448,34 +495,43 @@ const Cart = (props) => {
               hover:bg-blue-500 ease-in duration-300
               mr-2
             "
-              >
-                Siparişi Tamamla
-              </button>
-  </PopoverTrigger>
-  <PopoverContent color='white' bg='blue.800' borderColor='blue.800'>
-        <PopoverHeader pt={4} fontWeight='bold' border='0'>
-         İşlem onayı
-        </PopoverHeader>
-        <PopoverArrow />
-        <PopoverCloseButton />
-        <PopoverBody>
-         Siparişinizi tamamlamak istediğinize emin misiniz?
-        </PopoverBody>
-        <PopoverFooter
-          border='0'
-          display='flex'
-          alignItems='center'
-          justifyContent='space-between'
-          pb={4}
-        >
-          
-          <ButtonGroup size='sm'>
-            <Button colorScheme='green' onClick={CompleteOrder}> Onayla</Button>
-            <Button colorScheme='red' onClick={onToggle}> İptal</Button>
-          </ButtonGroup>
-        </PopoverFooter>
-      </PopoverContent>
-</Popover>
+                  >
+                    Siparişi Tamamla
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  color="white"
+                  bg="blue.800"
+                  borderColor="blue.800"
+                >
+                  <PopoverHeader pt={4} fontWeight="bold" border="0">
+                    İşlem onayı
+                  </PopoverHeader>
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverBody>
+                    Siparişinizi tamamlamak istediğinize emin misiniz?
+                  </PopoverBody>
+                  <PopoverFooter
+                    border="0"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    pb={4}
+                  >
+                    <ButtonGroup size="sm">
+                      <Button colorScheme="green" onClick={CompleteOrder}>
+                        {" "}
+                        Onayla
+                      </Button>
+                      <Button colorScheme="red" onClick={onToggle}>
+                        {" "}
+                        İptal
+                      </Button>
+                    </ButtonGroup>
+                  </PopoverFooter>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
@@ -487,15 +543,32 @@ const Cart = (props) => {
 export default Cart;
 
 export async function getServerSideProps(context) {
-  const response = await getPartners();
+  const responsePartners = await getPartners();
   //const options = []
   //Extract only the PartnerId and CompanyName fields from each object in the array
-  const options = response.map((partner) => ({
+  const options = responsePartners.map((partner) => ({
     value: partner.PartnerId,
     label: partner.CompanyName,
   }));
 
+  const getEndUsers = async () => {
+    const collectionRef = collection(db, "endusers");
+    const q = query(collectionRef);
+    const querySnapshot = await getDocs(q);
+    const endUserAllData = querySnapshot.docs.map((d) => ({
+      licenseKey: d.id,
+      ...d.data(),
+    }));
+    return endUserAllData;
+  };
+  const allEndUserData = await getEndUsers();
+
+  const endUserDataOptions = allEndUserData.map((endUser) => ({
+    value: endUser.licenseKey,
+    label: endUser.companyName,
+  }));
+
   return {
-    props: { options }, // will be passed to the page component as props
+    props: { options, endUserDataOptions }, // will be passed to the page component as props
   };
 }
