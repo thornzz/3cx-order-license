@@ -106,7 +106,7 @@ const LicenseRenewModal = (props) => {
 
     setCartState([...cartState, renewAnnualorPerpetual]);
     const res = await PostJsonData(renewAnnualorPerpetual);
-    res.Items[0].endUser = {};
+    //res.Items[0].endUser = {};
     res.Items[0].ResellerName = "";
     setDetailCartState([...cartDetailState, res]);
 
@@ -133,7 +133,7 @@ const LicenseRenewModal = (props) => {
 
     try {
       const responseData = await PostData(
-        "/api/newlicense",
+        "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
      

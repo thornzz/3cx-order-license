@@ -71,7 +71,7 @@ const Cart = (props) => {
   };
 
   useEffect(() => {
-    console.log(props.endUserDataOptions);
+  
     if (cartLengthState === 0) router.push("/dashboard");
 
     setSubTotals(subTotal);
@@ -79,7 +79,17 @@ const Cart = (props) => {
     setCartLength(cartLengthState);
     setOrderDetails(
       cartState.map((item, index) => {
+       let endUserData = undefined
+       
+        if(item.Type !== "NewLicense"){
+            endUserData = props.endUserDataOptions.filter((data) => {
+                return data.value === item.UpgradeKey
+            })
+          
+      }
+      console.log(endUserData)
         return (
+           
           <tr key={index}>
             <td className="text-center">
               {item.Type === "NewLicense" ? (
@@ -114,7 +124,8 @@ const Cart = (props) => {
               )}
             </td>
             <td className="text-center">
-              {item.Type !== "NewLicense" ? null : (
+                {endUserData ? endUserData[0]?.label : null}
+              {/* {item.Type !== "NewLicense" ? null : (
                 <Fragment>
                   <Select
                     options={props.endUserDataOptions}
@@ -129,7 +140,7 @@ const Cart = (props) => {
                     }}
                   ></Select>
                 </Fragment>
-              )}
+              )} */}
             </td>
             {/* <td className="p-4 px-6 flex justify-center">
               <button
@@ -267,7 +278,7 @@ const Cart = (props) => {
   };
   const CompleteOrder = async (props) => {
 
-    const endUserData = await getEndUserFromFireStore(endUserLicenseKey);
+    // const endUserData = await getEndUserFromFireStore(endUserLicenseKey);
     
     // popover kapat
     onToggle();
@@ -299,6 +310,7 @@ const Cart = (props) => {
         theme: "dark",
       });
 
+      console.log('cart detail state',cartDetailState)
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await addDoc(collection(db, "licenses"), { tcxResponses });

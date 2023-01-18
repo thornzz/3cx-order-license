@@ -52,26 +52,26 @@ const LicenseCheckModal = (props) => {
     }
   }, [formattedLicenseKey]);
 
-  const PostJsonData = async (data) => {
-    const postData = {
-      PO: "MYPO123",
-      SalesCode: "",
-      Notes: "",
-      //Lines: [data]
-      Lines: [data],
-    };
+  // const PostJsonData = async (data) => {
+  //   const postData = {
+  //     PO: "MYPO123",
+  //     SalesCode: "",
+  //     Notes: "",
+  //     //Lines: [data]
+  //     Lines: [data],
+  //   };
 
-    try {
-      const responseData = await PostData(
-        "/api/newlicense",
-        JSON.stringify(postData)
-      );
+  //   try {
+  //     const responseData = await PostData(
+  //       "/api/fakelicenseorder",
+  //       JSON.stringify(postData)
+  //     );
 
-      return responseData;
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //     return responseData;
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const getRenewLicenseData = async (lic, year) => {
     const response = await fetch(`/api/renew/${lic}/${year}`);

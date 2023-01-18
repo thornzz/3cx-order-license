@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   const licensekey = slug[0];
   const licenseType = slug[1] === "true" ? "Maintenance" : "RenewAnnual";
   try {
-    console.log(licensekey, licenseType);
+    
     const jsonData = await getLicenceKeyInfo(licensekey, licenseType);
-    console.log(jsonData);
+   
     res.status(200).json(jsonData);
   } catch (error) {
     res.status(500).json({ error: error.message });
