@@ -85,7 +85,7 @@ const BuyLicenseModal = (props) => {
 
     try {
       const responseData = await PostData(
-        "/api/newlicense",
+        "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
       console.log(responseData);

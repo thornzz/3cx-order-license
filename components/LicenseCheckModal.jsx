@@ -20,7 +20,7 @@ const LicenseCheckModal = (props) => {
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
 
   const router = useRouter();
-  
+
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
     setFormattedLicenseKey(
@@ -123,6 +123,7 @@ const LicenseCheckModal = (props) => {
         size="lg"
         popup={true}
         onClose={() => closeModal()}
+      
       >
         <Modal.Header />
         <Modal.Body>
@@ -148,6 +149,7 @@ const LicenseCheckModal = (props) => {
                 onChange={handleLicenseKeyChange}
               />
             </label>
+          
             {showLicenseCard && (
               <Fragment>
                 <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
