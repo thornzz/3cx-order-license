@@ -1,5 +1,5 @@
 import DataTable from "react-data-table-component";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { tableStyle } from "./styles/tableStyle";
 import { useRecoilState } from "recoil";
 import { licenses } from "../atoms/fireStoreDataAtom";
@@ -25,7 +25,7 @@ import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
 
 const LicensesTable = () => {
-  //const [myData, setData] = useState([])
+  
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,8 +37,8 @@ const LicensesTable = () => {
   const [openLicenseRenewModal, setlicenseRenewModal] = useState(null);
   const [openLicenseUpgradeModal, setlicenseUpgradeModal] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
-  const [selectedRow, setSelectedRow] = useState("");
-
+  const [selectedRow, setSelectedRow] = useState(null);
+  
   const updateInvoiceIdInItemObject = async (
     invoiceId,
     documentId,
@@ -127,9 +127,11 @@ const LicensesTable = () => {
       sortable: true,
       selector: (row, index) => {
         if (selectedRow === index) {
+          
           // Render an input field when the row is selected
           return (
             <input
+            autoFocus
               className="w-[100px] p-1 bg-blue-500 text-white border-white border-2"
               type="text"
               onChange={(event) => {
@@ -325,6 +327,8 @@ const LicensesTable = () => {
       setLicenseState(data);
     });
   };
+
+
   useEffect(() => {
     (async () => {
       try {
@@ -338,6 +342,9 @@ const LicensesTable = () => {
       }
     })();
   }, []);
+
+  
+  
 
   return (
     <div>
