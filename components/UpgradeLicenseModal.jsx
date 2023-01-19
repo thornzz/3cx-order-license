@@ -51,7 +51,7 @@ function UpgradeLicenseModal(props) {
         if (response.status === 200) {
           const json = await response.json();
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preformattedUpgradeLicenseKey}/${false}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preformattedUpgradeLicenseKey}/${false}/${true}`).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         } else {
@@ -80,10 +80,12 @@ function UpgradeLicenseModal(props) {
       console.log("renew license modal regular");
       const fetchData = async () => {
         const response = await getUpgradeLicenseData(formattedLicenseKey);
+      
         if (response.status === 200) {
           const json = await response.json();
+          
           const licenseKeyInfo = await fetch(
-            `/api/licenseinfo/${formattedLicenseKey}/${false}`
+            `/api/licenseinfo/${formattedLicenseKey}/${false}/${true}`
           ).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
 
@@ -150,6 +152,7 @@ function UpgradeLicenseModal(props) {
 
   const getUpgradeLicenseData = async (licenseKey) => {
     const response = await fetch(`/api/upgrade/${licenseKey}`);
+   
     return response;
   };
   const handleLicenseKeyChange = async (event) => {
@@ -217,7 +220,7 @@ function UpgradeLicenseModal(props) {
                   <div className="inline-flex items-center self-start">
                     <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
                     <span className="font-bold text-gray-900">
-                      {`${licenseKeyDetail?.Edition} Sürüm / ${licenseKeyDetail?.SimultaneousCalls} Kanal / ${licenseKeyDetail?.RemainingDays} Gün`}
+                      {`${licenseKeyDetail?.Edition} Sürüm / ${licenseKeyDetail?.SimultaneousCalls} Kanal / ${licenseKeyDetail?.RemainingDays ?? 0} Gün`}
                     </span>
                   </div>
                 </div>

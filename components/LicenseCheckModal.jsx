@@ -1,25 +1,13 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Modal } from "flowbite-react";
 import { GrLicense } from "react-icons/gr";
-import { TbLicense, TbSquareMinus, TbSquarePlus } from "react-icons/tb";
-import PostData from "../utility/HttpPostUtility";
-import { toast } from "react-toastify";
-import { useRecoilState } from "recoil";
-import { cart, cartDetail } from "../atoms/shoppingCartAtom";
-import { useRouter } from "next/router";
-import { getLicenceKeyInfo } from "../pages/api/licenseinfo/[...slug]";
+import { TbLicense } from "react-icons/tb";
 
 const LicenseCheckModal = (props) => {
   const [showLicenseCard, setShowLicenseCard] = useState(false);
-  const [years, setYears] = useState(1);
   const [licenseKey, setLicenseKey] = useState("");
-  const [licenseKeyData, setLicenseKeyData] = useState("");
   const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
   const [formattedLicenseKey, setFormattedLicenseKey] = useState("");
-  const [cartState, setCartState] = useRecoilState(cart);
-  const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
-
-  const router = useRouter();
 
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
@@ -29,54 +17,25 @@ const LicenseCheckModal = (props) => {
   }, [licenseKey]);
   useEffect(() => {
     if (licenseKey.length === 16) {
-      console.log("renew license modal regular");
+      console.log("upgrade license modal regular");
       const fetchData = async () => {
-        const response = await getRenewLicenseData(formattedLicenseKey, years);
+        const response = await fetch(
+          `/api/licenseinfo/${formattedLicenseKey}/${false}/${true}`
+        );
+
         if (response.status === 200) {
           const json = await response.json();
-          setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(
-            `/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`
-          ).then((res) => res.json());
-          setLicenseKeyDetail(licenseKeyInfo);
+          setLicenseKeyDetail(json);
           setShowLicenseCard(true);
         } else {
           setShowLicenseCard(false);
-          setLicenseKeyData(undefined);
         }
       };
       fetchData();
     } else {
       setShowLicenseCard(false);
-      setLicenseKeyData(undefined);
     }
   }, [formattedLicenseKey]);
-
-  // const PostJsonData = async (data) => {
-  //   const postData = {
-  //     PO: "MYPO123",
-  //     SalesCode: "",
-  //     Notes: "",
-  //     //Lines: [data]
-  //     Lines: [data],
-  //   };
-
-  //   try {
-  //     const responseData = await PostData(
-  //       "/api/fakelicenseorder",
-  //       JSON.stringify(postData)
-  //     );
-
-  //     return responseData;
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
-  const getRenewLicenseData = async (lic, year) => {
-    const response = await fetch(`/api/renew/${lic}/${year}`);
-    return response;
-  };
 
   const handleLicenseKeyChange = async (event) => {
     let value = event.target.value;
@@ -93,27 +52,23 @@ const LicenseCheckModal = (props) => {
 
   const openLicenseUpgradeModal = () => {
     props.closeModal();
-    props.setLicenseKey(formattedLicenseKey)
+    props.setLicenseKey(formattedLicenseKey);
     setLicenseKey("");
-    setLicenseKeyData(undefined);
+
     setLicenseKeyDetail(null);
     props.showUpgradeModal();
-
   };
   const openLicenseRenewalModal = () => {
     props.closeModal();
-    props.setLicenseKey(formattedLicenseKey)
+    props.setLicenseKey(formattedLicenseKey);
     setLicenseKey("");
-    setLicenseKeyData(undefined);
     setLicenseKeyDetail(null);
     props.showRenewModal();
   };
 
   const closeModal = () => {
     setLicenseKey("");
-    setLicenseKeyData(undefined);
     setLicenseKeyDetail(null);
-
     props.closeModal();
   };
   return (
@@ -123,7 +78,6 @@ const LicenseCheckModal = (props) => {
         size="lg"
         popup={true}
         onClose={() => closeModal()}
-      
       >
         <Modal.Header />
         <Modal.Body>
@@ -149,7 +103,7 @@ const LicenseCheckModal = (props) => {
                 onChange={handleLicenseKeyChange}
               />
             </label>
-          
+
             {showLicenseCard && (
               <Fragment>
                 <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
@@ -216,7 +170,7 @@ const LicenseCheckModal = (props) => {
                     </div>
                   </div>
                 </div>
-             
+
                 <div className="flex w-full justify-between">
                   <button
                     onClick={() => openLicenseRenewalModal()}

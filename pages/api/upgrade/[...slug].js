@@ -7,12 +7,13 @@ export default async function handler(req, res) {
         const basicAuth = btoa(`${username}:${password}`);
         const {slug} = req.query
         const licensekey = slug[0]
-        const toEdition = slug[1]
-        const toSimCalls = slug[2]
+        // const toEdition = slug[1]
+        // const toSimCalls = slug[2]
 
         if (licensekey.length == 18) {
             return res.status(400).json()
         } else {
+            console.log('upgrade 16')
             const response = await fetch(`https://api.3cx.com/public/v1/order/LicenseUpgradePrices?licensekey=${licensekey}`, {
                 headers: {
                     'Authorization': `Basic ${basicAuth}`

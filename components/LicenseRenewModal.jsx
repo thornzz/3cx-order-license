@@ -8,7 +8,12 @@ import { useRecoilState } from "recoil";
 import { cart, cartDetail } from "../atoms/shoppingCartAtom";
 import { useRouter } from "next/router";
 import { getLicenceKeyInfo } from "../pages/api/licenseinfo/[...slug]";
-
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+} from '@chakra-ui/react'
 const LicenseRenewModal = (props) => {
  
   const [showLicenseCard, setShowLicenseCard] = useState(false);
@@ -20,6 +25,7 @@ const LicenseRenewModal = (props) => {
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [preFormattedRenewalKey, setpreFormattedRenewalKey] = useState(null);
+  const [error,setError] = useState(null)
   const [
     preFormattedRenewalModalIsActive,
     setPreFormattedRenewalModalIsActive,
@@ -41,23 +47,21 @@ const LicenseRenewModal = (props) => {
       preFormattedRenewalKey?.length === 19 &&
       preFormattedRenewalModalIsActive
     ) {
+     
       console.log("renew license modal düzenle");
       setFormattedLicenseKey(preFormattedRenewalKey);
       const fetchData = async () => {
-        const response = await getRenewLicenseData(
-          preFormattedRenewalKey,
-          years
-        );
-        if (response.status === 200) {
-          const json = await response.json();
-        
-          setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${json.IsPerpetual}`).then((res) => res.json());
-          setLicenseKeyDetail(licenseKeyInfo);
-          setShowLicenseCard(true);
-        } else {
+        const response = await getRenewLicenseData(preFormattedRenewalKey, years);
+        const json = await response.json()
+        if (json?.status === 400) {
+         setError(json.detail)
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);
+        } else {
+          setLicenseKeyData(json);
+          const licenseKeyInfo = await fetch(`/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`).then((res) => res.json());
+          setLicenseKeyDetail(licenseKeyInfo);
+          setShowLicenseCard(true);
         }
       };
       fetchData();
@@ -74,22 +78,23 @@ const LicenseRenewModal = (props) => {
       console.log("renew license modal regular");
       const fetchData = async () => {
         const response = await getRenewLicenseData(formattedLicenseKey, years);
-        if (response.status === 200) {
-          const json = await response.json();
+        const json = await response.json()
+        if (json?.status === 400) {
+         setError(json.detail)
+          setShowLicenseCard(false);
+          setLicenseKeyData(undefined);
+        } else {
           setLicenseKeyData(json);
           const licenseKeyInfo = await fetch(`/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
-      
-        } else {
-          setShowLicenseCard(false);
-          setLicenseKeyData(undefined);
         }
       };
       fetchData();
       
     } else {
       setShowLicenseCard(false);
+      setError(null)
       setLicenseKeyData(undefined);
     }
   }, [formattedLicenseKey]);
@@ -158,10 +163,14 @@ const LicenseRenewModal = (props) => {
       // Make the value uppercase
       value = value.toUpperCase();
       setLicenseKey(value);
+      if(error){
+        setError(null)
+      }
     }
   };
 
   const closeModal = () => {
+    setError(null)
     setLicenseKey("");
     setLicenseKeyData(undefined);
     setLicenseKeyDetail(null);
@@ -205,6 +214,10 @@ const LicenseRenewModal = (props) => {
                 onChange={handleLicenseKeyChange}
               />
             </label>
+            {error && (<Alert status='error' variant="left-accent">
+  <AlertIcon />
+  <AlertDescription fontSize='xs'>{error}</AlertDescription>
+</Alert>)}
             {showLicenseCard && (
               <Fragment>
                  <label
