@@ -59,7 +59,7 @@ const LicenseRenewModal = (props) => {
           setLicenseKeyData(undefined);
         } else {
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${json.IsPerpetual}`).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         }
