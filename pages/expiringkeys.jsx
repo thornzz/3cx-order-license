@@ -20,7 +20,7 @@ import { db } from "../firebase";
 import { FaBook } from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import { Progress } from "flowbite-react";
-import _ from 'lodash';
+import _ from "lodash";
 
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
@@ -30,7 +30,7 @@ const ExpiringKeys = (props) => {
   const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
   const [enduserData, setendUserData] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(null);
-  //const [paginatedData, setPaginatedData] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const showEndUserModal = () => {
@@ -40,218 +40,204 @@ const ExpiringKeys = (props) => {
     setCustomerInfoModal(!openCustomerInfoModal);
   };
 
-  const filteredData = props.expiringKeys.filter((item) =>
-  // [item.LicenseKey, item?.endUser?.companyName]
-  [item.LicenseKey,item?.companyName]
-    .map((val) => val?.toLowerCase())
-    .some((val) => val?.includes(searchText.toLowerCase()))
-);
+  const columns = [
+    {
+      width: "50px",
+      cell: (row, index) => {
+        return (
+          <button
+            type="button"
+            onClick={async () => {
+              const customerInfoData = await getCustomerInfoFromFirestore(
+                row.LicenseKey
+              );
 
-const paginatedData = filteredData.slice(
-  (currentPage - 1) * rowsPerPage,
-  currentPage * rowsPerPage
-)
+              if (customerInfoData === undefined)
+                setCustomerInfo({ licenseKey: row.LicenseKey });
+              else setCustomerInfo(customerInfoData);
 
-const columns = [
-  {
-    width: "50px",
-    cell: (row, index) => {
-      return (
+              showCustomerInfoModal();
+            }}
+            className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            <FaBook />
+          </button>
+        );
+      },
+      hide: "sm",
+    },
+    {
+      name: "Lisans Anahtarı",
+      selector: (row) => row.LicenseKey,
+      filter: true,
+      reorder: true,
+      grow: 1.1,
+      hide: "sm",
+    },
+
+    {
+      name: "Bayi",
+      selector: (row, index) => {
+        const filterPartnerName = props.partners.filter(
+          (partner) => partner.value === row.ResellerID
+        );
+        if (filterPartnerName.length > 0) {
+          return filterPartnerName[0].label;
+        } else {
+          return "ResellerID bulunamadı!";
+        }
+      },
+      sortable: true,
+      reorder: true,
+      grow: 1.3,
+    },
+    {
+      name: "Tamamlandı",
+      center: true,
+      selector: (row, index) => {
+        let percentage = 0;
+        const item = props.customerInfoDataAll.find(
+          (key) => key.licenseKey === row.LicenseKey
+        );
+        if (item)
+          percentage = Number(countCheckedPercentage(item.customerInfo));
+        return (
+          <Progress
+            className="w-20"
+            progress={percentage}
+            labelPosition="outside"
+            label={" "}
+            color={"blue"}
+            labelProgress={true}
+            size={"md"}
+          />
+        );
+      },
+      hide: "md",
+    },
+    {
+      name: "End user",
+      cell: (row) => (
         <button
-          type="button"
           onClick={async () => {
-            const customerInfoData = await getCustomerInfoFromFirestore(
-              row.LicenseKey
-            );
-
-            if (customerInfoData === undefined)
-              setCustomerInfo({ licenseKey: row.LicenseKey });
-            else setCustomerInfo(customerInfoData);
-
-            showCustomerInfoModal();
+            setendUserData(await getEndUserFromFireStore(row.LicenseKey));
+            showEndUserModal();
           }}
-          className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
-          <FaBook />
+          <AiOutlineEye className="w-7 h-7 text-red-500" />
         </button>
-      );
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      reorder: true,
     },
-    hide: "sm",
-  },
-  {
-    name: "Lisans Anahtarı",
-    selector: (row) => row.LicenseKey,
-    filter: true,
-    reorder: true,
-    grow: 1.1,
-    hide: "sm",
-  },
+    {
+      name: "Şirket",
+      selector: (row) => row?.companyName,
+      grow: 1.2,
+      hide: "md",
+    },
+    {
+      name: "Telefon",
+      selector: (row) => row?.endUser?.telephone,
+      width: "100px",
+      hide: "md",
+    },
+    {
+      name: "Kalan (Gün)",
 
-  {
-    name: "Bayi",
-    selector: (row, index) => {
-      const filterPartnerName = props.partners.filter(
-        (partner) => partner.value === row.ResellerID
-      );
-      if (filterPartnerName.length > 0) {
-        return filterPartnerName[0].label;
-      } else {
-        return "ResellerID bulunamadı!";
-      }
-    },
-    sortable: true,
-    reorder: true,
-    grow: 1.3,
-  },
-  {
-    name: "Tamamlandı",
-    center: true,
-    selector: (row, index) => {
-      let percentage = 0;
-      const item = props.customerInfoDataAll.find(
-        (key) => key.licenseKey === row.LicenseKey
-      );
-      if (item)
-        percentage = Number(countCheckedPercentage(item.customerInfo));
-      return (
-        <Progress
-          className="w-20"
-          progress={percentage}
-          labelPosition="outside"
-          label={" "}
-          color={"blue"}
-          labelProgress={true}
-          size={"md"}
-        />
-      );
-    },
-    hide: "md",
-  },
-  {
-    name: "End user",
-    cell: (row) => (
-      <button
-        onClick={async () => {
-          setendUserData(await getEndUserFromFireStore(row.LicenseKey));
-          showEndUserModal();
-        }}
-      >
-        <AiOutlineEye className="w-7 h-7 text-red-500" />
-      </button>
-    ),
-    ignoreRowClick: true,
-    allowOverflow: true,
-    button: true,
-    reorder: true,
-  },
-  {
-    name: "Şirket",
-    selector: (row) => row?.companyName,
-    grow: 1.2,
-    hide: "md",
-  },
-  {
-    name: "Telefon",
-    selector: (row) => row?.endUser?.telephone,
-    width: "100px",
-    hide: "md",
-  },
-  {
-    name: "Kalan (Gün)",
-    
-    selector: (row) => row.remainingDay,
-    conditionalCellStyles: [
-      {
-        when: (row) => row.remainingDay <= 31,
-        style: {
-          backgroundColor: "red",
-          color: "white",
-          "&:hover": {
-            cursor: "pointer",
+      selector: (row) => row.remainingDay,
+      conditionalCellStyles: [
+        {
+          when: (row) => row.remainingDay <= 31,
+          style: {
+            backgroundColor: "red",
+            color: "white",
+            "&:hover": {
+              cursor: "pointer",
+            },
           },
         },
-      },
-      {
-        when: (row) => row.remainingDay > 31,
-        style: {
-          backgroundColor: "orange",
-          color: "white",
-          "&:hover": {
-            cursor: "pointer",
+        {
+          when: (row) => row.remainingDay > 31,
+          style: {
+            backgroundColor: "orange",
+            color: "white",
+            "&:hover": {
+              cursor: "pointer",
+            },
           },
         },
-      },
-      {
-        when: (row) => row.remainingDay > 60,
-        style: {
-          backgroundColor: "green",
-          color: "white",
-          "&:hover": {
-            cursor: "pointer",
+        {
+          when: (row) => row.remainingDay > 60,
+          style: {
+            backgroundColor: "green",
+            color: "white",
+            "&:hover": {
+              cursor: "pointer",
+            },
           },
         },
+      ],
+      reorder: true,
+      sortable: true,
+      center: true,
+      width: "150px",
+    },
+    {
+      name: "Expiry Date",
+      selector: (row) => {
+        const moment = require("moment");
+        moment.locale("tr");
+        // Parse the date and time string using moment
+        const date = moment(row.ExpiryDate);
+
+        // Format the date using moment's format method
+        const formattedDate = date.format("DD.MM.YYYY");
+
+        // Format the time using moment's format method
+        const formattedTime = date.format("HH:mm");
+        return `${formattedDate} ${formattedTime}`;
       },
-    ],
-    reorder: true,
-    sortable: true,
-    center: true,
-    width: "150px",
-  },
-  {
-    name: "Expiry Date",
-    selector: (row) => {
-      const moment = require("moment");
-      moment.locale("tr");
-      // Parse the date and time string using moment
-      const date = moment(row.ExpiryDate);
-
-      // Format the date using moment's format method
-      const formattedDate = date.format("DD.MM.YYYY");
-
-      // Format the time using moment's format method
-      const formattedTime = date.format("HH:mm");
-      return `${formattedDate} ${formattedTime}`;
+      reorder: true,
+      hide: "md",
     },
-    reorder: true,
-    hide: "md",
-  },
-  {
-    name: "Sürüm",
-    selector: (row) => {
-      return row.IsPerpetual ? "Perpetual" : "Annual";
+    {
+      name: "Sürüm",
+      selector: (row) => {
+        return row.IsPerpetual ? "Perpetual" : "Annual";
+      },
+      sortable: true,
+      reorder: true,
+      center: true,
+      hide: "md",
     },
-    sortable: true,
-    reorder: true,
-    center: true,
-    hide: "md",
-  },
-  {
-    name: "Kanal Sayısı",
-    selector: (row) => row.SimultaneousCalls,
-    sortable: true,
-    reorder: true,
-    hide: "sm",
-  },
-  {
-    name: "Lisans Tipi",
-    selector: (row) => row.Type,
-    sortable: true,
-    reorder: true,
-    hide: "md",
-  },
-]
+    {
+      name: "Kanal Sayısı",
+      selector: (row) => row.SimultaneousCalls,
+      sortable: true,
+      reorder: true,
+      hide: "sm",
+    },
+    {
+      name: "Lisans Tipi",
+      selector: (row) => row.Type,
+      sortable: true,
+      reorder: true,
+      hide: "md",
+    },
+  ];
 
-const handleSort = (column, direction) => {
-  // console.log("sort çalışan sütun", column)
-  // // create a copy of the filtered data
-  // let sortedData = [...filteredData];
-  // // sort the copied data using lodash's orderBy function
-  // sortedData = _.orderBy(sortedData, [column], [direction]);
-  // // update the paginated data with the appropriate slice of the sorted data
-  // setPaginatedData (sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
-}
-
-
+  const handleSort = (column, direction) => {
+    // console.log("sort çalışan sütun", column)
+    // // create a copy of the filtered data
+    // let sortedData = [...filteredData];
+    // // sort the copied data using lodash's orderBy function
+    // sortedData = _.orderBy(sortedData, [column], [direction]);
+    // // update the paginated data with the appropriate slice of the sorted data
+    // setPaginatedData (sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -355,13 +341,24 @@ const handleSort = (column, direction) => {
     }
     return ((count / total) * 100).toFixed(2);
   }
- 
+
   const handleSearch = (event) => {
     setSearchText(event.target.value);
   };
 
-  console.log(filteredData)
-  console.log("paginatedData", paginatedData)
+  const filteredData = props.expiringKeys.filter((item) =>
+    // [item.LicenseKey, item?.endUser?.companyName]
+    [item.LicenseKey, item?.companyName]
+      .map((val) => val?.toLowerCase())
+      .some((val) => val?.includes(searchText.toLowerCase()))
+  );
+
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+  console.log(filteredData);
+  console.log("paginatedData", paginatedData);
 
   return (
     <div className="bg-gray-900 h-screen">
@@ -398,7 +395,6 @@ const handleSort = (column, direction) => {
         </div>
       ) : (
         <DataTable
-       
           columns={columns}
           data={paginatedData}
           defaultSortFieldId={8}
@@ -408,7 +404,6 @@ const handleSort = (column, direction) => {
           highlightOnHover={true}
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
           subHeader
-          
           subHeaderComponent={
             <div style={{ display: "flex", alignItems: "center" }}>
               <h3 style={{ margin: "0 10px" }}>Ara :</h3>
@@ -547,7 +542,7 @@ export async function getServerSideProps(context) {
         (item) => item.licenseKey === keyResponse.LicenseKey
       );
       if (item) keyResponse.companyName = item.companyName;
-      
+
       return keyResponse;
     });
   };
