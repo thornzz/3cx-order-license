@@ -283,7 +283,7 @@ const Cart = (props) => {
         JSON.stringify(postData)
       );
       // console.log('tcxresponses 181',tcxResponses)
-     // addRandomLicenseKey(tcxResponses);
+      //addRandomLicenseKey(tcxResponses);
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
