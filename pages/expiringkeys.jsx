@@ -24,21 +24,128 @@ import { Progress } from "flowbite-react";
 
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
   const [openEndUserModal, setOpenEndUserModal] = useState(false);
   const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
   const [enduserData, setendUserData] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(null);
-
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [customerInfoAll, setCustomerInfoAll] = useState(null);
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
   };
   const showCustomerInfoModal = () => {
     setCustomerInfoModal(!openCustomerInfoModal);
   };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // eski sürüm için
+  // const getEndUserFromFireStore = async (licenseKey) => {
+  //     try {
+  //         const collectionRef = collection(db, 'licenses');
+  //         const querySnapshot = await getDocs(collectionRef)
+  //         const data = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
+
+  //         return await getEndUserByLicenseKey(data, licenseKey)
+
+  //     } catch (error) {
+  //         console.error('Error getting Item object: ', error);
+  //     }
+  // };
+
+  const getEndUserFromFireStore = async (licenseKey) => {
+    try {
+      const docRef = doc(db, "endusers", licenseKey);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+       return {endUser:docSnap.data()}
+      }
+    } catch (error) {
+      console.error("Error updating endUser in Item object: ", error);
+    }
+  };
+
+  const getCustomerInfoFromFirestore = async (licenseKey) => {
+    try {
+      const collectionRef = collection(db, "expiringkeys");
+      const q = query(collectionRef, where("licenseKey", "==", licenseKey));
+      const querySnapshot = await getDocs(q);
+      const [customerInfoData] = querySnapshot.docs.map((d) => ({
+        objectId: d.id,
+        ...d.data(),
+      }));
+      return customerInfoData;
+    } catch (error) {
+      console.error("Error getting Item object: ", error);
+    }
+  };
+
+  // async function getEndUserByLicenseKey(data, licenseKey) {
+  //   const tcxResponses = data.map((d) => d.tcxResponses);
+  //   const items = tcxResponses.flatMap((response) => response.Items);
+  //   const filteredItems = items.filter((item) => {
+  //     return item.LicenseKeys.some((key) => key.LicenseKey === licenseKey);
+  //   });
+
+  //   if (filteredItems.length === 0) {
+  //     return { endUser: {} };
+  //   }
+
+  //   const newLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "NewLicense"
+  //   );
+  //   if (newLicenseItem) {
+  //     return { endUser: newLicenseItem.endUser };
+  //   }
+
+  //   const renewAnnualLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "RenewAnnual"
+  //   );
+  //   if (renewAnnualLicenseItem) {
+  //     return { endUser: renewAnnualLicenseItem.endUser };
+  //   }
+  //   const upgradeLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "Upgrade"
+  //   );
+  //   if (upgradeLicenseItem) {
+  //     return { endUser: upgradeLicenseItem.endUser };
+  //   }
+  //   const maintanenceLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "Maintenance"
+  //   );
+  //   if (maintanenceLicenseItem) {
+  //     return { endUser: maintanenceLicenseItem.endUser };
+  //   }
+  //   return undefined;
+  // }
+  function countCheckedPercentage(obj) {
+    let count = 0;
+    let total = 0;
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const element = obj[key];
+        if (element.hasOwnProperty("checked")) {
+          total++;
+          if (element.checked === true) count++;
+        }
+      }
+    }
+    return ((count / total) * 100).toFixed(2);
+  }
 
   const columns = [
     {
@@ -122,6 +229,7 @@ const ExpiringKeys = (props) => {
           onClick={async () => {
             setendUserData(await getEndUserFromFireStore(row.LicenseKey));
             showEndUserModal();
+            //console.log(enduserData)
           }}
         >
           <AiOutlineEye className="w-7 h-7 text-red-500" />
@@ -134,7 +242,7 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "Şirket",
-      selector: (row) => row?.companyName,
+      selector: (row) => row?.endUser?.companyName,
       grow: 1.2,
       hide: "md",
     },
@@ -146,11 +254,10 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "Kalan (Gün)",
-
       selector: (row) => row.remainingDay,
       conditionalCellStyles: [
         {
-          when: (row) => row.remainingDay <= 31,
+          when: (row) => row.remainingDay < 31,
           style: {
             backgroundColor: "red",
             color: "white",
@@ -188,18 +295,21 @@ const ExpiringKeys = (props) => {
     {
       name: "Expiry Date",
       selector: (row) => {
-        // const moment = require("moment");
-        // moment.locale("tr");
-        // // Parse the date and time string using moment
-        // const date = moment(row.ExpiryDate);
-
-        // // Format the date using moment's format method
-        // const formattedDate = date.format("DD.MM.YYYY");
-
-        // // Format the time using moment's format method
-        // const formattedTime = date.format("HH:mm");
-        // return `${formattedDate} ${formattedTime}`;
-        return null
+        // Convert the string to a Date object
+        const date = new Date(row.ExpiryDate);
+        // Use the toLocaleDateString() method to format the date
+        const formattedDate = date.toLocaleDateString("tr-TR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+        // Use the toLocaleTimeString() method to format the time
+        const formattedTime = date.toLocaleTimeString("tr-TR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        // Concatenate the formatted date and time and return
+        return `${formattedDate} ${formattedTime}`;
       },
       reorder: true,
       hide: "md",
@@ -229,141 +339,20 @@ const ExpiringKeys = (props) => {
       hide: "md",
     },
   ];
-
-  const handleSort = (column, direction) => {
-    // console.log("sort çalışan sütun", column)
-    // // create a copy of the filtered data
-    // let sortedData = [...filteredData];
-    // // sort the copied data using lodash's orderBy function
-    // sortedData = _.orderBy(sortedData, [column], [direction]);
-    // // update the paginated data with the appropriate slice of the sorted data
-    // setPaginatedData (sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
-  };
-
- 
-
-  // eski sürüm için
-  // const getEndUserFromFireStore = async (licenseKey) => {
-  //     try {
-  //         const collectionRef = collection(db, 'licenses');
-  //         const querySnapshot = await getDocs(collectionRef)
-  //         const data = querySnapshot.docs.map((d) => ({objectId: d.id, ...d.data()}))
-
-  //         return await getEndUserByLicenseKey(data, licenseKey)
-
-  //     } catch (error) {
-  //         console.error('Error getting Item object: ', error);
-  //     }
-  // };
-
-  const getEndUserFromFireStore = async (licenseKey) => {
-    try {
-      const docRef = doc(db, "endusers", licenseKey);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        return { endUser: docSnap.data() };
-      } else return { endUser: {} };
-    } catch (error) {
-      console.error("Error fetching endUser in Item object: ", error);
-    }
-  };
-
-  const getCustomerInfoFromFirestore = async (licenseKey) => {
-    try {
-      const collectionRef = collection(db, "expiringkeys");
-      const q = query(collectionRef, where("licenseKey", "==", licenseKey));
-      const querySnapshot = await getDocs(q);
-      const [customerInfoData] = querySnapshot.docs.map((d) => ({
-        objectId: d.id,
-        ...d.data(),
-      }));
-
-      return customerInfoData;
-    } catch (error) {
-      console.error("Error getting Item object: ", error);
-    }
-  };
-
-  // async function getEndUserByLicenseKey(data, licenseKey) {
-  //   const tcxResponses = data.map((d) => d.tcxResponses);
-  //   const items = tcxResponses.flatMap((response) => response.Items);
-  //   const filteredItems = items.filter((item) => {
-  //     return item.LicenseKeys.some((key) => key.LicenseKey === licenseKey);
-  //   });
-
-  //   if (filteredItems.length === 0) {
-  //     return { endUser: {} };
-  //   }
-
-  //   const newLicenseItem = filteredItems.find(
-  //     (item) => item.Type === "NewLicense"
-  //   );
-  //   if (newLicenseItem) {
-  //     return { endUser: newLicenseItem.endUser };
-  //   }
-
-  //   const renewAnnualLicenseItem = filteredItems.find(
-  //     (item) => item.Type === "RenewAnnual"
-  //   );
-  //   if (renewAnnualLicenseItem) {
-  //     return { endUser: renewAnnualLicenseItem.endUser };
-  //   }
-  //   const upgradeLicenseItem = filteredItems.find(
-  //     (item) => item.Type === "Upgrade"
-  //   );
-  //   if (upgradeLicenseItem) {
-  //     return { endUser: upgradeLicenseItem.endUser };
-  //   }
-  //   const maintanenceLicenseItem = filteredItems.find(
-  //     (item) => item.Type === "Maintenance"
-  //   );
-  //   if (maintanenceLicenseItem) {
-  //     return { endUser: maintanenceLicenseItem.endUser };
-  //   }
-  //   return undefined;
-  // }
-  function countCheckedPercentage(obj) {
-    let count = 0;
-    let total = 0;
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const element = obj[key];
-        if (element.hasOwnProperty("checked")) {
-          total++;
-          if (element.checked === true) count++;
-        }
-      }
-    }
-    return ((count / total) * 100).toFixed(2);
-  }
-
   const handleSearch = (event) => {
     setSearchText(event.target.value);
   };
 
   const filteredData = props.expiringKeys.filter((item) =>
     // [item.LicenseKey, item?.endUser?.companyName]
-    [item.LicenseKey, item?.companyName]
+      [item.LicenseKey]
       .map((val) => val?.toLowerCase())
       .some((val) => val?.includes(searchText.toLowerCase()))
   );
-
   const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
-  console.log(filteredData);
-  console.log("paginatedData", paginatedData);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [paginatedData]);
-
-
 
   return (
     <div className="bg-gray-900 h-screen">
@@ -402,9 +391,6 @@ const ExpiringKeys = (props) => {
         <DataTable
           columns={columns}
           data={paginatedData}
-          // defaultSortFieldId={8}
-          // defaultSortAsc={true}
-          // onSort={handleSort}
           customStyles={tableStyle}
           highlightOnHover={true}
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
@@ -430,10 +416,9 @@ const ExpiringKeys = (props) => {
           }}
           onChangeRowsPerPage={setRowsPerPage}
           onChangePage={setCurrentPage}
-           paginationPerPage={rowsPerPage}
-          paginationTotalRows={filteredData.length}
           paginationServer
-          paginationRowsPerPageOptions={[50, 100, 250, 500]}
+          paginationTotalRows={filteredData.length}
+          paginationRowsPerPageOptions={[10, 25, 50, 100, 250, 500]}
         />
       )}
       <Footer />
@@ -442,10 +427,43 @@ const ExpiringKeys = (props) => {
 };
 
 export default ExpiringKeys;
-
 export async function getServerSideProps(context) {
   let expiringKeysResponse = await getExpiringKeys();
 
+  const getFirestoreDataAndMerge = async () => {
+    const collectionRef = collection(db, "licenses");
+    //long version
+    //const querySnapshot = await getDocs(query(collectionRef));
+    //const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
+    const data = await getDocs(query(collectionRef)).then((snapshot) =>
+      snapshot.docs.map((d) => ({ objectId: d.id, ...d.data() }))
+    );
+    // const tcxResponses = data.map(d => d.tcxResponses);
+    // const items = tcxResponses.flatMap(response => response.Items);
+    const items = data.flatMap((d) => d.tcxResponses?.Items || []);
+
+    expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
+      // add remainingDay field
+      const targetDate = new Date(keyResponse.ExpiryDate);
+      // Get the current date
+      const currentDate = new Date();
+      // Calculate the difference in milliseconds between the current date and the target date
+      const timeDifference = targetDate.getTime() - currentDate.getTime();
+      // Calculate the number of days remaining by dividing the time difference by the number of milliseconds in a day
+      keyResponse.remainingDay = Math.ceil(
+        timeDifference / (1000 * 60 * 60 * 24)
+      );
+
+      let item = items.find((item) =>
+        item.LicenseKeys.some(
+          (key) => key.LicenseKey === keyResponse.LicenseKey
+        )
+      );
+      // if (item) keyResponse.endUser = item.endUser;
+
+      return keyResponse;
+    });
+  };
   const getCustomerInfoAllData = async () => {
     const collectionRef = collection(db, "expiringkeys");
     const q = query(collectionRef);
@@ -457,100 +475,7 @@ export async function getServerSideProps(context) {
 
     return customerInfoAllData;
   };
-  const getAllEndUsersData = async () => {
-    const collectionRef = collection(db, "endusers");
-    const q = query(collectionRef);
-    const querySnapshot = await getDocs(q);
-    const endUsersData = querySnapshot.docs.map((d) => ({
-      objectId: d.id,
-      ...d.data(),
-    }));
-
-    return endUsersData;
-  };
-
   const customerDataAll = await getCustomerInfoAllData();
-
-  const getFirestoreDataAndMerge = async () => {
-    // const collectionRef = collection(db, "licenses");
-    // //long version
-    // //const querySnapshot = await getDocs(query(collectionRef));
-    // //const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
-    // const data = await getDocs(query(collectionRef)).then((snapshot) =>
-    //   snapshot.docs.map((d) => ({ objectId: d.id, ...d.data() }))
-    // );
-    // // const tcxResponses = data.map(d => d.tcxResponses);
-    // // const items = tcxResponses.flatMap(response => response.Items);
-    // const items = data.flatMap((d) => d.tcxResponses?.Items || []);
-    const endUsersData = await getAllEndUsersData();
-
-    expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
-      // const moment = require("moment");
-      // // Parse the expiry date string using moment
-      // const expiryDate = moment(keyResponse.ExpiryDate);
-      // // Get the current date
-      // const currentDate = moment();
-
-      // // Create a moment duration object
-      // const duration = moment.duration(expiryDate.diff(currentDate));
-
-      // // Get the remaining days
-      // const days = Math.floor(duration.asDays());
-
-      // // Get the remaining hours
-      // const hours = duration.hours();
-
-      // // Get the remaining minutes
-      // const minutes = duration.minutes();
-
-      // // Get the remaining seconds
-      // const seconds = duration.seconds();
-
-      // // // Create a string with the remaining days, hours, minutes, and seconds
-      // // const remainingTime = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
-      // let remainingTime = "";
-
-      // // Check if days is greater than 0
-      // if (days > 0) {
-      //   remainingTime += `${days} days `;
-      // }
-
-      // // Check if days is equal to 0 and hours is greater than 0
-      // if (days === 0 && hours > 0) {
-      //   remainingTime += `${hours} hours `;
-      // }
-
-      // // Check if days and hours are equal to 0 and minutes is greater than 0
-      // if (days === 0 && hours === 0 && minutes > 0) {
-      //   remainingTime += `${minutes} minutes `;
-      // }
-
-      // // Check if days, hours, and minutes are equal to 0 and seconds is greater than 0
-      // if (days === 0 && hours === 0 && minutes === 0 && seconds > 0) {
-      //   remainingTime += `${seconds} seconds`;
-      // }
-      // if (days > 0) remainingTime += `${days} days `;
-
-      // if (hours > 0) remainingTime += `${hours} hours `;
-
-      // if (minutes > 0) remainingTime += `${minutes} minutes `;
-
-      // if (seconds > 0) remainingTime += `${seconds} seconds`;
-
-      // console.log(remainingTime);
-
-      // remainingWeeks = expiryDate.diff(currentDate, 'weeks')
-
-      keyResponse.remainingDay = 0;
-
-      let item = endUsersData.find(
-        (item) => item.licenseKey === keyResponse.LicenseKey
-      );
-      if (item) keyResponse.companyName = item.companyName;
-
-      return keyResponse;
-    });
-  };
 
   await getFirestoreDataAndMerge();
 
