@@ -1,4 +1,3 @@
-
 export default async function handler(req, res) {
   try {
     // Make a request to the remote API endpoint to get the JSON response
@@ -23,7 +22,13 @@ export default async function handler(req, res) {
       );
 
       const data = await response.json();
-      res.status(200).json(data);
+      if (typeof data === "object" && data.length === 0) {
+        return res.status(200).json({
+          status: 400,
+          detail: "This license key not available for upgrade",
+        });
+
+      } else res.status(200).json(data);
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
