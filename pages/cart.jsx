@@ -248,18 +248,6 @@ const Cart = (props) => {
     };
   };
 
-  const getEndUserFromFireStore = async (licenseKey) => {
-    try {
-      const docRef = doc(db, "endusers", licenseKey);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        return { endUser: docSnap.data() };
-      }
-    } catch (error) {
-      console.error("Error updating endUser in Item object: ", error);
-    }
-  };
 
   const cancelOrder = () => {
     setCartState([]);
@@ -278,8 +266,6 @@ const Cart = (props) => {
   };
   const CompleteOrder = async (props) => {
 
-    // const endUserData = await getEndUserFromFireStore(endUserLicenseKey);
-    
     // popover kapat
     onToggle();
 
@@ -297,7 +283,7 @@ const Cart = (props) => {
         JSON.stringify(postData)
       );
       // console.log('tcxresponses 181',tcxResponses)
-      //addRandomLicenseKey(tcxResponses);
+     // addRandomLicenseKey(tcxResponses);
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
@@ -310,7 +296,7 @@ const Cart = (props) => {
         theme: "dark",
       });
 
-      console.log('cart detail state',cartDetailState)
+    
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await addDoc(collection(db, "licenses"), { tcxResponses });
@@ -323,64 +309,6 @@ const Cart = (props) => {
     } catch (error) {
       console.error(error);
     }
-  };
-
-  const CompleteOrderTest = async () => {
-    var jsonObjectwithoutLicenseKeys = {
-      UniqueId: null,
-      TrackingCode: null,
-      Currency: "USD",
-      AdditionalDiscountPerc: 0,
-      AdditionalDiscount: 0.0,
-      SubTotal: 327.25,
-      TaxPerc: 0.0,
-      Tax: 0.0,
-      GrandTotal: 327.25,
-      Items: [
-        {
-          Line: 1,
-          Type: "NewLicense",
-          ProductCode: "3CXPSPROFSPLA",
-          SKU: "3CXNAP16M12",
-          ProductName: "3CX Phone System Professional - Annual",
-          ProductDescription:
-            "3CX Phone System Professional 16 SC\nincl. 12 month maintenance\nFor: Pro-Sistem Bilgisayar\nSKU: 3CXNAP16M12",
-          UnitPrice: 595.0,
-          Discount: 45.0,
-          Quantity: 3,
-          Net: 327.25,
-          Tax: 0.0,
-          ResellerId: "219991",
-          ResellerPrice: 446.25,
-          PrivateKeyPassword: null,
-          LicenseKeys: [],
-        },
-      ],
-    };
-
-    addRandomLicenseKey(jsonObjectwithoutLicenseKeys);
-
-    // const filteredJson = {
-    //     Items: jsonObjectwithoutLicenseKeys.Items.map(item => ({
-    //         ResellerName: item.ProductDescription.split('For:')[1].split('\n')[0].trim(),
-    //         LicenseKeys: item.LicenseKeys.map(licenseKey => ({
-    //             LicenseKey: licenseKey.LicenseKey,
-    //             SimultaneousCalls: licenseKey.SimultaneousCalls,
-    //             Edition: licenseKey.Edition
-    //         })),
-    //         ResellerId: item.ResellerId
-    //     }))
-    // };
-    //
-    // const now = new Date();
-    // const datetime = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
-    // filteredJson.Items.forEach(item => {
-    //     item.LicenseKeys.forEach(licenseKey => {
-    //         console.log(`${datetime} - ${item.ResellerName},${licenseKey.Edition},${licenseKey.SimultaneousCalls},${licenseKey.LicenseKey}`);
-    //     });
-    // });
-
-    //  return filteredJson;
   };
 
   return (
