@@ -188,17 +188,18 @@ const ExpiringKeys = (props) => {
     {
       name: "Expiry Date",
       selector: (row) => {
-        const moment = require("moment");
-        moment.locale("tr");
-        // Parse the date and time string using moment
-        const date = moment(row.ExpiryDate);
+        // const moment = require("moment");
+        // moment.locale("tr");
+        // // Parse the date and time string using moment
+        // const date = moment(row.ExpiryDate);
 
-        // Format the date using moment's format method
-        const formattedDate = date.format("DD.MM.YYYY");
+        // // Format the date using moment's format method
+        // const formattedDate = date.format("DD.MM.YYYY");
 
-        // Format the time using moment's format method
-        const formattedTime = date.format("HH:mm");
-        return `${formattedDate} ${formattedTime}`;
+        // // Format the time using moment's format method
+        // const formattedTime = date.format("HH:mm");
+        // return `${formattedDate} ${formattedTime}`;
+        return null
       },
       reorder: true,
       hide: "md",
@@ -484,30 +485,30 @@ export async function getServerSideProps(context) {
     const endUsersData = await getAllEndUsersData();
 
     expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
-      const moment = require("moment");
-      // Parse the expiry date string using moment
-      const expiryDate = moment(keyResponse.ExpiryDate);
-      // Get the current date
-      const currentDate = moment();
+      // const moment = require("moment");
+      // // Parse the expiry date string using moment
+      // const expiryDate = moment(keyResponse.ExpiryDate);
+      // // Get the current date
+      // const currentDate = moment();
 
-      // Create a moment duration object
-      const duration = moment.duration(expiryDate.diff(currentDate));
+      // // Create a moment duration object
+      // const duration = moment.duration(expiryDate.diff(currentDate));
 
-      // Get the remaining days
-      const days = Math.floor(duration.asDays());
+      // // Get the remaining days
+      // const days = Math.floor(duration.asDays());
 
-      // Get the remaining hours
-      const hours = duration.hours();
+      // // Get the remaining hours
+      // const hours = duration.hours();
 
-      // Get the remaining minutes
-      const minutes = duration.minutes();
+      // // Get the remaining minutes
+      // const minutes = duration.minutes();
 
-      // Get the remaining seconds
-      const seconds = duration.seconds();
+      // // Get the remaining seconds
+      // const seconds = duration.seconds();
 
-      // // Create a string with the remaining days, hours, minutes, and seconds
-      // const remainingTime = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
-      let remainingTime = "";
+      // // // Create a string with the remaining days, hours, minutes, and seconds
+      // // const remainingTime = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
+      // let remainingTime = "";
 
       // // Check if days is greater than 0
       // if (days > 0) {
@@ -540,7 +541,7 @@ export async function getServerSideProps(context) {
 
       // remainingWeeks = expiryDate.diff(currentDate, 'weeks')
 
-      keyResponse.remainingDay = days;
+      keyResponse.remainingDay = 0;
 
       let item = endUsersData.find(
         (item) => item.licenseKey === keyResponse.LicenseKey

@@ -3,6 +3,7 @@ import {
   convertDateTime,
   calculateRemainingDay,
 } from "../../../utility/DateTimeUtils";
+import { data } from "autoprefixer";
 export default async function handler(req, res) {
   const { slug } = req.query;
   const licensekey = slug[0];
@@ -82,7 +83,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
     }
 
     return desiredObject;
-  } catch (error) {
-    console.log(error);
+  } catch (error) {æ
+    return error
   }
 }
