@@ -239,12 +239,7 @@ const ExpiringKeys = (props) => {
     // setPaginatedData (sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+ 
 
   // eski sürüm için
   // const getEndUserFromFireStore = async (licenseKey) => {
@@ -359,6 +354,15 @@ const ExpiringKeys = (props) => {
   );
   console.log(filteredData);
   console.log("paginatedData", paginatedData);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+
 
   return (
     <div className="bg-gray-900 h-screen">
