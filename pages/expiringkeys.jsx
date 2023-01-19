@@ -20,7 +20,7 @@ import { db } from "../firebase";
 import { FaBook } from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import { Progress } from "flowbite-react";
-import _ from "lodash";
+
 
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
