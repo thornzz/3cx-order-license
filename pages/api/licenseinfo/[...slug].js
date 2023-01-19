@@ -3,7 +3,7 @@ import {
   convertDateTime,
   calculateRemainingDay,
 } from "../../../utility/DateTimeUtils";
-import { data } from "autoprefixer";
+
 export default async function handler(req, res) {
   const { slug } = req.query;
   const licensekey = slug[0];
@@ -16,10 +16,9 @@ export default async function handler(req, res) {
       licenseType,
       isUpgrade
     );
-
     res.status(200).json(jsonData);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json(error);
   }
 }
 
@@ -46,6 +45,10 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       JSON.stringify(jsonPostData)
     );
 
+    if (data?.status) {
+      return data;
+    }
+
     const desiredProperties = [
       "LicenseKey",
       "SimultaneousCalls",
@@ -58,7 +61,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
 
     const desiredObject = {};
     desiredProperties.forEach((property) => {
-      console.log(property);
+      
       desiredObject[property] = data.Items[0].LicenseKeys[0][property];
     });
 
@@ -83,7 +86,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
     }
 
     return desiredObject;
-  } catch (error) {æ
-    return error
+  } catch (error) {
+    console.log(error);
   }
 }

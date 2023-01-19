@@ -88,7 +88,7 @@ const BuyLicenseModal = (props) => {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-      console.log(responseData);
+      
       return responseData;
     } catch (error) {
       console.error(error);

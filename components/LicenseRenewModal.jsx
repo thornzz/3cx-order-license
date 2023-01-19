@@ -48,7 +48,7 @@ const LicenseRenewModal = (props) => {
       preFormattedRenewalModalIsActive
     ) {
      
-      console.log("renew license modal düzenle");
+     
       setFormattedLicenseKey(preFormattedRenewalKey);
       const fetchData = async () => {
         const response = await getRenewLicenseData(preFormattedRenewalKey, years);
@@ -75,11 +75,11 @@ const LicenseRenewModal = (props) => {
   }, [licenseKey]);
   useEffect(() => {
     if (licenseKey.length === 16) {
-      console.log("renew license modal regular");
+      
       const fetchData = async () => {
         const response = await getRenewLicenseData(formattedLicenseKey, years);
         const json = await response.json()
-        if (json?.status === 400) {
+        if (json?.status) {
          setError(json.detail)
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);

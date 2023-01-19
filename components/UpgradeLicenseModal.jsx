@@ -7,6 +7,13 @@ import { GrLicense } from "react-icons/gr";
 import { TbLicense } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+} from '@chakra-ui/react'
+
 function UpgradeLicenseModal(props) {
   const [showLicenseCard, setShowLicenseCard] = useState(true);
   const [licenseKey, setLicenseKey] = useState("");
@@ -17,6 +24,7 @@ function UpgradeLicenseModal(props) {
   const [licenseType, setLicenseType] = useState("Professional");
   const [simCall, setSimCall] = useState(64);
   const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
+  const [error, setError] = useState(null);
   const router = useRouter();
   const [preformattedUpgradeLicenseKey, setpreFormattedUpgradeLicenseKey] =
     useState(null);
@@ -40,7 +48,6 @@ function UpgradeLicenseModal(props) {
       preformattedUpgradeLicenseKey?.length === 19 &&
       preFormattedUpgradeModalIsActive
     ) {
-      console.log("upgrade license modal düzenle");
       setFormattedLicenseKey(preformattedUpgradeLicenseKey);
       const fetchData = async () => {
         const response = await getUpgradeLicenseData(
@@ -48,15 +55,18 @@ function UpgradeLicenseModal(props) {
           licenseType,
           simCall
         );
-        if (response.status === 200) {
-          const json = await response.json();
-          setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preformattedUpgradeLicenseKey}/${false}/${true}`).then((res) => res.json());
-          setLicenseKeyDetail(licenseKeyInfo);
-          setShowLicenseCard(true);
-        } else {
+        const json = await response.json();
+        if (json?.status) {
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);
+          setError(json.detail);
+        } else {
+          setLicenseKeyData(json);
+          const licenseKeyInfo = await fetch(
+            `/api/licenseinfo/${preformattedUpgradeLicenseKey}/${false}/${true}`
+          ).then((res) => res.json());
+          setLicenseKeyDetail(licenseKeyInfo);
+          setShowLicenseCard(true);
         }
       };
       fetchData();
@@ -77,23 +87,22 @@ function UpgradeLicenseModal(props) {
 
   useEffect(() => {
     if (licenseKey.length === 16) {
-      console.log("renew license modal regular");
+      
       const fetchData = async () => {
         const response = await getUpgradeLicenseData(formattedLicenseKey);
-      
-        if (response.status === 200) {
-          const json = await response.json();
-          
+
+        const json = await response.json();
+        if (json?.status) {
+          setShowLicenseCard(false);
+          setLicenseKeyData(undefined);
+          setError(json.detail);
+        } else {
+          setLicenseKeyData(json);
           const licenseKeyInfo = await fetch(
             `/api/licenseinfo/${formattedLicenseKey}/${false}/${true}`
           ).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
-
-          setLicenseKeyData(json);
           setShowLicenseCard(true);
-        } else {
-          setShowLicenseCard(false);
-          setLicenseKeyData(undefined);
         }
       };
       fetchData();
@@ -143,7 +152,7 @@ function UpgradeLicenseModal(props) {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-      console.log(responseData);
+    
       return responseData;
     } catch (error) {
       console.error(error);
@@ -152,7 +161,7 @@ function UpgradeLicenseModal(props) {
 
   const getUpgradeLicenseData = async (licenseKey) => {
     const response = await fetch(`/api/upgrade/${licenseKey}`);
-   
+
     return response;
   };
   const handleLicenseKeyChange = async (event) => {
@@ -165,15 +174,20 @@ function UpgradeLicenseModal(props) {
       // Make the value uppercase
       value = value.toUpperCase();
       setLicenseKey(value);
+      if (error) {
+        setError(null);
+      }
     }
   };
 
   const closeModal = () => {
     setLicenseKey("");
+    setError(null);
     setLicenseKeyData(undefined);
     setpreFormattedUpgradeLicenseKey("");
     setFormattedLicenseKey("");
-    if(props.upgradeLicenseKey.setLicenseKey!==undefined) props?.upgradeLicenseKey?.setLicenseKey("")
+    if (props.upgradeLicenseKey.setLicenseKey !== undefined)
+      props?.upgradeLicenseKey?.setLicenseKey("");
     props.closeModal();
   };
   return (
@@ -208,9 +222,15 @@ function UpgradeLicenseModal(props) {
                 onChange={handleLicenseKeyChange}
               />
             </label>
+            {error && (
+              <Alert status="error" variant="left-accent">
+                <AlertIcon />
+                <AlertDescription fontSize="xs">{error}</AlertDescription>
+              </Alert>
+            )}
             {showLicenseCard && (
               <Fragment>
-                      <label
+                <label
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="select1"
                 >
@@ -220,7 +240,9 @@ function UpgradeLicenseModal(props) {
                   <div className="inline-flex items-center self-start">
                     <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
                     <span className="font-bold text-gray-900">
-                      {`${licenseKeyDetail?.Edition} Sürüm / ${licenseKeyDetail?.SimultaneousCalls} Kanal / ${licenseKeyDetail?.RemainingDays ?? 0} Gün`}
+                      {`${licenseKeyDetail?.Edition} Sürüm / ${
+                        licenseKeyDetail?.SimultaneousCalls
+                      } Kanal / ${licenseKeyDetail?.RemainingDays ?? 0} Gün`}
                     </span>
                   </div>
                 </div>

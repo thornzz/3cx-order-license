@@ -2,12 +2,18 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Modal } from "flowbite-react";
 import { GrLicense } from "react-icons/gr";
 import { TbLicense } from "react-icons/tb";
-
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+} from '@chakra-ui/react'
 const LicenseCheckModal = (props) => {
   const [showLicenseCard, setShowLicenseCard] = useState(false);
   const [licenseKey, setLicenseKey] = useState("");
   const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
   const [formattedLicenseKey, setFormattedLicenseKey] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Update formattedLicenseKey when licenseKey changes
@@ -17,22 +23,24 @@ const LicenseCheckModal = (props) => {
   }, [licenseKey]);
   useEffect(() => {
     if (licenseKey.length === 16) {
-      console.log("upgrade license modal regular");
+     
       const fetchData = async () => {
         const response = await fetch(
           `/api/licenseinfo/${formattedLicenseKey}/${false}/${true}`
         );
+        const json = await response.json()
 
-        if (response.status === 200) {
-          const json = await response.json();
+        if (json.status) {
+          setError(json.detail)
+          setShowLicenseCard(false);
+        } else {
           setLicenseKeyDetail(json);
           setShowLicenseCard(true);
-        } else {
-          setShowLicenseCard(false);
         }
       };
       fetchData();
     } else {
+    
       setShowLicenseCard(false);
     }
   }, [formattedLicenseKey]);
@@ -47,6 +55,9 @@ const LicenseCheckModal = (props) => {
       // Make the value uppercase
       value = value.toUpperCase();
       setLicenseKey(value);
+      if(error){
+        setError(null)
+      }
     }
   };
 
@@ -68,6 +79,7 @@ const LicenseCheckModal = (props) => {
 
   const closeModal = () => {
     setLicenseKey("");
+    setError(null)
     setLicenseKeyDetail(null);
     props.closeModal();
   };
@@ -103,7 +115,10 @@ const LicenseCheckModal = (props) => {
                 onChange={handleLicenseKeyChange}
               />
             </label>
-
+            {error && (<Alert status='error' variant="left-accent">
+  <AlertIcon />
+  <AlertDescription fontSize='xs'>{error}</AlertDescription>
+</Alert>)}
             {showLicenseCard && (
               <Fragment>
                 <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">

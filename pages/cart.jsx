@@ -43,8 +43,6 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { getPartners } from "./api/getpartners";
-import EndUserModal from "../components/EndUserModal";
-import { AiOutlineEye } from "react-icons/ai";
 
 const Cart = (props) => {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -60,18 +58,15 @@ const Cart = (props) => {
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [license, setLicenseState] = useRecoilState(licenses);
   //const [openEndUserModal, setOpenEndUserModal] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
   const { isOpen, onToggle, onClose } = useDisclosure();
-  const initialFocusRefPopOver = React.useRef();
 
-  const showEndUserModal = (index) => {
-    setSelectedIndex(index);
-    setOpenEndUserModal(!openEndUserModal);
-  };
+  // const showEndUserModal = (index) => {
+  //   setSelectedIndex(index);
+  //   setOpenEndUserModal(!openEndUserModal);
+  // };
 
   useEffect(() => {
-  
     if (cartLengthState === 0) router.push("/dashboard");
 
     setSubTotals(subTotal);
@@ -79,17 +74,15 @@ const Cart = (props) => {
     setCartLength(cartLengthState);
     setOrderDetails(
       cartState.map((item, index) => {
-       let endUserData = undefined
-       
-        if(item.Type !== "NewLicense"){
-            endUserData = props.endUserDataOptions.filter((data) => {
-                return data.value === item.UpgradeKey
-            })
-          
-      }
-      console.log(endUserData)
+        let endUserData = undefined;
+
+        if (item.Type !== "NewLicense") {
+          endUserData = props.endUserDataOptions.filter((data) => {
+            return data.value === item.UpgradeKey;
+          });
+        }
+
         return (
-           
           <tr key={index}>
             <td className="text-center">
               {item.Type === "NewLicense" ? (
@@ -124,7 +117,7 @@ const Cart = (props) => {
               )}
             </td>
             <td className="text-center">
-                {endUserData ? endUserData[0]?.label : null}
+              {endUserData ? endUserData[0]?.label : null}
               {/* {item.Type !== "NewLicense" ? null : (
                 <Fragment>
                   <Select
@@ -248,7 +241,6 @@ const Cart = (props) => {
     };
   };
 
-
   const cancelOrder = () => {
     setCartState([]);
     setDetailCartState([]);
@@ -265,10 +257,8 @@ const Cart = (props) => {
     router.push("/dashboard");
   };
   const CompleteOrder = async (props) => {
-
     // popover kapat
     onToggle();
-
 
     const postData = {
       PO: "MYPO123",
@@ -283,7 +273,7 @@ const Cart = (props) => {
         JSON.stringify(postData)
       );
       // console.log('tcxresponses 181',tcxResponses)
-      addRandomLicenseKey(tcxResponses);
+      //addRandomLicenseKey(tcxResponses);
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
@@ -296,7 +286,6 @@ const Cart = (props) => {
         theme: "dark",
       });
 
-    
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await addDoc(collection(db, "licenses"), { tcxResponses });

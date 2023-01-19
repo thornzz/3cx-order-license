@@ -183,7 +183,7 @@ const LicensesTable = () => {
       cell: (row) => (
         <button
           onClick={async () => {
-            console.log("enduser getir çalıştı 149");
+          
             const endUser = await getEndUserFromFireStore(row.LicenseKey);
             if (endUser) {
               setendUserData(endUser);

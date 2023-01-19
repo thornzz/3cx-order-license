@@ -34,7 +34,6 @@ function AddEndUserModal(props) {
 
   useEffect(() => {
     if (licenseKey.length === 16) {
-      console.log("end user bilgisi çekiliyor");
       const fetchEndUserData = async () => {
         await getEndUserData(formattedLicenseKey);
       };

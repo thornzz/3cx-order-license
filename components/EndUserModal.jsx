@@ -76,7 +76,7 @@ function EndUserModal(props) {
         if (props.tableData !== undefined && props.tableData !== null) {
 
             if (Object.keys(props.tableData.endUser).length === 0) {
-                console.log('table data boş end user')
+              
                 setCompanyName('')
                 setAddress('')
                 setEmail('')
@@ -163,8 +163,7 @@ function EndUserModal(props) {
     // }
 
     const updateFirestoreEndUser = async () => {
-        console.log('updateFirestoreEndUser çalıştı')
-        console.log('licenseKey', licenseKey)
+     
 
         const enduserObject = {
             licenseKey:licenseKey,

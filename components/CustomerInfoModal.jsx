@@ -29,7 +29,7 @@ function CustomerInfoModal(props) {
                 setNewRecord(true)
             } else {
                 setNewRecord(false)
-                console.log(props.data.customerInfo)
+              
                 setResellerEmail(props.data.customerInfo.resellerEmail.checked)
                 setResellerCall(props.data.customerInfo.resellerCall.checked)
                 setEndUserEmail(props.data.customerInfo.endUserEmail.checked)
@@ -60,40 +60,40 @@ function CustomerInfoModal(props) {
     }
 
     const addFirestoreCustomerInfo = async () => {
-        console.log(props.data.customerInfo)
+       
         const customerInfo = {}
         // EndUserEmail kontrolü
 
         if (newRecord && endUserEmail) {
-            console.log('70')
+          
             customerInfo.endUserEmail = {
                 user: session.user.email.split('@')[0],
                 checked: endUserEmail,
                 datetime: getCurrentDateTime()
             }
         } else if (newRecord && !endUserEmail) {
-            console.log('77')
+          
             customerInfo.endUserEmail = {
                 user: null,
                 checked: endUserEmail,
                 datetime: null
             }
         } else if (!newRecord && endUserEmail && props.data.customerInfo.endUserEmail.user !== null) {
-            console.log('84')
+         
             customerInfo.endUserEmail = {
                 user: props.data.customerInfo.endUserEmail.user,
                 checked: endUserEmail,
                 datetime: props.data.customerInfo.endUserEmail.datetime
             }
         } else if (!newRecord && endUserEmail && props.data.customerInfo.endUserEmail.user === null) {
-            console.log('91')
+          
             customerInfo.endUserEmail = {
                 user: session.user.email.split('@')[0],
                 checked: endUserEmail,
                 datetime: getCurrentDateTime()
             }
         } else {
-            console.log('else girdi')
+           
             customerInfo.endUserEmail = {
                 user: null,
                 checked: false,
