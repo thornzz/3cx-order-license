@@ -398,7 +398,7 @@ const handleSort = (column, direction) => {
         </div>
       ) : (
         <DataTable
-        progressPending={isLoading}
+       
           columns={columns}
           data={paginatedData}
           defaultSortFieldId={8}
@@ -431,9 +431,9 @@ const handleSort = (column, direction) => {
           onChangeRowsPerPage={setRowsPerPage}
           onChangePage={setCurrentPage}
           paginationPerPage={rowsPerPage}
-          
           paginationTotalRows={filteredData.length}
-          paginationRowsPerPageOptions={[ 50, 100, 250]}
+          paginationServer
+          paginationRowsPerPageOptions={[50, 100, 250, 500]}
         />
       )}
       <Footer />
