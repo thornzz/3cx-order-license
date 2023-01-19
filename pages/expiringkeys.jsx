@@ -425,7 +425,7 @@ const ExpiringKeys = (props) => {
           }}
           onChangeRowsPerPage={setRowsPerPage}
           onChangePage={setCurrentPage}
-          paginationPerPage={rowsPerPage}
+          // paginationPerPage={rowsPerPage}
           paginationTotalRows={filteredData.length}
           paginationServer
           paginationRowsPerPageOptions={[50, 100, 250, 500]}
