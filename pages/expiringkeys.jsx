@@ -391,6 +391,8 @@ const ExpiringKeys = (props) => {
         <DataTable
           columns={columns}
           data={paginatedData}
+          defaultSortFieldId={8}
+          defaultSortAsc={true}
           customStyles={tableStyle}
           highlightOnHover={true}
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
@@ -416,9 +418,10 @@ const ExpiringKeys = (props) => {
           }}
           onChangeRowsPerPage={setRowsPerPage}
           onChangePage={setCurrentPage}
-          paginationServer
+          paginationPerPage={rowsPerPage}
           paginationTotalRows={filteredData.length}
-          paginationRowsPerPageOptions={[10, 25, 50, 100, 250, 500]}
+          paginationServer
+          paginationRowsPerPageOptions={[50, 100, 250, 500]}
         />
       )}
       <Footer />
