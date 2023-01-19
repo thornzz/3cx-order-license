@@ -32,7 +32,7 @@ const ExpiringKeys = (props) => {
   const [customerInfo, setCustomerInfo] = useState(null);
   //const [paginatedData, setPaginatedData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [columns,setColumns] = useState([])
+
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
   };
@@ -52,6 +52,194 @@ const paginatedData = filteredData.slice(
   currentPage * rowsPerPage
 )
 
+const columns = [
+  {
+    width: "50px",
+    cell: (row, index) => {
+      return (
+        <button
+          type="button"
+          onClick={async () => {
+            const customerInfoData = await getCustomerInfoFromFirestore(
+              row.LicenseKey
+            );
+
+            if (customerInfoData === undefined)
+              setCustomerInfo({ licenseKey: row.LicenseKey });
+            else setCustomerInfo(customerInfoData);
+
+            showCustomerInfoModal();
+          }}
+          className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          <FaBook />
+        </button>
+      );
+    },
+    hide: "sm",
+  },
+  {
+    name: "Lisans Anahtarı",
+    selector: (row) => row.LicenseKey,
+    filter: true,
+    reorder: true,
+    grow: 1.1,
+    hide: "sm",
+  },
+
+  {
+    name: "Bayi",
+    selector: (row, index) => {
+      const filterPartnerName = props.partners.filter(
+        (partner) => partner.value === row.ResellerID
+      );
+      if (filterPartnerName.length > 0) {
+        return filterPartnerName[0].label;
+      } else {
+        return "ResellerID bulunamadı!";
+      }
+    },
+    sortable: true,
+    reorder: true,
+    grow: 1.3,
+  },
+  {
+    name: "Tamamlandı",
+    center: true,
+    selector: (row, index) => {
+      let percentage = 0;
+      const item = props.customerInfoDataAll.find(
+        (key) => key.licenseKey === row.LicenseKey
+      );
+      if (item)
+        percentage = Number(countCheckedPercentage(item.customerInfo));
+      return (
+        <Progress
+          className="w-20"
+          progress={percentage}
+          labelPosition="outside"
+          label={" "}
+          color={"blue"}
+          labelProgress={true}
+          size={"md"}
+        />
+      );
+    },
+    hide: "md",
+  },
+  {
+    name: "End user",
+    cell: (row) => (
+      <button
+        onClick={async () => {
+          setendUserData(await getEndUserFromFireStore(row.LicenseKey));
+          showEndUserModal();
+        }}
+      >
+        <AiOutlineEye className="w-7 h-7 text-red-500" />
+      </button>
+    ),
+    ignoreRowClick: true,
+    allowOverflow: true,
+    button: true,
+    reorder: true,
+  },
+  {
+    name: "Şirket",
+    selector: (row) => row?.companyName,
+    grow: 1.2,
+    hide: "md",
+  },
+  {
+    name: "Telefon",
+    selector: (row) => row?.endUser?.telephone,
+    width: "100px",
+    hide: "md",
+  },
+  {
+    name: "Kalan (Gün)",
+    
+    selector: (row) => row.remainingDay,
+    conditionalCellStyles: [
+      {
+        when: (row) => row.remainingDay <= 31,
+        style: {
+          backgroundColor: "red",
+          color: "white",
+          "&:hover": {
+            cursor: "pointer",
+          },
+        },
+      },
+      {
+        when: (row) => row.remainingDay > 31,
+        style: {
+          backgroundColor: "orange",
+          color: "white",
+          "&:hover": {
+            cursor: "pointer",
+          },
+        },
+      },
+      {
+        when: (row) => row.remainingDay > 60,
+        style: {
+          backgroundColor: "green",
+          color: "white",
+          "&:hover": {
+            cursor: "pointer",
+          },
+        },
+      },
+    ],
+    reorder: true,
+    sortable: true,
+    center: true,
+    width: "150px",
+  },
+  {
+    name: "Expiry Date",
+    selector: (row) => {
+      const moment = require("moment");
+      moment.locale("tr");
+      // Parse the date and time string using moment
+      const date = moment(row.ExpiryDate);
+
+      // Format the date using moment's format method
+      const formattedDate = date.format("DD.MM.YYYY");
+
+      // Format the time using moment's format method
+      const formattedTime = date.format("HH:mm");
+      return `${formattedDate} ${formattedTime}`;
+    },
+    reorder: true,
+    hide: "md",
+  },
+  {
+    name: "Sürüm",
+    selector: (row) => {
+      return row.IsPerpetual ? "Perpetual" : "Annual";
+    },
+    sortable: true,
+    reorder: true,
+    center: true,
+    hide: "md",
+  },
+  {
+    name: "Kanal Sayısı",
+    selector: (row) => row.SimultaneousCalls,
+    sortable: true,
+    reorder: true,
+    hide: "sm",
+  },
+  {
+    name: "Lisans Tipi",
+    selector: (row) => row.Type,
+    sortable: true,
+    reorder: true,
+    hide: "md",
+  },
+]
 
 const handleSort = (column, direction) => {
   // console.log("sort çalışan sütun", column)
@@ -67,196 +255,6 @@ const handleSort = (column, direction) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-     
-      setColumns( [
-        {
-          width: "50px",
-          cell: (row, index) => {
-            return (
-              <button
-                type="button"
-                onClick={async () => {
-                  const customerInfoData = await getCustomerInfoFromFirestore(
-                    row.LicenseKey
-                  );
-    
-                  if (customerInfoData === undefined)
-                    setCustomerInfo({ licenseKey: row.LicenseKey });
-                  else setCustomerInfo(customerInfoData);
-    
-                  showCustomerInfoModal();
-                }}
-                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-              >
-                <FaBook />
-              </button>
-            );
-          },
-          hide: "sm",
-        },
-        {
-          name: "Lisans Anahtarı",
-          selector: (row) => row.LicenseKey,
-          filter: true,
-          reorder: true,
-          grow: 1.1,
-          hide: "sm",
-        },
-    
-        {
-          name: "Bayi",
-          selector: (row, index) => {
-            const filterPartnerName = props.partners.filter(
-              (partner) => partner.value === row.ResellerID
-            );
-            if (filterPartnerName.length > 0) {
-              return filterPartnerName[0].label;
-            } else {
-              return "ResellerID bulunamadı!";
-            }
-          },
-          sortable: true,
-          reorder: true,
-          grow: 1.3,
-        },
-        {
-          name: "Tamamlandı",
-          center: true,
-          selector: (row, index) => {
-            let percentage = 0;
-            const item = props.customerInfoDataAll.find(
-              (key) => key.licenseKey === row.LicenseKey
-            );
-            if (item)
-              percentage = Number(countCheckedPercentage(item.customerInfo));
-            return (
-              <Progress
-                className="w-20"
-                progress={percentage}
-                labelPosition="outside"
-                label={" "}
-                color={"blue"}
-                labelProgress={true}
-                size={"md"}
-              />
-            );
-          },
-          hide: "md",
-        },
-        {
-          name: "End user",
-          cell: (row) => (
-            <button
-              onClick={async () => {
-                setendUserData(await getEndUserFromFireStore(row.LicenseKey));
-                showEndUserModal();
-              }}
-            >
-              <AiOutlineEye className="w-7 h-7 text-red-500" />
-            </button>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-          reorder: true,
-        },
-        {
-          name: "Şirket",
-          selector: (row) => row?.companyName,
-          grow: 1.2,
-          hide: "md",
-        },
-        {
-          name: "Telefon",
-          selector: (row) => row?.endUser?.telephone,
-          width: "100px",
-          hide: "md",
-        },
-        {
-          name: "Kalan (Gün)",
-          
-          selector: (row) => row.remainingDay,
-          conditionalCellStyles: [
-            {
-              when: (row) => row.remainingDay <= 31,
-              style: {
-                backgroundColor: "red",
-                color: "white",
-                "&:hover": {
-                  cursor: "pointer",
-                },
-              },
-            },
-            {
-              when: (row) => row.remainingDay > 31,
-              style: {
-                backgroundColor: "orange",
-                color: "white",
-                "&:hover": {
-                  cursor: "pointer",
-                },
-              },
-            },
-            {
-              when: (row) => row.remainingDay > 60,
-              style: {
-                backgroundColor: "green",
-                color: "white",
-                "&:hover": {
-                  cursor: "pointer",
-                },
-              },
-            },
-          ],
-          reorder: true,
-          sortable: true,
-          center: true,
-          width: "150px",
-        },
-        {
-          name: "Expiry Date",
-          selector: (row) => {
-            const moment = require("moment");
-            moment.locale("tr");
-            // Parse the date and time string using moment
-            const date = moment(row.ExpiryDate);
-    
-            // Format the date using moment's format method
-            const formattedDate = date.format("DD.MM.YYYY");
-    
-            // Format the time using moment's format method
-            const formattedTime = date.format("HH:mm");
-            return `${formattedDate} ${formattedTime}`;
-          },
-          reorder: true,
-          hide: "md",
-        },
-        {
-          name: "Sürüm",
-          selector: (row) => {
-            return row.IsPerpetual ? "Perpetual" : "Annual";
-          },
-          sortable: true,
-          reorder: true,
-          center: true,
-          hide: "md",
-        },
-        {
-          name: "Kanal Sayısı",
-          selector: (row) => row.SimultaneousCalls,
-          sortable: true,
-          reorder: true,
-          hide: "sm",
-        },
-        {
-          name: "Lisans Tipi",
-          selector: (row) => row.Type,
-          sortable: true,
-          reorder: true,
-          hide: "md",
-        },
-      ])
-      
       setIsLoading(false);
     }, 2000);
     return () => clearTimeout(timer);
