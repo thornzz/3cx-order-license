@@ -3128,10 +3128,18 @@ minimist@^1.2.6:
   resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz"
   integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
 
-moment@^2.29.4:
+moment@^2.19.3:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
+
+momento@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/momento/-/momento-0.2.0.tgz#eae56ac3fcfc9ff56e3b77895cf5864c1707b4c1"
+  integrity sha512-nIuBJ0hbUtyx+64LOSV+Bt53bQ3/YFvLx7VmPoTzXT0CBpFJdN5einKfUG0SMOpfSFFDQDh5Yjc1/k0082IwCw==
+  dependencies:
+    moment "^2.19.3"
+    ramda "^0.25.0"
 
 ms@2.1.2:
   version "2.1.2"
@@ -3470,6 +3478,11 @@ quick-lru@^5.1.1:
   version "5.1.1"
   resolved "https://registry.npmjs.org/quick-lru/-/quick-lru-5.1.1.tgz"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
+
+ramda@^0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.25.0.tgz#8fdf68231cffa90bc2f9460390a0cb74a29b29a9"
+  integrity sha512-GXpfrYVPwx3K7RQ6aYT8KPS8XViSXUVJT1ONhoKPE9VAleW42YE+U+8VEyGWt41EnEQW7gwecYJriTI0pKoecQ==
 
 react-clientside-effect@^1.2.6:
   version "1.2.6"

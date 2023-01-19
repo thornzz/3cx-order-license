@@ -25,7 +25,7 @@ import { Progress } from "flowbite-react";
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
   const [openEndUserModal, setOpenEndUserModal] = useState(false);
   const [openCustomerInfoModal, setCustomerInfoModal] = useState(false);
@@ -45,12 +45,7 @@ const ExpiringKeys = (props) => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+
 
   // eski sürüm için
   // const getEndUserFromFireStore = async (licenseKey) => {
@@ -72,10 +67,10 @@ const ExpiringKeys = (props) => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-       return {endUser:docSnap.data()}
-      }
+        return { endUser: docSnap.data() };
+      } else return { endUser: {} };
     } catch (error) {
-      console.error("Error updating endUser in Item object: ", error);
+      console.error("Error fetching endUser in Item object: ", error);
     }
   };
 
@@ -257,7 +252,7 @@ const ExpiringKeys = (props) => {
       selector: (row) => row.remainingDay,
       conditionalCellStyles: [
         {
-          when: (row) => row.remainingDay < 31,
+          when: (row) => row.remainingDay <= 31,
           style: {
             backgroundColor: "red",
             color: "white",
@@ -413,6 +408,7 @@ const ExpiringKeys = (props) => {
             rowsPerPageText: "Kayıt sayısı :",
             rangeSeparatorText: "/",
             noRowsPerPage: false,
+            noRowsPerPage: false,
             selectAllRowsItem: false,
             selectAllRowsItemText: "All",
           }}
@@ -433,40 +429,6 @@ export default ExpiringKeys;
 export async function getServerSideProps(context) {
   let expiringKeysResponse = await getExpiringKeys();
 
-  const getFirestoreDataAndMerge = async () => {
-    const collectionRef = collection(db, "licenses");
-    //long version
-    //const querySnapshot = await getDocs(query(collectionRef));
-    //const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
-    const data = await getDocs(query(collectionRef)).then((snapshot) =>
-      snapshot.docs.map((d) => ({ objectId: d.id, ...d.data() }))
-    );
-    // const tcxResponses = data.map(d => d.tcxResponses);
-    // const items = tcxResponses.flatMap(response => response.Items);
-    const items = data.flatMap((d) => d.tcxResponses?.Items || []);
-
-    expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
-      // add remainingDay field
-      const targetDate = new Date(keyResponse.ExpiryDate);
-      // Get the current date
-      const currentDate = new Date();
-      // Calculate the difference in milliseconds between the current date and the target date
-      const timeDifference = targetDate.getTime() - currentDate.getTime();
-      // Calculate the number of days remaining by dividing the time difference by the number of milliseconds in a day
-      keyResponse.remainingDay = Math.ceil(
-        timeDifference / (1000 * 60 * 60 * 24)
-      );
-
-      let item = items.find((item) =>
-        item.LicenseKeys.some(
-          (key) => key.LicenseKey === keyResponse.LicenseKey
-        )
-      );
-      // if (item) keyResponse.endUser = item.endUser;
-
-      return keyResponse;
-    });
-  };
   const getCustomerInfoAllData = async () => {
     const collectionRef = collection(db, "expiringkeys");
     const q = query(collectionRef);
@@ -478,7 +440,101 @@ export async function getServerSideProps(context) {
 
     return customerInfoAllData;
   };
+  const getAllEndUsersData = async () => {
+    const collectionRef = collection(db, "endusers");
+    const q = query(collectionRef);
+    const querySnapshot = await getDocs(q);
+    const endUsersData = querySnapshot.docs.map((d) => ({
+      objectId: d.id,
+      ...d.data(),
+    }));
+
+    return endUsersData;
+  };
+
   const customerDataAll = await getCustomerInfoAllData();
+
+  const getFirestoreDataAndMerge = async () => {
+    // const collectionRef = collection(db, "licenses");
+    // //long version
+    // //const querySnapshot = await getDocs(query(collectionRef));
+    // //const data = await querySnapshot?.docs.map((d) => ({objectId: d.id, ...d.data()}))
+    // const data = await getDocs(query(collectionRef)).then((snapshot) =>
+    //   snapshot.docs.map((d) => ({ objectId: d.id, ...d.data() }))
+    // );
+    // // const tcxResponses = data.map(d => d.tcxResponses);
+    // // const items = tcxResponses.flatMap(response => response.Items);
+    // const items = data.flatMap((d) => d.tcxResponses?.Items || []);
+    const endUsersData = await getAllEndUsersData();
+
+    expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
+      const moment = require("moment");
+      // Parse the expiry date string using moment
+      const expiryDate = moment(keyResponse.ExpiryDate);
+      // Get the current date
+      const currentDate = moment();
+
+      // Create a moment duration object
+      const duration = moment.duration(expiryDate.diff(currentDate));
+
+      // Get the remaining days
+      const days = Math.floor(duration.asDays());
+
+      // Get the remaining hours
+      const hours = duration.hours();
+
+      // Get the remaining minutes
+      const minutes = duration.minutes();
+
+      // Get the remaining seconds
+      const seconds = duration.seconds();
+
+      // // Create a string with the remaining days, hours, minutes, and seconds
+      // const remainingTime = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
+      let remainingTime = "";
+
+      // // Check if days is greater than 0
+      // if (days > 0) {
+      //   remainingTime += `${days} days `;
+      // }
+
+      // // Check if days is equal to 0 and hours is greater than 0
+      // if (days === 0 && hours > 0) {
+      //   remainingTime += `${hours} hours `;
+      // }
+
+      // // Check if days and hours are equal to 0 and minutes is greater than 0
+      // if (days === 0 && hours === 0 && minutes > 0) {
+      //   remainingTime += `${minutes} minutes `;
+      // }
+
+      // // Check if days, hours, and minutes are equal to 0 and seconds is greater than 0
+      // if (days === 0 && hours === 0 && minutes === 0 && seconds > 0) {
+      //   remainingTime += `${seconds} seconds`;
+      // }
+      // if (days > 0) remainingTime += `${days} days `;
+
+      // if (hours > 0) remainingTime += `${hours} hours `;
+
+      // if (minutes > 0) remainingTime += `${minutes} minutes `;
+
+      // if (seconds > 0) remainingTime += `${seconds} seconds`;
+
+      // console.log(remainingTime);
+
+      // remainingWeeks = expiryDate.diff(currentDate, 'weeks')
+
+      keyResponse.remainingDay = days;
+
+      let item = endUsersData.find(
+        (item) => item.licenseKey === keyResponse.LicenseKey
+      );
+      if (item) keyResponse.companyName = item.companyName;
+      
+      return keyResponse;
+    });
+  };
+
 
   await getFirestoreDataAndMerge();
 
