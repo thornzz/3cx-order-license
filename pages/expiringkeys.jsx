@@ -86,44 +86,44 @@ const ExpiringKeys = (props) => {
     }
   };
 
-  async function getEndUserByLicenseKey(data, licenseKey) {
-    const tcxResponses = data.map((d) => d.tcxResponses);
-    const items = tcxResponses.flatMap((response) => response.Items);
-    const filteredItems = items.filter((item) => {
-      return item.LicenseKeys.some((key) => key.LicenseKey === licenseKey);
-    });
+  // async function getEndUserByLicenseKey(data, licenseKey) {
+  //   const tcxResponses = data.map((d) => d.tcxResponses);
+  //   const items = tcxResponses.flatMap((response) => response.Items);
+  //   const filteredItems = items.filter((item) => {
+  //     return item.LicenseKeys.some((key) => key.LicenseKey === licenseKey);
+  //   });
 
-    if (filteredItems.length === 0) {
-      return { endUser: {} };
-    }
+  //   if (filteredItems.length === 0) {
+  //     return { endUser: {} };
+  //   }
 
-    const newLicenseItem = filteredItems.find(
-      (item) => item.Type === "NewLicense"
-    );
-    if (newLicenseItem) {
-      return { endUser: newLicenseItem.endUser };
-    }
+  //   const newLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "NewLicense"
+  //   );
+  //   if (newLicenseItem) {
+  //     return { endUser: newLicenseItem.endUser };
+  //   }
 
-    const renewAnnualLicenseItem = filteredItems.find(
-      (item) => item.Type === "RenewAnnual"
-    );
-    if (renewAnnualLicenseItem) {
-      return { endUser: renewAnnualLicenseItem.endUser };
-    }
-    const upgradeLicenseItem = filteredItems.find(
-      (item) => item.Type === "Upgrade"
-    );
-    if (upgradeLicenseItem) {
-      return { endUser: upgradeLicenseItem.endUser };
-    }
-    const maintanenceLicenseItem = filteredItems.find(
-      (item) => item.Type === "Maintenance"
-    );
-    if (maintanenceLicenseItem) {
-      return { endUser: maintanenceLicenseItem.endUser };
-    }
-    return undefined;
-  }
+  //   const renewAnnualLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "RenewAnnual"
+  //   );
+  //   if (renewAnnualLicenseItem) {
+  //     return { endUser: renewAnnualLicenseItem.endUser };
+  //   }
+  //   const upgradeLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "Upgrade"
+  //   );
+  //   if (upgradeLicenseItem) {
+  //     return { endUser: upgradeLicenseItem.endUser };
+  //   }
+  //   const maintanenceLicenseItem = filteredItems.find(
+  //     (item) => item.Type === "Maintenance"
+  //   );
+  //   if (maintanenceLicenseItem) {
+  //     return { endUser: maintanenceLicenseItem.endUser };
+  //   }
+  //   return undefined;
+  // }
   function countCheckedPercentage(obj) {
     let count = 0;
     let total = 0;
@@ -336,7 +336,8 @@ const ExpiringKeys = (props) => {
   };
 
   const filteredData = props.expiringKeys.filter((item) =>
-    [item.LicenseKey, item?.endUser?.companyName]
+    // [item.LicenseKey, item?.endUser?.companyName]
+      [item.LicenseKey]
       .map((val) => val?.toLowerCase())
       .some((val) => val?.includes(searchText.toLowerCase()))
   );
@@ -451,7 +452,7 @@ export async function getServerSideProps(context) {
           (key) => key.LicenseKey === keyResponse.LicenseKey
         )
       );
-      if (item) keyResponse.endUser = item.endUser;
+      // if (item) keyResponse.endUser = item.endUser;
 
       return keyResponse;
     });

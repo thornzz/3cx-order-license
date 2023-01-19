@@ -9,6 +9,7 @@ import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
 import Footer from "../components/Footer";
 import LicenseCheckModal from "../components/LicenseCheckModal";
 import AddEndUserModal from "../components/AddEndUserModal";
+import { ButtonGroup, Spacer, VStack, HStack } from "@chakra-ui/react";
 
 const Dashboard = () => {
   const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
@@ -37,7 +38,7 @@ const Dashboard = () => {
 
   return (
     <div className="bg-gray-900 h-screen">
-         <AddEndUserModal
+      <AddEndUserModal
         showModal={openAddEndUserModal}
         closeModal={showAddEndUserModal}
       ></AddEndUserModal>
@@ -71,7 +72,48 @@ const Dashboard = () => {
       ></UpgradeLicenseModal>
 
       <Navbar />
-      <div className="flex items-center justify-between">
+      <HStack>
+        <ButtonGroup>
+          <Button
+            onClick={showLicenseCheckModal}
+            className="bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2"
+          >
+            Lisans Sorgulama
+          </Button>
+          <Button
+            onClick={showAddEndUserModal}
+            className="px-4 w-35 mb-2 mt-2 mr-2 bg-orange-400"
+          >
+            End User Ekle
+          </Button>
+        </ButtonGroup>
+        <Spacer />
+
+        <ButtonGroup>
+          <Button
+            onClick={showRenewLicenseModal}
+            className="bg-red-500 px-4 w-35 mb-2 mt-2 mr-2"
+          >
+            Lisans Yenileme
+          </Button>
+          <Button
+            onClick={showUpgradeLicenseModal}
+            className="bg-green-500 px-4 w-35 mb-2 mt-2 mr-2"
+          >
+            Lisans Yükseltme
+          </Button>
+        </ButtonGroup>
+
+        <Button style={{marginRight: "10px", marginLeft: "150px"}}
+            onClick={showNewLicenseModal}
+            className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
+          >
+            Yeni Lisans
+          </Button>
+
+      </HStack>
+
+      {/* <div className="flex items-center justify-between">
         <div className="flex">
           <Button
             onClick={showLicenseCheckModal}
@@ -111,7 +153,7 @@ const Dashboard = () => {
           </div>
         </div>
        
-      </div>
+      </div> */}
 
       <div>
         <LicensesTable />

@@ -148,6 +148,18 @@ const LicensesTable = () => {
                 // Save the updated value to the database and exit edit mode when the input field loses focus
                 setSelectedRow(null);
               }}
+              onKeyDown={async event => {
+                if (event.key === "Enter") {
+                  await updateInvoiceIdInItemObject(
+                    invoiceId,
+                    row.objectId,
+                    row.Line
+                  );
+                  await getFireStoreData();
+                  // Save the updated value to the database and exit edit mode when the input field loses focus
+                  setSelectedRow(null);
+                }
+              }}
             />
           );
         } else {
