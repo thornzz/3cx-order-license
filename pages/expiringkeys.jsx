@@ -360,6 +360,8 @@ const handleSort = (column, direction) => {
     setSearchText(event.target.value);
   };
 
+  console.log(filteredData)
+  console.log("paginatedData", paginatedData)
 
   return (
     <div className="bg-gray-900 h-screen">
