@@ -408,7 +408,7 @@ const handleSort = (column, direction) => {
           highlightOnHover={true}
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
           subHeader
-          paginationServer
+          
           subHeaderComponent={
             <div style={{ display: "flex", alignItems: "center" }}>
               <h3 style={{ margin: "0 10px" }}>Ara :</h3>
