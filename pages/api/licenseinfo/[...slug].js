@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
 export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
   try {
-    let jsonPostData = {
+    const jsonPostData = {
       PO: "MYPO123",
       SalesCode: "",
       Notes: "",
@@ -40,54 +40,34 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       ],
     };
 
-    let data = await PostData(
-      "https://api.3cx.com/public/v1/order/?readonly=true",
-      JSON.stringify(jsonPostData)
-    );
+    const handleError = (errorCode) => {
+      switch (errorCode) {
+        case "UpgradeIsNotAvailable":
+          jsonPostData.Lines[0].Type = "Maintenance";
+          break;
+        case "KeyVersionIsDeprecated":
+          jsonPostData.Lines[0].Type = "RenewAnnual";
+          break;
+      }
+    };
 
-    if (data?.status && data?.ErrorCode === "UpgradeIsNotAvailable") {
-      jsonPostData = {
-        PO: "MYPO123",
-        SalesCode: "",
-        Notes: "",
-        Lines: [
-          {
-            Type: "Maintenance",
-            UpgradeKey: licensekey,
-            ResellerId: null,
-            AddHosting: false,
-          },
-        ],
-      };
-      data = await PostData(
+      let data = await PostData(
         "https://api.3cx.com/public/v1/order/?readonly=true",
         JSON.stringify(jsonPostData)
       );
-    }
-    else if (data?.status && data?.ErrorCode === "KeyVersionIsDeprecated") {
-      jsonPostData = {
-        PO: "MYPO123",
-        SalesCode: "",
-        Notes: "",
-        Lines: [
-          {
-            Type: "RenewAnnual",
-            UpgradeKey: licensekey,
-            ResellerId: null,
-            AddHosting: false,
-          },
-        ],
-      };
-      data = await PostData(
+     
+    const { status, ErrorCode } = data;
+
+    if (status && ErrorCode) {
+   
+      handleError(ErrorCode);
+
+       data = await PostData(
         "https://api.3cx.com/public/v1/order/?readonly=true",
-        JSON.stringify(jsonPostData)
-      );
+        JSON.stringify(jsonPostData))
     }
-    else if (data?.status && data?.ErrorCode !== "UpgradeIsNotAvailable") {
-    
-      return data;
-    }
-    
+
+
     const desiredProperties = [
       "LicenseKey",
       "SimultaneousCalls",
