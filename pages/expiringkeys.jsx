@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import { tableStyle } from "../components/styles/tableStyle";
 import EndUserModal from "../components/EndUserModal";
 import { AiOutlineEye } from "react-icons/ai";
+import { RxClipboardCopy } from "react-icons/rx";
 import {
   collection,
   getDocs,
@@ -20,7 +21,7 @@ import { db } from "../firebase";
 import { FaBook } from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import { Progress } from "flowbite-react";
-
+import { Icon,Text,useToast } from "@chakra-ui/react";
 
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
@@ -32,6 +33,8 @@ const ExpiringKeys = (props) => {
   const [enduserData, setendUserData] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(null);
   const [customerInfoAll, setCustomerInfoAll] = useState(null);
+  const toast = useToast()
+
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
   };
@@ -170,10 +173,24 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "Lisans Anahtarı",
-      selector: (row) => row.LicenseKey,
+      cell: (row) => { return(
+        <>
+        <Icon as={RxClipboardCopy} boxSize="6" color={"red.500"}
+        onClick={() => {
+          navigator.clipboard.writeText(row.LicenseKey);
+          toast({
+            title: 'Anahtar kopyalandı',
+            status: 'info',
+            duration: 1000,
+            isClosable: true,
+          })
+        }}
+        />
+        <Text ml={2}>{row.LicenseKey}</Text>
+        </>)},
       filter: true,
       reorder: true,
-      grow: 1.1,
+      grow: 1.3,
       hide: "sm",
     },
 
@@ -238,7 +255,7 @@ const ExpiringKeys = (props) => {
     {
       name: "Şirket",
       selector: (row) => row?.endUser?.companyName,
-      grow: 1.2,
+      grow: 1,
       hide: "md",
     },
     {
