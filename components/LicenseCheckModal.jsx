@@ -13,6 +13,7 @@ import {
   InputRightElement,
   InputLeftElement,
   Icon,
+  Fade
 } from "@chakra-ui/react";
 const LicenseCheckModal = (props) => {
   const [showLicenseCard, setShowLicenseCard] = useState(false);
@@ -86,7 +87,7 @@ const LicenseCheckModal = (props) => {
     setLicenseKey(clipboardText);
     handleLicenseKeyChange({ target: { value: clipboardText } });
   };
-  
+
   const closeModal = () => {
     setLicenseKey("");
     setError(null);
@@ -149,93 +150,95 @@ const LicenseCheckModal = (props) => {
               </Alert>
             )}
             {showLicenseCard && (
-              <Fragment>
-                <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
-                  <div class="overflow-hidden bg-white shadow sm:rounded-lg">
-                    <div className="px-2 py-3 sm:px-4 flex items-center">
-                      <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
-                      <h3 class="text-md font-medium leading-6 text-gray-900">
-                        Lisans Bilgileri
-                      </h3>
-                    </div>
-                    <div class="border-t border-gray-200">
-                      <dl>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Sürümü
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.Edition}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Tipi
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.IsPerpetual
-                              ? "Perpetual"
-                              : "Annual"}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Lisans Aktif mi?
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.IsActive ? "Evet" : "Hayır"}
-                          </dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Expiry Tarihi
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.MaintenanceDate}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Kanal Sayısı
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.SimultaneousCalls}
-                          </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                          <dt class="text-sm font-medium text-gray-500">
-                            Kalan Gün
-                          </dt>
-                          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                            {licenseKeyDetail?.RemainingDays}
-                          </dd>
-                        </div>
-                      </dl>
+            <Fade in={showLicenseCard} transition={{ enter: { duration: 1.5 } }} >
+                <Fragment>
+                  <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
+                    <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+                      <div className="px-2 py-3 sm:px-4 flex items-center">
+                        <TbLicense className="h-8 w-8 mr-2 bg-gradient-to-r from-pink-600 to-red-600 shadow-lg rounded p-1.5 text-gray-100" />
+                        <h3 class="text-md font-medium leading-6 text-gray-900">
+                          Lisans Bilgileri
+                        </h3>
+                      </div>
+                      <div class="border-t border-gray-200">
+                        <dl>
+                          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Lisans Sürümü
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.Edition}
+                            </dd>
+                          </div>
+                          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Lisans Tipi
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.IsPerpetual
+                                ? "Perpetual"
+                                : "Annual"}
+                            </dd>
+                          </div>
+                          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Lisans Aktif mi?
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.IsActive ? "Evet" : "Hayır"}
+                            </dd>
+                          </div>
+                          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Expiry Tarihi
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.MaintenanceDate}
+                            </dd>
+                          </div>
+                          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Kanal Sayısı
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.SimultaneousCalls}
+                            </dd>
+                          </div>
+                          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">
+                              Kalan Gün
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                              {licenseKeyDetail?.RemainingDays}
+                            </dd>
+                          </div>
+                        </dl>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex w-full justify-between">
-                  <button
-                    onClick={() => openLicenseRenewalModal()}
-                    className="px-4 py-2 py-1.5 mr-2 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
-                    type="button"
-                  >
-                    Lisans Yenileme
-                  </button>
+                  <div className="flex w-full justify-between">
+                    <button
+                      onClick={() => openLicenseRenewalModal()}
+                      className="px-4 py-2 py-1.5 mr-2 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-pink-600 to-red-600 font-medium text-gray-100 block transition duration-300"
+                      type="button"
+                    >
+                      Lisans Yenileme
+                    </button>
 
-                  <button
-                    onClick={async () => {
-                      openLicenseUpgradeModal();
-                    }}
-                    className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300
+                    <button
+                      onClick={async () => {
+                        openLicenseUpgradeModal();
+                      }}
+                      className="px-4 py-2 py-1.5 w-[200px] rounded-md shadow-lg bg-gradient-to-r from-blue-600 to-green-600 font-medium text-gray-100 block transition duration-300
                     hover:"
-                    type="button"
-                  >
-                    Lisans Yükseltme
-                  </button>
-                </div>
-              </Fragment>
+                      type="button"
+                    >
+                      Lisans Yükseltme
+                    </button>
+                  </div>
+                </Fragment>
+              </Fade>
             )}
           </form>
         </Modal.Body>
