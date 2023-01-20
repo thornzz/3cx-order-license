@@ -315,15 +315,15 @@ const ExpiringKeys = (props) => {
       name: "Kalan (Gün)",
       selector: (row) => {
         return row.remainingDay <= 31 ? (
-          <Badge colorScheme="red" w={90} textAlign="center" fontSize={"1em"}>
+          <Badge colorScheme="red" w={90}  borderRadius="xl" textAlign="center" fontSize={"1em"}>
             {row.remainingDay}
           </Badge>
         ) : row.remainingDay <= 60 ? (
           <Badge
             w={90}
+            borderRadius="xl"
             textAlign={"center"}
             fontSize={"1.1em"}
-            round
             colorScheme="orange"
           >
             {row.remainingDay}
@@ -333,8 +333,8 @@ const ExpiringKeys = (props) => {
             w={90}
             textAlign={"center"}
             fontSize={"1.1em"}
-            round
-            colorScheme="green"
+            borderRadius="xl"
+            colorScheme="whatsapp"
           >
             {row.remainingDay}
           </Badge>
