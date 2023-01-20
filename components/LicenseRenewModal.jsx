@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Modal } from "flowbite-react";
-import { GrLicense } from "react-icons/gr";
 import { BiPaste } from "react-icons/bi";
 import PostData from "../utility/HttpPostUtility";
 import { toast } from "react-toastify";
@@ -45,6 +44,7 @@ const LicenseRenewModal = (props) => {
     ) {
       setpreFormattedRenewalKey(props.renewalLicenseKey.licenseKey);
       setPreFormattedRenewalModalIsActive(true);
+
     }
   });
   useEffect(() => {
@@ -228,6 +228,7 @@ const LicenseRenewModal = (props) => {
             </label> */}
             <InputGroup size="md" mt={"2"}>
               <Input
+             
                 mb={"2"}
                 pr="4.5rem"
                 type={"text"}

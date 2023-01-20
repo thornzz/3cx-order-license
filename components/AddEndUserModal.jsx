@@ -6,6 +6,19 @@ import { SlUser } from "react-icons/sl";
 import { toast } from "react-toastify";
 import { collection, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { TbLicense } from "react-icons/tb";
+import { BiPaste } from "react-icons/bi";
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Input,
+  InputGroup,
+  InputRightElement,
+  InputLeftElement,
+  Icon,
+} from "@chakra-ui/react";
 
 function AddEndUserModal(props) {
   const [companyName, setCompanyName] = useState("");
@@ -70,6 +83,11 @@ function AddEndUserModal(props) {
     }
     closeModal();
   };
+  const pasteClipboard = async () => {
+    const clipboardText = await navigator.clipboard.readText();
+    setLicenseKey(clipboardText);
+    handleLicenseKeyChange({ target: { value: clipboardText } });
+  };
 
   const getEndUserData = async () => {
     try {
@@ -123,22 +141,24 @@ function AddEndUserModal(props) {
                 End User Bilgi Girişi
               </h1>
               <form>
-                <div className="flex flex-col mb-4">
-                  <label
-                    className="mb-2 font-bold text-lg text-sky-900"
-                    htmlFor="license_key"
-                  >
-                    Lisans Anahtarı
-                  </label>
-                  <input
-                    className="border py-2 px-3 text-grey-800"
-                    type="text"
-                    name="license_key"
-                    id="license_key"
-                    value={formattedLicenseKey}
-                    onChange={handleLicenseKeyChange}
-                  />
-                </div>
+              <InputGroup size="lg" borderColor={"black"}>
+              <Input
+             
+                mb={"2"}
+                pr="4.5rem"
+                type={"text"}
+                placeholder="Lisans anahtarını giriniz..."
+                value={formattedLicenseKey}
+                onChange={handleLicenseKeyChange}
+                onPaste={pasteClipboard}
+              />
+              <InputLeftElement width="2.5rem" mr={"2"}>
+                <Icon boxSize="6" as={TbLicense} />
+              </InputLeftElement>
+              <InputRightElement width="2.5rem" onClick={pasteClipboard}>
+                <Icon boxSize="6" as={BiPaste} />
+              </InputRightElement>
+            </InputGroup>
                 <div className="flex flex-col mb-4">
                   <label
                     className="mb-2 font-bold text-lg text-sky-900"
