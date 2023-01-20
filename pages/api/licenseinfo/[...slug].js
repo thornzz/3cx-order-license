@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
 export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
   try {
-    const jsonPostData = {
+    let jsonPostData = {
       PO: "MYPO123",
       SalesCode: "",
       Notes: "",
@@ -40,15 +40,54 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       ],
     };
 
-    const data = await PostData(
+    let data = await PostData(
       "https://api.3cx.com/public/v1/order/?readonly=true",
       JSON.stringify(jsonPostData)
     );
 
-    if (data?.status) {
+    if (data?.status && data?.ErrorCode === "UpgradeIsNotAvailable") {
+      jsonPostData = {
+        PO: "MYPO123",
+        SalesCode: "",
+        Notes: "",
+        Lines: [
+          {
+            Type: "Maintenance",
+            UpgradeKey: licensekey,
+            ResellerId: null,
+            AddHosting: false,
+          },
+        ],
+      };
+      data = await PostData(
+        "https://api.3cx.com/public/v1/order/?readonly=true",
+        JSON.stringify(jsonPostData)
+      );
+    }
+    else if (data?.status && data?.ErrorCode === "KeyVersionIsDeprecated") {
+      jsonPostData = {
+        PO: "MYPO123",
+        SalesCode: "",
+        Notes: "",
+        Lines: [
+          {
+            Type: "RenewAnnual",
+            UpgradeKey: licensekey,
+            ResellerId: null,
+            AddHosting: false,
+          },
+        ],
+      };
+      data = await PostData(
+        "https://api.3cx.com/public/v1/order/?readonly=true",
+        JSON.stringify(jsonPostData)
+      );
+    }
+    else if (data?.status && data?.ErrorCode !== "UpgradeIsNotAvailable") {
+    
       return data;
     }
-
+    
     const desiredProperties = [
       "LicenseKey",
       "SimultaneousCalls",
@@ -61,7 +100,6 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
 
     const desiredObject = {};
     desiredProperties.forEach((property) => {
-      
       desiredObject[property] = data.Items[0].LicenseKeys[0][property];
     });
 

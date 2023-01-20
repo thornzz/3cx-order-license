@@ -43,6 +43,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { getPartners } from "./api/getpartners";
+import axios from "axios";
 
 const Cart = (props) => {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -274,7 +275,15 @@ const Cart = (props) => {
       );
       // console.log('tcxresponses 181',tcxResponses)
       //addRandomLicenseKey(tcxResponses);
+      mergeJSONObjects(cartDetailState, tcxResponses);
+      
+      //await axios.post('/api/sendmail',tcxResponses)
 
+      await addDoc(collection(db, "licenses"), { tcxResponses });
+      //refresh firestore data
+      // const firestoreData = await fetch('/api/getfirestoredata');
+      // const data = await firestoreData.json();
+      // setLicenseState(data)
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
         autoClose: 2000,
@@ -286,15 +295,9 @@ const Cart = (props) => {
         theme: "dark",
       });
 
-      mergeJSONObjects(cartDetailState, tcxResponses);
-
-      await addDoc(collection(db, "licenses"), { tcxResponses });
-      //refresh firestore data
-      // const firestoreData = await fetch('/api/getfirestoredata');
-      // const data = await firestoreData.json();
-      // setLicenseState(data)
       setCartState([]);
       setDetailCartState([]);
+     
     } catch (error) {
       console.error(error);
     }
@@ -450,11 +453,9 @@ const Cart = (props) => {
                   >
                     <ButtonGroup size="sm">
                       <Button colorScheme="green" onClick={CompleteOrder}>
-                        {" "}
                         Onayla
                       </Button>
                       <Button colorScheme="red" onClick={onToggle}>
-                        {" "}
                         İptal
                       </Button>
                     </ButtonGroup>
