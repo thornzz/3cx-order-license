@@ -73,7 +73,7 @@ const Dashboard = () => {
 
       <Navbar />
       <HStack>
-        <ButtonGroup>
+        <ButtonGroup ml={2}>
           <Button
             onClick={showLicenseCheckModal}
             className="bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2"

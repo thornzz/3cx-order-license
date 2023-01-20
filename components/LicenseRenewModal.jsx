@@ -1,31 +1,36 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Modal } from "flowbite-react";
 import { GrLicense } from "react-icons/gr";
-import { TbLicense, TbSquareMinus, TbSquarePlus } from "react-icons/tb";
+import { BiPaste } from "react-icons/bi";
 import PostData from "../utility/HttpPostUtility";
 import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { cart, cartDetail } from "../atoms/shoppingCartAtom";
 import { useRouter } from "next/router";
 import { getLicenceKeyInfo } from "../pages/api/licenseinfo/[...slug]";
+import { TbLicense } from "react-icons/tb";
 import {
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-} from '@chakra-ui/react'
+  Input,
+  InputGroup,
+  InputRightElement,
+  InputLeftElement,
+  Icon,
+} from "@chakra-ui/react";
 const LicenseRenewModal = (props) => {
- 
   const [showLicenseCard, setShowLicenseCard] = useState(false);
   const [years, setYears] = useState(1);
   const [licenseKey, setLicenseKey] = useState("");
   const [licenseKeyData, setLicenseKeyData] = useState("");
-  const [licenseKeyDetail,setLicenseKeyDetail] = useState(null);
+  const [licenseKeyDetail, setLicenseKeyDetail] = useState(null);
   const [formattedLicenseKey, setFormattedLicenseKey] = useState("");
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [preFormattedRenewalKey, setpreFormattedRenewalKey] = useState(null);
-  const [error,setError] = useState(null)
+  const [error, setError] = useState(null);
   const [
     preFormattedRenewalModalIsActive,
     setPreFormattedRenewalModalIsActive,
@@ -47,19 +52,22 @@ const LicenseRenewModal = (props) => {
       preFormattedRenewalKey?.length === 19 &&
       preFormattedRenewalModalIsActive
     ) {
-     
-     
       setFormattedLicenseKey(preFormattedRenewalKey);
       const fetchData = async () => {
-        const response = await getRenewLicenseData(preFormattedRenewalKey, years);
-        const json = await response.json()
+        const response = await getRenewLicenseData(
+          preFormattedRenewalKey,
+          years
+        );
+        const json = await response.json();
         if (json?.status === 400) {
-         setError(json.detail)
+          setError(json.detail);
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);
         } else {
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${preFormattedRenewalKey}/${json.IsPerpetual}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(
+            `/api/licenseinfo/${preFormattedRenewalKey}/${json.IsPerpetual}`
+          ).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         }
@@ -75,26 +83,26 @@ const LicenseRenewModal = (props) => {
   }, [licenseKey]);
   useEffect(() => {
     if (licenseKey.length === 16) {
-      
       const fetchData = async () => {
         const response = await getRenewLicenseData(formattedLicenseKey, years);
-        const json = await response.json()
+        const json = await response.json();
         if (json?.status) {
-         setError(json.detail)
+          setError(json.detail);
           setShowLicenseCard(false);
           setLicenseKeyData(undefined);
         } else {
           setLicenseKeyData(json);
-          const licenseKeyInfo = await fetch(`/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`).then((res) => res.json());
+          const licenseKeyInfo = await fetch(
+            `/api/licenseinfo/${formattedLicenseKey}/${json.IsPerpetual}`
+          ).then((res) => res.json());
           setLicenseKeyDetail(licenseKeyInfo);
           setShowLicenseCard(true);
         }
       };
       fetchData();
-      
     } else {
       setShowLicenseCard(false);
-      setError(null)
+      setError(null);
       setLicenseKeyData(undefined);
     }
   }, [formattedLicenseKey]);
@@ -106,8 +114,6 @@ const LicenseRenewModal = (props) => {
       Quantity: years,
       ResellerId: null,
     };
-
-  
 
     setCartState([...cartState, renewAnnualorPerpetual]);
     const res = await PostJsonData(renewAnnualorPerpetual);
@@ -141,7 +147,7 @@ const LicenseRenewModal = (props) => {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-     
+
       return responseData;
     } catch (error) {
       console.error(error);
@@ -152,7 +158,12 @@ const LicenseRenewModal = (props) => {
     const response = await fetch(`/api/renew/${lic}/${year}`);
     return response;
   };
-  
+
+  const pasteClipboard = async () => {
+    const clipboardText = await navigator.clipboard.readText();
+    setLicenseKey(clipboardText);
+    handleLicenseKeyChange({ target: { value: clipboardText } });
+  };
   const handleLicenseKeyChange = async (event) => {
     let value = event.target.value;
     // Only allow digits, letters, and hyphens
@@ -163,25 +174,26 @@ const LicenseRenewModal = (props) => {
       // Make the value uppercase
       value = value.toUpperCase();
       setLicenseKey(value);
-      if(error){
-        setError(null)
+      if (error) {
+        setError(null);
       }
     }
   };
 
   const closeModal = () => {
-    setError(null)
+    setError(null);
     setLicenseKey("");
     setLicenseKeyData(undefined);
     setLicenseKeyDetail(null);
     setPreFormattedRenewalModalIsActive(false);
     setpreFormattedRenewalKey("");
-    setFormattedLicenseKey("")
-    if(props.renewalLicenseKey.setLicenseKey!==undefined) props?.renewalLicenseKey?.setLicenseKey("")
+    setFormattedLicenseKey("");
+    if (props.renewalLicenseKey.setLicenseKey !== undefined)
+      props?.renewalLicenseKey?.setLicenseKey("");
 
     props.closeModal();
   };
-  
+
   return (
     <Fragment>
       <Modal
@@ -199,7 +211,7 @@ const LicenseRenewModal = (props) => {
             >
               Lisans Yenileme
             </label>
-            <label className="text-md font-medium">Lisans Anahtarı</label>
+            {/* <label className="text-md font-medium">Lisans Anahtarı</label>
 
             <label className="relative block mb-2">
               <span className="absolute inset-y-0 left-0 flex items-center pl-2">
@@ -213,14 +225,33 @@ const LicenseRenewModal = (props) => {
                 value={formattedLicenseKey}
                 onChange={handleLicenseKeyChange}
               />
-            </label>
-            {error && (<Alert status='error' variant="left-accent">
-  <AlertIcon />
-  <AlertDescription fontSize='xs'>{error}</AlertDescription>
-</Alert>)}
+            </label> */}
+            <InputGroup size="md" mt={"2"}>
+              <Input
+                mb={"2"}
+                pr="4.5rem"
+                type={"text"}
+                placeholder="Lisans anahtarını giriniz..."
+                value={formattedLicenseKey}
+                onChange={handleLicenseKeyChange}
+                onPaste={pasteClipboard}
+              />
+              <InputLeftElement width="2.5rem" mr={"2"}>
+                <Icon boxSize="6" as={TbLicense} />
+              </InputLeftElement>
+              <InputRightElement width="2.5rem" onClick={pasteClipboard}>
+                <Icon boxSize="6" as={BiPaste} />
+              </InputRightElement>
+            </InputGroup>
+            {error && (
+              <Alert status="error" variant="left-accent">
+                <AlertIcon />
+                <AlertDescription fontSize="xs">{error}</AlertDescription>
+              </Alert>
+            )}
             {showLicenseCard && (
               <Fragment>
-                 <label
+                <label
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="select1"
                 >
@@ -234,7 +265,7 @@ const LicenseRenewModal = (props) => {
                     </span>
                   </div>
                 </div>
-             
+
                 <div className="flex flex-row-reverse mb-2">
                   <button
                     type="button"

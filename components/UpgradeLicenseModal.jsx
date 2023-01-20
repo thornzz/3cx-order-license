@@ -3,16 +3,21 @@ import { useRecoilState } from "recoil";
 import { cart, cartDetail } from "../atoms/shoppingCartAtom";
 import PostData from "../utility/HttpPostUtility";
 import { Modal } from "flowbite-react";
-import { GrLicense } from "react-icons/gr";
-import { TbLicense } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import { TbLicense } from "react-icons/tb";
+import { BiPaste } from "react-icons/bi";
 import {
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-} from '@chakra-ui/react'
+  Input,
+  InputGroup,
+  InputRightElement,
+  InputLeftElement,
+  Icon,
+} from "@chakra-ui/react";
 
 function UpgradeLicenseModal(props) {
   const [showLicenseCard, setShowLicenseCard] = useState(true);
@@ -164,6 +169,12 @@ function UpgradeLicenseModal(props) {
 
     return response;
   };
+  const pasteClipboard = async () => {
+    const clipboardText = await navigator.clipboard.readText();
+    setLicenseKey(clipboardText);
+    handleLicenseKeyChange({ target: { value: clipboardText } });
+  };
+
   const handleLicenseKeyChange = async (event) => {
     let value = event.target.value;
     // Only allow digits, letters, and hyphens
@@ -207,7 +218,7 @@ function UpgradeLicenseModal(props) {
             >
               Lisans Yükseltme
             </label>
-            <label className="text-md font-medium">Lisans Anahtarı</label>
+            {/* <label className="text-md font-medium">Lisans Anahtarı</label>
 
             <label className="relative block mb-2">
               <span className="absolute inset-y-0 left-0 flex items-center pl-2">
@@ -221,7 +232,25 @@ function UpgradeLicenseModal(props) {
                 value={formattedLicenseKey}
                 onChange={handleLicenseKeyChange}
               />
-            </label>
+            </label> */}
+                  <InputGroup size="md" mt={"2"}>
+              <Input
+                mb={"2"}
+                pr="4.5rem"
+                type={"text"}
+                placeholder="Lisans anahtarını giriniz..."
+                value={formattedLicenseKey}
+                onChange={handleLicenseKeyChange}
+                onPaste={pasteClipboard}
+              />
+              <InputLeftElement width="2.5rem" mr={"2"}>
+                <Icon boxSize="6" as={TbLicense} />
+              </InputLeftElement>
+              <InputRightElement width="2.5rem" onClick={pasteClipboard}>
+                <Icon boxSize="6" as={BiPaste} />
+              </InputRightElement>
+            </InputGroup>
+
             {error && (
               <Alert status="error" variant="left-accent">
                 <AlertIcon />

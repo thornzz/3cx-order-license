@@ -1,13 +1,19 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Modal } from "flowbite-react";
 import { GrLicense } from "react-icons/gr";
+import { BiPaste } from "react-icons/bi";
 import { TbLicense } from "react-icons/tb";
 import {
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-} from '@chakra-ui/react'
+  Input,
+  InputGroup,
+  InputRightElement,
+  InputLeftElement,
+  Icon,
+} from "@chakra-ui/react";
 const LicenseCheckModal = (props) => {
   const [showLicenseCard, setShowLicenseCard] = useState(false);
   const [licenseKey, setLicenseKey] = useState("");
@@ -23,15 +29,14 @@ const LicenseCheckModal = (props) => {
   }, [licenseKey]);
   useEffect(() => {
     if (licenseKey.length === 16) {
-     
       const fetchData = async () => {
         const response = await fetch(
           `/api/licenseinfo/${formattedLicenseKey}/${false}/${true}`
         );
-        const json = await response.json()
+        const json = await response.json();
 
         if (json.status) {
-          setError(json.detail)
+          setError(json.detail);
           setShowLicenseCard(false);
         } else {
           setLicenseKeyDetail(json);
@@ -40,7 +45,6 @@ const LicenseCheckModal = (props) => {
       };
       fetchData();
     } else {
-    
       setShowLicenseCard(false);
     }
   }, [formattedLicenseKey]);
@@ -55,8 +59,8 @@ const LicenseCheckModal = (props) => {
       // Make the value uppercase
       value = value.toUpperCase();
       setLicenseKey(value);
-      if(error){
-        setError(null)
+      if (error) {
+        setError(null);
       }
     }
   };
@@ -77,9 +81,15 @@ const LicenseCheckModal = (props) => {
     props.showRenewModal();
   };
 
+  const pasteClipboard = async () => {
+    const clipboardText = await navigator.clipboard.readText();
+    setLicenseKey(clipboardText);
+    handleLicenseKeyChange({ target: { value: clipboardText } });
+  };
+  
   const closeModal = () => {
     setLicenseKey("");
-    setError(null)
+    setError(null);
     setLicenseKeyDetail(null);
     props.closeModal();
   };
@@ -100,9 +110,9 @@ const LicenseCheckModal = (props) => {
             >
               Lisans Sorgulama
             </label>
-            <label className="text-md font-medium">Lisans Anahtarı</label>
+            {/* <label className="text-md font-medium">Lisans Anahtarı</label> */}
 
-            <label className="relative block mb-2">
+            {/* <label className="relative block mb-2">
               <span className="absolute inset-y-0 left-0 flex items-center pl-2">
                 <GrLicense className="h-5 w-5" />
               </span>
@@ -114,11 +124,30 @@ const LicenseCheckModal = (props) => {
                 value={formattedLicenseKey}
                 onChange={handleLicenseKeyChange}
               />
-            </label>
-            {error && (<Alert status='error' variant="left-accent">
-  <AlertIcon />
-  <AlertDescription fontSize='xs'>{error}</AlertDescription>
-</Alert>)}
+            </label> */}
+            <InputGroup size="md" mt={"2"}>
+              <Input
+                mb={"2"}
+                pr="4.5rem"
+                type={"text"}
+                placeholder="Lisans anahtarını giriniz..."
+                value={formattedLicenseKey}
+                onChange={handleLicenseKeyChange}
+                onPaste={pasteClipboard}
+              />
+              <InputLeftElement width="2.5rem" mr={"2"}>
+                <Icon boxSize="6" as={TbLicense} />
+              </InputLeftElement>
+              <InputRightElement width="2.5rem" onClick={pasteClipboard}>
+                <Icon boxSize="6" as={BiPaste} />
+              </InputRightElement>
+            </InputGroup>
+            {error && (
+              <Alert status="error" variant="left-accent">
+                <AlertIcon />
+                <AlertDescription fontSize="xs">{error}</AlertDescription>
+              </Alert>
+            )}
             {showLicenseCard && (
               <Fragment>
                 <div className="container mx-auto mb-3  border-2 border-gray-200 shadow-lg">
