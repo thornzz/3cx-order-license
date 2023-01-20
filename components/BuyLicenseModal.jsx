@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState,useRef } from "react";
 import { Modal } from "flowbite-react";
 import Select from "react-select";
 import PostData from "../utility/HttpPostUtility";
@@ -20,6 +20,8 @@ const BuyLicenseModal = (props) => {
   const [getPartners, setPartners] = useRecoilState(partners);
   const [options, setOptions] = useState([]);
   const [edition, setEdition] = useState(editionOption[0].name);
+  const selectInputRef = useRef();
+
   const router = useRouter();
   useEffect(() => {
     const getPartners = async () => {
@@ -61,6 +63,12 @@ const BuyLicenseModal = (props) => {
       .split("\n")[0]
       .trim();
     setDetailCartState([...cartDetailState, res]);
+    selectInputRef.current.clearValue();
+    setQuantity(1);
+    setPartnerId(null);
+    setAdditionalYear(0);
+    setSimCall(8);
+    setEdition("Professional");
 
     toast.info("Ürün sepete eklendi.", {
       position: "top-center",
@@ -122,6 +130,7 @@ const BuyLicenseModal = (props) => {
             <div className="relative rounded-md shadow-sm mb-2">
               <Select
                 options={options}
+                ref={selectInputRef}
                 isLoading={false}
                 isClearable={true}
                 noOptionsMessage={() => "Uygun kayıt bulunamadı!"}

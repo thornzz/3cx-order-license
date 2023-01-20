@@ -1,10 +1,11 @@
 import DataTable from "react-data-table-component";
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { tableStyle } from "./styles/tableStyle";
 import { useRecoilState } from "recoil";
 import { licenses } from "../atoms/fireStoreDataAtom";
 import { RotatingSquare } from "react-loader-spinner";
 import { AiOutlineEye } from "react-icons/ai";
+import { RxClipboardCopy } from "react-icons/rx";
 import EndUserModal from "./EndUserModal";
 import { TbLicense } from "react-icons/tb";
 import { FaEdit } from "react-icons/fa";
@@ -12,6 +13,7 @@ import { HiOutlineKey } from "react-icons/hi";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
+import { Icon,Text,useToast } from "@chakra-ui/react";
 import {
   collection,
   doc,
@@ -25,7 +27,6 @@ import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
 
 const LicensesTable = () => {
-  
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +39,8 @@ const LicensesTable = () => {
   const [openLicenseUpgradeModal, setlicenseUpgradeModal] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
-  
+  const toast = useToast()
+
   const updateInvoiceIdInItemObject = async (
     invoiceId,
     documentId,
@@ -127,11 +129,10 @@ const LicensesTable = () => {
       sortable: true,
       selector: (row, index) => {
         if (selectedRow === index) {
-          
           // Render an input field when the row is selected
           return (
             <input
-            autoFocus
+              autoFocus
               className="w-[100px] p-1 bg-blue-500 text-white border-white border-2"
               type="text"
               onChange={(event) => {
@@ -148,7 +149,7 @@ const LicensesTable = () => {
                 // Save the updated value to the database and exit edit mode when the input field loses focus
                 setSelectedRow(null);
               }}
-              onKeyDown={async event => {
+              onKeyDown={async (event) => {
                 if (event.key === "Enter") {
                   await updateInvoiceIdInItemObject(
                     invoiceId,
@@ -183,7 +184,6 @@ const LicensesTable = () => {
       cell: (row) => (
         <button
           onClick={async () => {
-          
             const endUser = await getEndUserFromFireStore(row.LicenseKey);
             if (endUser) {
               setendUserData(endUser);
@@ -228,7 +228,24 @@ const LicensesTable = () => {
     },
     {
       name: "Lisans Anahtarı",
-      selector: (row) => row.LicenseKey,
+      cell: (row) => { 
+        return(
+        <>
+        <Icon as={RxClipboardCopy} boxSize="6" color={"red.500"}
+        onClick={() => {
+          navigator.clipboard.writeText(row.LicenseKey);
+          toast({
+            title: 'Anahtar kopyalandı',
+            status: 'info',
+            duration: 1000,
+            isClosable: true,
+          })
+        }}
+        />
+        <Text ml={2}>{row.LicenseKey}</Text>
+        </>)
+        
+      },
       grow: 2,
       reorder: true,
     },
@@ -340,7 +357,6 @@ const LicensesTable = () => {
     });
   };
 
-
   useEffect(() => {
     (async () => {
       try {
@@ -354,9 +370,6 @@ const LicensesTable = () => {
       }
     })();
   }, []);
-
-  
-  
 
   return (
     <div>
