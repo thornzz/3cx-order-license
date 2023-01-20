@@ -21,7 +21,7 @@ import { db } from "../firebase";
 import { FaBook } from "react-icons/fa";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import { Progress } from "flowbite-react";
-import { Icon,Text,useToast } from "@chakra-ui/react";
+import { Icon, Text, useToast, Badge } from "@chakra-ui/react";
 
 const ExpiringKeys = (props) => {
   const [searchText, setSearchText] = useState("");
@@ -33,7 +33,7 @@ const ExpiringKeys = (props) => {
   const [enduserData, setendUserData] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(null);
   const [customerInfoAll, setCustomerInfoAll] = useState(null);
-  const toast = useToast()
+  const toast = useToast();
 
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
@@ -47,8 +47,6 @@ const ExpiringKeys = (props) => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
-
-
 
   // eski sürüm için
   // const getEndUserFromFireStore = async (licenseKey) => {
@@ -144,6 +142,9 @@ const ExpiringKeys = (props) => {
     }
     return ((count / total) * 100).toFixed(2);
   }
+  const sortRemainingDay = (rowA, rowB) => {
+   return rowA.remainingDay - rowB.remainingDay
+  };
 
   const columns = [
     {
@@ -173,21 +174,27 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "Lisans Anahtarı",
-      cell: (row) => { return(
-        <>
-        <Icon as={RxClipboardCopy} boxSize="6" color={"red.500"}
-        onClick={() => {
-          navigator.clipboard.writeText(row.LicenseKey);
-          toast({
-            title: 'Anahtar kopyalandı',
-            status: 'info',
-            duration: 1000,
-            isClosable: true,
-          })
-        }}
-        />
-        <Text ml={2}>{row.LicenseKey}</Text>
-        </>)},
+      cell: (row) => {
+        return (
+          <>
+            <Icon
+              as={RxClipboardCopy}
+              boxSize="6"
+              color={"red.500"}
+              onClick={() => {
+                navigator.clipboard.writeText(row.LicenseKey);
+                toast({
+                  title: "Anahtar kopyalandı",
+                  status: "info",
+                  duration: 1000,
+                  isClosable: true,
+                });
+              }}
+            />
+            <Text ml={2}>{row.LicenseKey}</Text>
+          </>
+        );
+      },
       filter: true,
       reorder: true,
       grow: 1.3,
@@ -264,41 +271,76 @@ const ExpiringKeys = (props) => {
       width: "100px",
       hide: "md",
     },
+    // {
+    //   name: "Kalan (Gün)",
+    //   selector: (row) => row.remainingDay,
+    //   conditionalCellStyles: [
+    //     {
+    //       when: (row) => row.remainingDay <= 31,
+    //       style: {
+    //         backgroundColor: "red",
+    //         color: "white",
+    //         "&:hover": {
+    //           cursor: "pointer",
+    //         },
+    //       },
+    //     },
+    //     {
+    //       when: (row) => row.remainingDay > 31,
+    //       style: {
+    //         backgroundColor: "orange",
+    //         color: "white",
+    //         "&:hover": {
+    //           cursor: "pointer",
+    //         },
+    //       },
+    //     },
+    //     {
+    //       when: (row) => row.remainingDay > 60,
+    //       style: {
+    //         backgroundColor: "green",
+    //         color: "white",
+    //         "&:hover": {
+    //           cursor: "pointer",
+    //         },
+    //       },
+    //     },
+    //   ],
+    //   reorder: true,
+    //   sortable: true,
+    //   center: true,
+    //   width: "150px",
+    // },
     {
       name: "Kalan (Gün)",
-      selector: (row) => row.remainingDay,
-      conditionalCellStyles: [
-        {
-          when: (row) => row.remainingDay <= 31,
-          style: {
-            backgroundColor: "red",
-            color: "white",
-            "&:hover": {
-              cursor: "pointer",
-            },
-          },
-        },
-        {
-          when: (row) => row.remainingDay > 31,
-          style: {
-            backgroundColor: "orange",
-            color: "white",
-            "&:hover": {
-              cursor: "pointer",
-            },
-          },
-        },
-        {
-          when: (row) => row.remainingDay > 60,
-          style: {
-            backgroundColor: "green",
-            color: "white",
-            "&:hover": {
-              cursor: "pointer",
-            },
-          },
-        },
-      ],
+      selector: (row) => {
+        return row.remainingDay <= 31 ? (
+          <Badge colorScheme="red" w={90} textAlign="center" fontSize={"1em"}>
+            {row.remainingDay}
+          </Badge>
+        ) : row.remainingDay <= 60 ? (
+          <Badge
+            w={90}
+            textAlign={"center"}
+            fontSize={"1.1em"}
+            round
+            colorScheme="orange"
+          >
+            {row.remainingDay}
+          </Badge>
+        ) : (
+          <Badge
+            w={90}
+            textAlign={"center"}
+            fontSize={"1.1em"}
+            round
+            colorScheme="green"
+          >
+            {row.remainingDay}
+          </Badge>
+        );
+      },
+      sortFunction:sortRemainingDay,
       reorder: true,
       sortable: true,
       center: true,
@@ -357,7 +399,7 @@ const ExpiringKeys = (props) => {
 
   const filteredData = props.expiringKeys.filter((item) =>
     // [item.LicenseKey, item?.endUser?.companyName]
-      [item.LicenseKey]
+    [item.LicenseKey]
       .map((val) => val?.toLowerCase())
       .some((val) => val?.includes(searchText.toLowerCase()))
   );
@@ -548,11 +590,10 @@ export async function getServerSideProps(context) {
         (item) => item.licenseKey === keyResponse.LicenseKey
       );
       if (item) keyResponse.companyName = item.companyName;
-      
+
       return keyResponse;
     });
   };
-
 
   await getFirestoreDataAndMerge();
 
