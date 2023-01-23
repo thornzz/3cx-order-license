@@ -594,8 +594,16 @@ export async function getServerSideProps(context) {
       return keyResponse;
     });
   };
+ 
 
   await getFirestoreDataAndMerge();
+
+  expiringKeysResponse.sort(function(a, b){
+    if (isNaN(a.remainingDay) || isNaN(b.remainingDay)) {
+      return 0;
+    }
+    return Number(a.remainingDay) - Number(b.remainingDay);
+});
 
   const getPartnersResponse = await getPartners();
   const getPartnersResponseFilter = getPartnersResponse.map((partner) => ({
