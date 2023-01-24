@@ -22,6 +22,13 @@ const extractData = async (arr) => {
             }
         }
     }
+    
+    let moment = require('moment');
+
+    result.sort(function(a, b) {
+        return moment(b.DateTime, "DD.MM.YYYY").unix() - moment(a.DateTime, "DD.MM.YYYY").unix();
+    });
+   
     return result;
 }
 export default extractData

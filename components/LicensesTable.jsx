@@ -30,7 +30,7 @@ const LicensesTable = () => {
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
   const [openEndUserModal, setOpenEndUserModal] = useState(false);
   const [enduserData, setendUserData] = useState(null);
@@ -87,16 +87,18 @@ const LicensesTable = () => {
     setlicenseRenewModal(!openLicenseRenewModal);
   };
   const sortDateTime = (rowA, rowB) => {
-    // Split the date strings into an array of [day, month, year]
-    const a = rowA.DateTime.toLowerCase();
-    const b = rowB.DateTime.toLowerCase();
-    const date1 = a.split(".");
-    const date2 = b.split(".");
-    // Create new Date object with the year, month, day
-    const newDate1 = new Date(date1[2], date1[1] - 1, date1[0]);
-    const newDate2 = new Date(date2[2], date2[1] - 1, date2[0]);
-    // Compare the two dates
-    return newDate1 - newDate2;
+    let moment = require('moment');
+    return moment(rowA.DateTime, "DD.MM.YYYY").unix() - moment(rowB.DateTime, "DD.MM.YYYY").unix();
+    // // Split the date strings into an array of [day, month, year]
+    // const a = rowA.DateTime.toLowerCase();
+    // const b = rowB.DateTime.toLowerCase();
+    // const date1 = a.split(".");
+    // const date2 = b.split(".");
+    // // Create new Date object with the year, month, day
+    // const newDate1 = new Date(date1[2], date1[1] - 1, date1[0]);
+    // const newDate2 = new Date(date2[2], date2[1] - 1, date2[0]);
+    // // Compare the two dates
+    // return newDate1 - newDate2;
   };
 
   const columns = [
@@ -433,13 +435,15 @@ const LicensesTable = () => {
             rowsPerPageText: "Kayıt sayısı :",
             rangeSeparatorText: "/",
             noRowsPerPage: false,
+            noRowsPerPage: false,
             selectAllRowsItem: false,
             selectAllRowsItemText: "All",
           }}
           onChangeRowsPerPage={setRowsPerPage}
           onChangePage={setCurrentPage}
-          paginationServer
+          paginationPerPage={rowsPerPage}
           paginationTotalRows={filteredData.length}
+          paginationServer
           paginationRowsPerPageOptions={[50, 100, 250, 500]}
         />
       )}
