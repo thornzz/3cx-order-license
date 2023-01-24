@@ -277,13 +277,10 @@ const Cart = (props) => {
       //addRandomLicenseKey(tcxResponses);
       mergeJSONObjects(cartDetailState, tcxResponses);
       
-      //await axios.post('/api/sendmail',tcxResponses)
-
-      await addDoc(collection(db, "licenses"), { tcxResponses });
-      //refresh firestore data
-      // const firestoreData = await fetch('/api/getfirestoredata');
-      // const data = await firestoreData.json();
-      // setLicenseState(data)
+      await axios.post('/api/sendmail',tcxResponses)
+   
+       await addDoc(collection(db, "licenses"), { tcxResponses });
+    
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
         autoClose: 2000,
