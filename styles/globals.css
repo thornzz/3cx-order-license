@@ -3,5 +3,13 @@
 @tailwind utilities;
 
 .dataTables_wrapper {
-    @apply text-white;
+  @apply text-white;
+}
+
+.login {
+  background: url("/background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
