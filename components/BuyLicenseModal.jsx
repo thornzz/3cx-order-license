@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState,useRef } from "react";
+import React, { Fragment, useEffect, useState, useRef } from "react";
 import { Modal } from "flowbite-react";
 import Select from "react-select";
 import PostData from "../utility/HttpPostUtility";
@@ -7,12 +7,15 @@ import { cart, cartDetail, partners } from "../atoms/shoppingCartAtom";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { RadioGroup } from "@headlessui/react";
-
+import CustomSelect from "./Helpers/CustomSelect";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import { Alert, AlertIcon } from "@chakra-ui/react";
 const editionOption = [{ name: "Professional" }, { name: "Enterprise" }];
 
 const BuyLicenseModal = (props) => {
   const [quantity, setQuantity] = useState(1);
-  const [partnerId, setPartnerId] = useState("");
+  const [isForwardCart, setForwardCart] = useState(false);
   const [additionalYear, setAdditionalYear] = useState(0);
   const [simCall, setSimCall] = useState(8);
   const [cartState, setCartState] = useRecoilState(cart);
@@ -44,6 +47,26 @@ const BuyLicenseModal = (props) => {
     return classes.filter(Boolean).join(" ");
   }
 
+  const closeModal = () => {
+    props.closeModal();
+  };
+
+  const validationSchema = yup.object().shape({
+    partners: yup.string().required("Bayi zorunlu alandır!"),
+  });
+
+  const formik = useFormik({
+    validationSchema,
+    initialValues: { partners: undefined },
+    onSubmit: (values) => {
+      if (formik.isValid) {
+        if (isForwardCart) router.push("/cart");
+        addLine();
+        formik.resetForm();
+        setForwardCart(false);
+      }
+    },
+  });
   async function addLine() {
     const newLine = {
       Type: "NewLicense",
@@ -51,7 +74,7 @@ const BuyLicenseModal = (props) => {
       SimultaneousCalls: parseInt(simCall, 10),
       Quantity: parseInt(quantity, 10),
       AdditionalInsuranceYears: parseInt(additionalYear, 10),
-      ResellerId: partnerId,
+      ResellerId: formik.values.partners,
       AddHosting: false,
     };
 
@@ -65,7 +88,6 @@ const BuyLicenseModal = (props) => {
     setDetailCartState([...cartDetailState, res]);
     selectInputRef.current.clearValue();
     setQuantity(1);
-    setPartnerId(null);
     setAdditionalYear(0);
     setSimCall(8);
     setEdition("Professional");
@@ -96,15 +118,11 @@ const BuyLicenseModal = (props) => {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-      
+
       return responseData;
     } catch (error) {
       console.error(error);
     }
-  };
-
-  const closeModal = () => {
-    props.closeModal();
   };
 
   return (
@@ -120,27 +138,34 @@ const BuyLicenseModal = (props) => {
           <h1 className="grid border border-b-3 border-b-blue-600 justify-center pb-2 pt-2 shadow-2xl">
             YENİ LİSANS
           </h1>
-          <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+
+          <form
+            onSubmit={formik.handleSubmit}
+            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+          >
             <label
               className="block text-gray-700 text-sm font-bold mb-2 mt-2"
               htmlFor="select3"
             >
               Bayi Seçimi
             </label>
-            <div className="relative rounded-md shadow-sm mb-2">
-              <Select
-                options={options}
-                ref={selectInputRef}
-                isLoading={false}
-                isClearable={true}
-                noOptionsMessage={() => "Uygun kayıt bulunamadı!"}
-                placeholder="Bayi seçimi yapınız"
-                onChange={(data, opt) => {
-                  setPartnerId(data?.value);
-                }}
-              ></Select>
-            </div>
-
+            <CustomSelect
+              name="partners"
+              options={options}
+              ref={selectInputRef}
+              onBlur={() => {
+                formik.handleBlur({ target: { name: "partners" } });
+              }}
+              onChange={(option) => {
+                formik.setFieldValue("partners", option?.value);
+              }}
+            />
+            {formik.errors.partners && formik.touched.partners ? (
+              <Alert status="error">
+                <AlertIcon />
+                {formik.errors.partners}
+              </Alert>
+            ) : null}
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
@@ -149,8 +174,11 @@ const BuyLicenseModal = (props) => {
                 Lisans Tipi
               </label>
 
-              <RadioGroup value={edition} onChange={setEdition} className="mt-2">
-               
+              <RadioGroup
+                value={edition}
+                onChange={setEdition}
+                className="mt-2"
+              >
                 <div className="grid grid-cols-3 gap-1 sm:grid-cols-6 space-x-20">
                   {editionOption.map((option) => (
                     <RadioGroup.Option
@@ -171,22 +199,6 @@ const BuyLicenseModal = (props) => {
                   ))}
                 </div>
               </RadioGroup>
-
-              {/* <div className="relative rounded-md shadow-sm">
-                                <select
-                                    id="select1"
-                                    className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
-                                    value={licenseType}
-                                    onChange={(event) => setLicenseType(event.target.value)}
-                                >
-                                    <option value="">Lisans Tipini Seçiniz</option>
-                                    <option value="Professional">Professional</option>
-                                    <option value="Enterprise">Enterprise</option>
-                                </select>
-                                <div
-                                    className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                </div>
-                            </div> */}
 
               <label
                 className="block text-gray-700 text-sm font-bold mb-2 mt-2"
@@ -248,39 +260,24 @@ const BuyLicenseModal = (props) => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   value={additionalYear}
                   onChange={(event) => setAdditionalYear(event.target.value)}
-                  min={1}
-                  max={50}
+                  min={0}
+                  max={5}
                 />
               </div>
-
-              {/* <div className="mb-4">
-                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="toggle">
-                                    Perpetual Lisans mı?
-                                </label>
-                                <div className="relative rounded-md shadow-sm">
-                                    <input
-                                        id="toggle"
-                                        type="checkbox"
-                                        className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                                        checked={togglePerpetual}
-                                        onChange={(event) => setTogglePerpetual(event.target.checked)}
-                                    />
-                                </div>
-                            </div> */}
             </div>
 
             <div className="flex items-center justify-between">
               <button
-                onClick={addLine}
+                // onClick={addLine}
                 className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                type="button"
+                type="submit"
               >
                 SEPETE EKLE
               </button>
               <button
                 onClick={() => {
-                  addLine();
-                  router.push("/cart");
+                  formik.handleSubmit();
+                  if (formik.isValid && formik.dirty) setForwardCart(true);
                 }}
                 className="bg-indigo-500 w-full hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="button"
