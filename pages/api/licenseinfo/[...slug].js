@@ -48,6 +48,9 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
         case "CanNotUpgradeKeyWithAdditionalMaintenance":
           jsonPostData.Lines[0].Type = "Maintenance";
           break;
+        case "CannotUpgradeKeyWithExpiredMaintenance":
+          jsonPostData.Lines[0].Type = "Maintenance";
+          break;
         case "KeyVersionIsDeprecated":
           jsonPostData.Lines[0].Type = "RenewAnnual";
           break;
@@ -58,9 +61,8 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       "https://api.3cx.com/public/v1/order/?readonly=true",
       JSON.stringify(jsonPostData)
     );
-
+    
     const { status, ErrorCode } = data;
-
 
     if (status && ErrorCode) {
       handleError(ErrorCode);
