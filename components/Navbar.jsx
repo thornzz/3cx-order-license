@@ -51,8 +51,8 @@ function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
   const Logout = async () => {
-    await router.push("/login");
     await signOut();
+    await router.push("/login");
   };
   return (
     <>
