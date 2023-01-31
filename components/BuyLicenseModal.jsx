@@ -17,7 +17,7 @@ const BuyLicenseModal = (props) => {
   const [quantity, setQuantity] = useState(1);
   const [isForwardCart, setForwardCart] = useState(false);
   const [additionalYear, setAdditionalYear] = useState(0);
-  const [simCall, setSimCall] = useState(8);
+  const [simCall, setSimCall] = useState(4);
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [getPartners, setPartners] = useRecoilState(partners);
@@ -214,6 +214,7 @@ const BuyLicenseModal = (props) => {
                   onChange={(event) => setSimCall(event.target.value)}
                 >
                   <option value="">Kanal sayısını seçiniz</option>
+                  <option value="4">4</option>
                   <option value="8">8</option>
                   <option value="16">16</option>
                   <option value="24">24</option>
