@@ -104,13 +104,13 @@ const Dashboard = () => {
           </Button>
         </ButtonGroup>
 
-        <Button style={{marginRight: "10px", marginLeft: "150px"}}
-            onClick={showNewLicenseModal}
-            className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
-          >
-            Yeni Lisans
-          </Button>
-
+        <Button
+          style={{ marginRight: "10px", marginLeft: "150px" }}
+          onClick={showNewLicenseModal}
+          className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
+        >
+          Yeni Lisans
+        </Button>
       </HStack>
 
       {/* <div className="flex items-center justify-between">

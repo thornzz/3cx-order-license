@@ -41,6 +41,7 @@ const ExpiringKeys = (props) => {
   const showCustomerInfoModal = () => {
     setCustomerInfoModal(!openCustomerInfoModal);
   };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -143,7 +144,7 @@ const ExpiringKeys = (props) => {
     return ((count / total) * 100).toFixed(2);
   }
   const sortRemainingDay = (rowA, rowB) => {
-   return rowA.remainingDay - rowB.remainingDay
+    return rowA.remainingDay - rowB.remainingDay;
   };
 
   const columns = [
@@ -315,7 +316,13 @@ const ExpiringKeys = (props) => {
       name: "Kalan (Gün)",
       selector: (row) => {
         return row.remainingDay <= 31 ? (
-          <Badge colorScheme="red" w={90}  borderRadius="xl" textAlign="center" fontSize={"1em"}>
+          <Badge
+            colorScheme="red"
+            w={90}
+            borderRadius="xl"
+            textAlign="center"
+            fontSize={"1em"}
+          >
             {row.remainingDay}
           </Badge>
         ) : row.remainingDay <= 60 ? (
@@ -340,7 +347,7 @@ const ExpiringKeys = (props) => {
           </Badge>
         );
       },
-      sortFunction:sortRemainingDay,
+      sortFunction: sortRemainingDay,
       reorder: true,
       sortable: true,
       center: true,
@@ -594,16 +601,15 @@ export async function getServerSideProps(context) {
       return keyResponse;
     });
   };
- 
 
   await getFirestoreDataAndMerge();
 
-  expiringKeysResponse.sort(function(a, b){
+  expiringKeysResponse.sort(function (a, b) {
     if (isNaN(a.remainingDay) || isNaN(b.remainingDay)) {
       return 0;
     }
     return Number(a.remainingDay) - Number(b.remainingDay);
-});
+  });
 
   const getPartnersResponse = await getPartners();
   const getPartnersResponseFilter = getPartnersResponse.map((partner) => ({
