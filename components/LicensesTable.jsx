@@ -78,7 +78,7 @@ const LicensesTable = (props) => {
   //     console.error("Error updating endUser in Item object: ", error);
   //   }
   // };
-  
+
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
   };
@@ -248,6 +248,7 @@ const LicensesTable = (props) => {
               color={"red.500"}
               _hover={{
                 cursor: "pointer",
+                color:"blue.500"
               }}
               onClick={() => {
                 navigator.clipboard.writeText(row.LicenseKey);

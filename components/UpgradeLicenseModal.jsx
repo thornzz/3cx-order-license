@@ -249,6 +249,7 @@ function UpgradeLicenseModal(props) {
               <InputRightElement width="2.5rem" onClick={pasteClipboard}>
                 <Icon boxSize="6" as={BiPaste}  _hover={{
                 cursor: "pointer",
+                color:"red.500"
               }} />
               </InputRightElement>
             </InputGroup>
