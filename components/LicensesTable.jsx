@@ -13,7 +13,7 @@ import { HiOutlineKey } from "react-icons/hi";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
-import { Icon,Text,useToast } from "@chakra-ui/react";
+import { Icon, Text, useToast } from "@chakra-ui/react";
 import {
   collection,
   doc,
@@ -26,7 +26,7 @@ import {
 import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
 
-const LicensesTable = () => {
+const LicensesTable = (props) => {
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,12 +34,13 @@ const LicensesTable = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [openEndUserModal, setOpenEndUserModal] = useState(false);
   const [enduserData, setendUserData] = useState(null);
+  const [allEnduserData, setallEnduserData] = useState([]);
   const [licenseKey, setLicenseKey] = useState(null);
   const [openLicenseRenewModal, setlicenseRenewModal] = useState(null);
   const [openLicenseUpgradeModal, setlicenseUpgradeModal] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
-  const toast = useToast()
+  const toast = useToast();
 
   const updateInvoiceIdInItemObject = async (
     invoiceId,
@@ -65,18 +66,19 @@ const LicensesTable = () => {
     }
   };
 
-  const getEndUserFromFireStore = async (licenseKey) => {
-    try {
-      const docRef = doc(db, "endusers", licenseKey);
-      const docSnap = await getDoc(docRef);
+  // const getEndUserFromFireStore = async (licenseKey) => {
+  //   try {
+  //     const docRef = doc(db, "endusers", licenseKey);
+  //     const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        return { endUser: docSnap.data() };
-      }
-    } catch (error) {
-      console.error("Error updating endUser in Item object: ", error);
-    }
-  };
+  //     if (docSnap.exists()) {
+  //       return { endUser: docSnap.data() };
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating endUser in Item object: ", error);
+  //   }
+  // };
+  
   const showEndUserModal = () => {
     setOpenEndUserModal(!openEndUserModal);
   };
@@ -87,8 +89,11 @@ const LicensesTable = () => {
     setlicenseRenewModal(!openLicenseRenewModal);
   };
   const sortDateTime = (rowA, rowB) => {
-    let moment = require('moment');
-    return moment(rowA.DateTime, "DD.MM.YYYY").unix() - moment(rowB.DateTime, "DD.MM.YYYY").unix();
+    let moment = require("moment");
+    return (
+      moment(rowA.DateTime, "DD.MM.YYYY").unix() -
+      moment(rowB.DateTime, "DD.MM.YYYY").unix()
+    );
     // // Split the date strings into an array of [day, month, year]
     // const a = rowA.DateTime.toLowerCase();
     // const b = rowB.DateTime.toLowerCase();
@@ -183,31 +188,35 @@ const LicensesTable = () => {
 
     {
       name: "End user",
-      cell: (row) => (
-        <button
-          onClick={async () => {
-            const endUser = await getEndUserFromFireStore(row.LicenseKey);
-            if (endUser) {
-              setendUserData(endUser);
-            } else {
-              setendUserData({
-                endUser: {
-                  licenseKey: row.LicenseKey,
-                  companyName: "",
-                  email: "",
-                  address: "",
-                  telephone: "",
-                  other: "",
-                },
-              });
-            }
-            showEndUserModal();
-            //console.log(enduserData)
-          }}
-        >
-          <AiOutlineEye className="w-7 h-7 text-red-500" />
-        </button>
-      ),
+      cell:  (row) => {
+        const endUser = allEnduserData.find((user)=> user.licenseKey === row.LicenseKey)
+        return (
+          <button
+            onClick={async () => {
+             
+              // const endUser = await getEndUserFromFireStore(row.LicenseKey)
+              if (endUser) {
+                setendUserData({endUser:endUser});
+              } else {
+                setendUserData({
+                  endUser: {
+                    licenseKey: row.LicenseKey,
+                    companyName: "",
+                    email: "",
+                    address: "",
+                    telephone: "",
+                    other: "",
+                  },
+                });
+              }
+              showEndUserModal();
+              //console.log(enduserData)
+            }}
+          >
+            <AiOutlineEye   className={endUser?.licenseKey ? "w-7 h-7 text-blue-500" : "w-7 h-7 text-red-500"}   />
+          </button>
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -230,23 +239,29 @@ const LicensesTable = () => {
     },
     {
       name: "Lisans Anahtarı",
-      cell: (row) => { 
-        return(
-        <>
-        <Icon as={RxClipboardCopy} boxSize="6" color={"red.500"}
-        onClick={() => {
-          navigator.clipboard.writeText(row.LicenseKey);
-          toast({
-            title: 'Anahtar kopyalandı',
-            status: 'info',
-            duration: 1000,
-            isClosable: true,
-          })
-        }}
-        />
-        <Text ml={2}>{row.LicenseKey}</Text>
-        </>)
-        
+      cell: (row) => {
+        return (
+          <>
+            <Icon
+              as={RxClipboardCopy}
+              boxSize="6"
+              color={"red.500"}
+              _hover={{
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                navigator.clipboard.writeText(row.LicenseKey);
+                toast({
+                  title: "Anahtar kopyalandı",
+                  status: "info",
+                  duration: 1000,
+                  isClosable: true,
+                });
+              }}
+            />
+            <Text ml={2}>{row.LicenseKey}</Text>
+          </>
+        );
       },
       grow: 2,
       reorder: true,
@@ -360,9 +375,22 @@ const LicensesTable = () => {
   };
 
   useEffect(() => {
+    
     (async () => {
       try {
         await getFireStoreData();
+        const getEndUsers = async () => {
+          const collectionRef = collection(db, "endusers");
+          const q = query(collectionRef);
+          const querySnapshot = await getDocs(q);
+          const endUserAllData = querySnapshot.docs.map((d) => ({
+            ...d.data(),
+          }));
+          return endUserAllData;
+        };
+        const allEndUserData = await getEndUsers();
+        setallEnduserData(allEndUserData)
+        
         const timer = setTimeout(() => {
           setIsLoading(false);
         }, 1000);
@@ -452,3 +480,5 @@ const LicensesTable = () => {
 };
 
 export default LicensesTable;
+
+

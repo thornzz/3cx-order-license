@@ -247,7 +247,9 @@ function UpgradeLicenseModal(props) {
                 <Icon boxSize="6" as={TbLicense} />
               </InputLeftElement>
               <InputRightElement width="2.5rem" onClick={pasteClipboard}>
-                <Icon boxSize="6" as={BiPaste} />
+                <Icon boxSize="6" as={BiPaste}  _hover={{
+                cursor: "pointer",
+              }} />
               </InputRightElement>
             </InputGroup>
 

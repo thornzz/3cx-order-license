@@ -209,7 +209,7 @@ const BuyLicenseModal = (props) => {
               <div className="relative rounded-md shadow-sm">
                 <select
                   id="select2"
-                  className="form-select w-full py-2 px-3 py-0 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
+                  className="form-select w-full px-3 py-2 leading-tight text-gray-700 bg-white border border-gray-400 rounded appearance-none focus:outline-none focus:shadow-outline"
                   value={simCall}
                   onChange={(event) => setSimCall(event.target.value)}
                 >
