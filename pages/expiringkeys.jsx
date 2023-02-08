@@ -182,6 +182,10 @@ const ExpiringKeys = (props) => {
               as={RxClipboardCopy}
               boxSize="6"
               color={"red.500"}
+              _hover={{
+                cursor: "pointer",
+                color: "blue.500",
+              }}
               onClick={() => {
                 navigator.clipboard.writeText(row.LicenseKey);
                 toast({
