@@ -187,7 +187,7 @@ const LicensesTable = (props) => {
     },
 
     {
-      name: "Şirket",
+      name: "End User",
       cell:  (row) => {
         const endUser = allEnduserData.find((user)=> user.licenseKey === row.LicenseKey)
         return (
