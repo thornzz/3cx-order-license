@@ -63,18 +63,18 @@ const ExpiringKeys = (props) => {
   //     }
   // };
 
-  const getEndUserFromFireStore = async (licenseKey) => {
-    try {
-      const docRef = doc(db, "endusers", licenseKey);
-      const docSnap = await getDoc(docRef);
+  // const getEndUserFromFireStore = async (licenseKey) => {
+  //   try {
+  //     const docRef = doc(db, "endusers", licenseKey);
+  //     const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        return { endUser: docSnap.data() };
-      } else return { endUser: {} };
-    } catch (error) {
-      console.error("Error fetching endUser in Item object: ", error);
-    }
-  };
+  //     if (docSnap.exists()) {
+  //       return { endUser: docSnap.data() };
+  //     } else return { endUser: {} };
+  //   } catch (error) {
+  //     console.error("Error fetching endUser in Item object: ", error);
+  //   }
+  // };
 
   const getCustomerInfoFromFirestore = async (licenseKey) => {
     try {
@@ -244,17 +244,42 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "End user",
-      cell: (row) => (
-        <button
-          onClick={async () => {
-            setendUserData(await getEndUserFromFireStore(row.LicenseKey));
-            showEndUserModal();
-            //console.log(enduserData)
-          }}
-        >
-          <AiOutlineEye className="w-7 h-7 text-red-500" />
-        </button>
-      ),
+      cell: (row) => {
+        const endUser = props?.endUsersData?.find(
+          (user) => user.licenseKey === row.LicenseKey
+        );
+        return (
+          <button
+            onClick={async () => {
+              // const endUser = await getEndUserFromFireStore(row.LicenseKey)
+              if (endUser) {
+                setendUserData({ endUser: endUser });
+              } else {
+                setendUserData({
+                  endUser: {
+                    licenseKey: row.LicenseKey,
+                    companyName: "",
+                    email: "",
+                    address: "",
+                    telephone: "",
+                    other: "",
+                  },
+                });
+              }
+              showEndUserModal();
+              //console.log(enduserData)
+            }}
+          >
+            <AiOutlineEye
+              className={
+                endUser?.licenseKey
+                  ? "w-7 h-7 text-blue-500"
+                  : "w-7 h-7 text-red-500"
+              }
+            />
+          </button>
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -262,13 +287,13 @@ const ExpiringKeys = (props) => {
     },
     {
       name: "Şirket",
-      selector: (row) => row?.endUser?.companyName,
+      selector: (row) => row?.companyName,
       grow: 1,
       hide: "md",
     },
     {
       name: "Telefon",
-      selector: (row) => row?.endUser?.telephone,
+      selector: (row) => row?.telephone,
       width: "100px",
       hide: "md",
     },
@@ -406,7 +431,7 @@ const ExpiringKeys = (props) => {
 
   const filteredData = props.expiringKeys.filter((item) =>
     // [item.LicenseKey, item?.endUser?.companyName]
-    [item.LicenseKey]
+    [item.LicenseKey, item.companyName]
       .map((val) => val?.toLowerCase())
       .some((val) => val?.includes(searchText.toLowerCase()))
   );
@@ -521,6 +546,8 @@ export async function getServerSideProps(context) {
 
   const customerDataAll = await getCustomerInfoAllData();
 
+  const endUsersData = await getAllEndUsersData();
+
   const getFirestoreDataAndMerge = async () => {
     // const collectionRef = collection(db, "licenses");
     // //long version
@@ -532,7 +559,6 @@ export async function getServerSideProps(context) {
     // // const tcxResponses = data.map(d => d.tcxResponses);
     // // const items = tcxResponses.flatMap(response => response.Items);
     // const items = data.flatMap((d) => d.tcxResponses?.Items || []);
-    const endUsersData = await getAllEndUsersData();
 
     expiringKeysResponse = expiringKeysResponse.map((keyResponse) => {
       const moment = require("moment");
@@ -596,7 +622,9 @@ export async function getServerSideProps(context) {
       let item = endUsersData.find(
         (item) => item.licenseKey === keyResponse.LicenseKey
       );
-      if (item) keyResponse.companyName = item.companyName;
+      if (item) {
+        keyResponse.companyName = item.companyName;
+      }
 
       return keyResponse;
     });
@@ -621,6 +649,7 @@ export async function getServerSideProps(context) {
       expiringKeys: expiringKeysResponse,
       partners: getPartnersResponseFilter,
       customerInfoDataAll: customerDataAll,
+      endUsersData: endUsersData,
     }, // will be passed to the page component as props
   };
 }
