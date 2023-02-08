@@ -68,6 +68,7 @@ const Cart = (props) => {
   // };
 
   useEffect(() => {
+    console.log(cartDetailState);
     if (cartLengthState === 0) router.push("/dashboard");
 
     setSubTotals(subTotal);
@@ -164,6 +165,15 @@ const Cart = (props) => {
             <td className="p-4 px-6 text-center whitespace-nowrap">
               <div className="flex flex-col items-center justify-center">
                 <h3>
+                  {item.Type !== "NewLicense"
+                    ? cartDetailState[index]?.Items[0].LicenseKeys[0].LicenseKey
+                    : null}
+                </h3>
+              </div>
+            </td>
+            <td className="p-4 px-6 text-center whitespace-nowrap">
+              <div className="flex flex-col items-center justify-center">
+                <h3>
                   {item.Type === "NewLicense"
                     ? "Yeni Lisans"
                     : item.Type === "RenewAnnual"
@@ -174,6 +184,7 @@ const Cart = (props) => {
                 </h3>
               </div>
             </td>
+
             <td className="p-4 px-6 text-center whitespace-nowrap">
               {item.Type === "NewLicense"
                 ? item.SimultaneousCalls
@@ -276,11 +287,11 @@ const Cart = (props) => {
       // console.log('tcxresponses 181',tcxResponses)
       //addRandomLicenseKey(tcxResponses);
       mergeJSONObjects(cartDetailState, tcxResponses);
-      
-      await axios.post('/api/sendmail',tcxResponses)
-   
-       await addDoc(collection(db, "licenses"), { tcxResponses });
-    
+
+      await axios.post("/api/sendmail", tcxResponses);
+
+      await addDoc(collection(db, "licenses"), { tcxResponses });
+
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
         autoClose: 2000,
@@ -294,7 +305,6 @@ const Cart = (props) => {
 
       setCartState([]);
       setDetailCartState([]);
-     
     } catch (error) {
       console.error(error);
     }
@@ -324,11 +334,14 @@ const Cart = (props) => {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="px-6 py-3 font-bold w-1/4">Bayi</th>
-                  <th className="px-6 py-3 font-bold whitespace-nowrap">
+                  <th className="px-9 py-3 font-bold whitespace-nowrap ">
                     End User
                   </th>
                   <th className="px-6 py-3 font-bold whitespace-nowrap">
                     Lisans Tipi
+                  </th>
+                  <th className="px-6 py-3 font-bold whitespace-nowrap">
+                    Lisans Anahtarı
                   </th>
                   <th className="px-6 py-3 font-bold whitespace-nowrap">
                     İşlem
