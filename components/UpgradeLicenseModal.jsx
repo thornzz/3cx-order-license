@@ -315,6 +315,7 @@ function UpgradeLicenseModal(props) {
                     onChange={(event) => setSimCall(event.target.value)}
                   >
                     <option value="">Kanal sayısını seçiniz</option>
+                    <option value="4">4</option>
                     <option value="8">8</option>
                     <option value="16">16</option>
                     <option value="24">24</option>
