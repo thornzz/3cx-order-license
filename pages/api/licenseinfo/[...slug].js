@@ -54,6 +54,9 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
         case "KeyVersionIsDeprecated":
           jsonPostData.Lines[0].Type = "RenewAnnual";
           break;
+        case "CanRenewOnlyAnnualKey":
+          jsonPostData.Lines[0].Type = "Maintenance";
+          break;
       }
     };
 
@@ -61,11 +64,19 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       "https://api.3cx.com/public/v1/order/?readonly=true",
       JSON.stringify(jsonPostData)
     );
-    
+
     const { status, ErrorCode } = data;
 
     if (status && ErrorCode) {
       handleError(ErrorCode);
+
+      data = await PostData(
+        "https://api.3cx.com/public/v1/order/?readonly=true",
+        JSON.stringify(jsonPostData)
+      );
+
+      // Re-run handleError with updated jsonPostData
+      handleError(data.ErrorCode);
 
       data = await PostData(
         "https://api.3cx.com/public/v1/order/?readonly=true",
