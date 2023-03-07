@@ -48,6 +48,9 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
         case "CanNotUpgradeKeyWithAdditionalMaintenance":
           jsonPostData.Lines[0].Type = "Maintenance";
           break;
+          case "CanAddMaintenanceOnlyToPerpetualKey":
+            jsonPostData.Lines[0].Type = "RenewAnnual";
+            break;
         case "CannotUpgradeKeyWithExpiredMaintenance":
           jsonPostData.Lines[0].Type = "Maintenance";
           break;
@@ -69,12 +72,10 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
 
     if (status && ErrorCode) {
       handleError(ErrorCode);
-
       data = await PostData(
         "https://api.3cx.com/public/v1/order/?readonly=true",
         JSON.stringify(jsonPostData)
       );
-
       // Re-run handleError with updated jsonPostData
       handleError(data.ErrorCode);
 
