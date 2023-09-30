@@ -294,24 +294,24 @@ const Cart = (props) => {
 
     try {
       //! OPEN AT LIVE
-      // const tcxResponses = await PostData(
-      //   "/api/newlicense",
-      //   JSON.stringify(postData)
-      // );
-
       const tcxResponses = await PostData(
-        "/api/fakelicenseorder",
+        "/api/newlicense",
         JSON.stringify(postData)
       );
+
+      // const tcxResponses = await PostData(
+      //   "/api/fakelicenseorder",
+      //   JSON.stringify(postData)
+      // );
     
       //addRandomLicenseKey(tcxResponses);
       mergeJSONObjects(cartDetailState, tcxResponses);
 
-      //await axios.post("/api/sendmail", tcxResponses);
+      await axios.post("/api/sendmail", tcxResponses);
 
       //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
 
-      //await addDoc(collection(db, "licenses"), { tcxResponses });
+      await addDoc(collection(db, "licenses"), { tcxResponses });
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
