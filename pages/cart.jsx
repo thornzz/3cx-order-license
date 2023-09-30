@@ -5,8 +5,11 @@ import {
   cartDetail,
   cartDetailDiscountTotal,
   cartDetailSubTotal,
+  cartDetailGrandTotal,
   cartLength,
+  cartDetailLicenseTotal,
   partners,
+  cartDetailHostingTotal,
 } from "../atoms/shoppingCartAtom";
 import {
   Popover,
@@ -50,11 +53,17 @@ const Cart = (props) => {
   const [endUserLicenseKey, setendUserLicenseKey] = useState(null);
 
   const subTotal = useRecoilValue(cartDetailSubTotal);
+  const licenseTotal = useRecoilValue(cartDetailLicenseTotal);
+  const grandTotal = useRecoilValue(cartDetailGrandTotal);
   const discountTotal = useRecoilValue(cartDetailDiscountTotal);
+  const hostingTotal = useRecoilValue(cartDetailHostingTotal);
   const cartLengthState = useRecoilValue(cartLength);
   const [subTotals, setSubTotals] = useState(null);
+  const [licenseTotals, setLicenseTotals] = useState(null);
+  const [grandTotals, setGrandTotals] = useState(null);
   const [cartLenghtStates, setCartLength] = useState(null);
   const [discountTotals, setDiscountTotals] = useState(null);
+  const [hostingTotals, setHostingTotal] = useState(null);
   const [cartState, setCartState] = useRecoilState(cart);
   const [cartDetailState, setDetailCartState] = useRecoilState(cartDetail);
   const [license, setLicenseState] = useRecoilState(licenses);
@@ -68,11 +77,14 @@ const Cart = (props) => {
   // };
 
   useEffect(() => {
-    console.log(cartDetailState);
+    //console.log(cartDetailState);
     if (cartLengthState === 0) router.push("/dashboard");
 
     setSubTotals(subTotal);
+    setLicenseTotals(licenseTotal);
     setDiscountTotals(discountTotal);
+    setGrandTotals(grandTotal);
+    setHostingTotal(hostingTotal);
     setCartLength(cartLengthState);
     setOrderDetails(
       cartState.map((item, index) => {
@@ -103,14 +115,15 @@ const Cart = (props) => {
                         const newCartDetail = [...prevCartDetail];
                         newCartDetail[index] = {
                           ...newCartDetail[index],
-                          Items: [
-                            {
-                              ...newCartDetail[index].Items[0],
+                          Items: newCartDetail[index].Items.map((item) => {
+                            return {
+                              ...item,
                               ResellerName: data?.label,
                               ResellerId: data?.value,
-                            },
-                          ],
+                            };
+                          }),
                         };
+
                         return newCartDetail;
                       });
                     }}
@@ -280,17 +293,25 @@ const Cart = (props) => {
     };
 
     try {
+      //! OPEN AT LIVE
+      // const tcxResponses = await PostData(
+      //   "/api/newlicense",
+      //   JSON.stringify(postData)
+      // );
+
       const tcxResponses = await PostData(
-        "/api/newlicense",
+        "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-      // console.log('tcxresponses 181',tcxResponses)
+    
       //addRandomLicenseKey(tcxResponses);
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await axios.post("/api/sendmail", tcxResponses);
 
-      await addDoc(collection(db, "licenses"), { tcxResponses });
+      //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
+
+      //await addDoc(collection(db, "licenses"), { tcxResponses });
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
@@ -371,9 +392,22 @@ const Cart = (props) => {
                 <h3 className="text-xl font-bold text-blue-600">
                   Sipariş Özeti
                 </h3>
+
+                {hostingTotals > 0 && (
+                  <div className="flex justify-between px-4">
+                    <span className="font-bold">Lisans Bedeli</span>
+                    <span className="font-bold">{licenseTotals}$</span>
+                  </div>
+                )}
+                {hostingTotals > 0 && (
+                  <div className="flex justify-between px-4">
+                    <span className="font-bold">Hosting Bedeli</span>
+                    <span className="font-bold">{hostingTotals}$</span>
+                  </div>
+                )}
                 <div className="flex justify-between px-4">
                   <span className="font-bold">Ara Toplam</span>
-                  <span className="font-bold">${subTotals}</span>
+                  <span className="font-bold">{subTotals}$</span>
                 </div>
                 <div className="flex justify-between px-4">
                   <span className="font-bold">İndirim</span>
@@ -394,9 +428,7 @@ const Cart = (props) => {
               "
                 >
                   <span className="text-xl font-bold">Toplam</span>
-                  <span className="text-2xl font-bold">
-                    ${subTotals - discountTotals}
-                  </span>
+                  <span className="text-2xl font-bold">${grandTotals}</span>
                 </div>
               </div>
             </div>
@@ -483,14 +515,15 @@ const Cart = (props) => {
 export default Cart;
 
 export async function getServerSideProps(context) {
+  // Get Partners
   const responsePartners = await getPartners();
-  //const options = []
-  //Extract only the PartnerId and CompanyName fields from each object in the array
+  // Extract only the PartnerId and CompanyName fields from each object in the array
   const options = responsePartners.map((partner) => ({
     value: partner.PartnerId,
     label: partner.CompanyName,
   }));
 
+  // Get End Users
   const getEndUsers = async () => {
     const collectionRef = collection(db, "endusers");
     const q = query(collectionRef);
@@ -503,6 +536,7 @@ export async function getServerSideProps(context) {
   };
   const allEndUserData = await getEndUsers();
 
+  // Extract only the licenseKey and companyName fields from each object in the array
   const endUserDataOptions = allEndUserData.map((endUser) => ({
     value: endUser.licenseKey,
     label: endUser.companyName,

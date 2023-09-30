@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import { Dropdown } from "flowbite-react";
 import { HiLogout, HiOutlineDocumentReport, HiViewGrid } from "react-icons/hi";
+import { FiMail } from "react-icons/fi";
 import { AiOutlineUser } from "react-icons/ai";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { cartLength } from "../atoms/shoppingCartAtom";
@@ -56,6 +57,7 @@ function Navbar() {
   };
   return (
     <>
+   
       <Drawer
         isOpen={isOpen}
         placement="right"
@@ -83,7 +85,12 @@ function Navbar() {
                   Keys
                 </Link>
               </Box>
-
+              <Box ml={1}>
+                <Link href={"/partnersmailinglist"}>
+                  {" "}
+                  <Icon as={FiMail} w="7" h="7" /> Mailing List
+                </Link>
+              </Box>
               <Flex ml={1} alignItems="flex-start">
                 {/* <Badge w="4" variant="solid" colorScheme="red" mr={3} ml={2}>
                   {getCartLengthState}
@@ -149,6 +156,7 @@ function Navbar() {
           />
         </div>
       </nav>
+    
     </>
   );
 }

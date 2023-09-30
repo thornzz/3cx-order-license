@@ -18,7 +18,8 @@ export async function getPartners(){
         const filteredData = data.map(partner => ({
             PartnerId: partner.PartnerId,
             CompanyName: partner.CompanyName,
-            PartnerLevelName:partner.PartnerLevelName
+            PartnerLevelName:partner.PartnerLevelName,
+            Email:partner.ContactEmail
         }));
 
         // Send the filtered data as the response

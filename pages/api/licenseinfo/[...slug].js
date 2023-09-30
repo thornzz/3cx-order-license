@@ -48,9 +48,9 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
         case "CanNotUpgradeKeyWithAdditionalMaintenance":
           jsonPostData.Lines[0].Type = "Maintenance";
           break;
-          case "CanAddMaintenanceOnlyToPerpetualKey":
-            jsonPostData.Lines[0].Type = "RenewAnnual";
-            break;
+        case "CanAddMaintenanceOnlyToPerpetualKey":
+          jsonPostData.Lines[0].Type = "RenewAnnual";
+          break;
         case "CannotUpgradeKeyWithExpiredMaintenance":
           jsonPostData.Lines[0].Type = "Maintenance";
           break;
@@ -93,6 +93,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       "MaintenanceDate",
       "HostingExpiry",
       "Edition",
+      "HostingExists"
     ];
 
     const desiredObject = {};
@@ -103,9 +104,12 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
     if (desiredObject) {
       desiredObject.IsActive =
         desiredObject.MaintenanceDate !== null ||
-        desiredObject.ExpiryDate !== null
+          desiredObject.ExpiryDate !== null
           ? true
           : false;
+
+      desiredObject.HostingExists = (data.Items.some(item => item.Type === 'Hosting')) ? 'Var' : 'Yok';
+      
       desiredObject.RemainingDays =
         desiredObject.MaintenanceDate !== null
           ? calculateRemainingDay(desiredObject.MaintenanceDate)
@@ -119,7 +123,6 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
           ? convertDateTime(desiredObject.MaintenanceDate)
           : "";
     }
-
     return desiredObject;
   } catch (error) {
     console.log(error);

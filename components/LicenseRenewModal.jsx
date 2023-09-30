@@ -147,7 +147,6 @@ const LicenseRenewModal = (props) => {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-
       return responseData;
     } catch (error) {
       console.error(error);
