@@ -1,7 +1,6 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { GrLicense } from "react-icons/gr";
-import { BiPaste } from "react-icons/bi";
-import { TbLicense } from "react-icons/tb";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
@@ -38,7 +37,7 @@ const modules = {
     ["link", "image"],
     [{ align: [] }],
     [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-  
+
   ],
   clipboard: {
     // toggle to add extralökkğiş line breaks when pasting HTML:
@@ -46,11 +45,12 @@ const modules = {
   },
 };
 const PartnersMailingList = (props) => {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [address, setAddress] = useState("");
   const { isOpen, onToggle, onClose } = useDisclosure();
-
+  const { data: session, status: isLoaded } = useSession();
   function submitHandler(event) {
     event.preventDefault();
 
@@ -85,11 +85,19 @@ const PartnersMailingList = (props) => {
     });
   }
 
-  return (
+  useEffect(() => {
+    if (isLoaded !== "authenticated") {
+      router.push("/login");
+    }
+  }, [isLoaded, session]);
+
+  return isLoaded !== "authenticated" ? (
+    <div>Sayfa yükleniyor...</div>
+  ) : (
     <>
       <div>
         <Head>
-          <title>Lisans Portal || Partner Mailing</title>
+          <title>Bayi İletişim</title>
           <meta name="description" content="3CX Order License" />
         </Head>
         <main>
@@ -107,7 +115,7 @@ const PartnersMailingList = (props) => {
                 <Flex justify="center" align="center" width="100%">
                   <Box width="90%">
                     <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>
-                      Tüm Partnerlere eMail Gönder (Test MODE)
+                      Bayi İletişim Formu (Test MODE)
                     </h1>
 
                     <form onSubmit={submitHandler}>

@@ -87,7 +87,7 @@ function Navbar() {
               </Box>
               <Box ml={1}>
                 <Link href={"/partnersmailinglist"}>
-                  {" "}
+                 
                   <Icon as={FiMail} w="7" h="7" /> Mailing List
                 </Link>
               </Box>

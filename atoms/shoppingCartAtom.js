@@ -40,12 +40,15 @@ const cartDetailGrandTotal = selector({
     key: 'cartDetailGrandTotal',
     get: ({ get }) => {
         const cartDetailState = get(cartDetail);
-        var GrandTotal = cartDetailState.map(function (item) {
-            return item?.GrandTotal ?? 0;
-        });
-        return GrandTotal
+        
+        // Tüm GrandTotal değerlerini topla
+        const grandTotalSum = cartDetailState.reduce((total, item) => {
+            return total + (item?.GrandTotal ?? 0);
+        }, 0);
+        return grandTotalSum;
     }
-})
+});
+
 const cartDetailLicenseTotal = selector({
     key: 'cartDetailLicenseTotal',
     get: ({ get }) => {
@@ -62,33 +65,43 @@ const cartDetailLicenseTotal = selector({
 const cartDetailDiscountTotal = selector({
     key: 'cartDetailDiscountTotal',
     get: ({ get }) => {
-        const cartDetailState = get(cartDetail);
-
-        const discountTotal = cartDetailState.reduce((total, item) => {
-            const itemDiscountTotal = item.Items.reduce((itemTotal, product) => {
-                const unitPrice = product.UnitPrice;
-                const discountPercentage = product.Discount;
-                const quantity = product.Quantity;
-                const itemDiscount = (unitPrice * quantity * discountPercentage) / 100;
-                return itemTotal + itemDiscount;
-            }, 0);
-            return total + itemDiscountTotal;
+      const cartDetailState = get(cartDetail);
+  
+      const discountTotal = cartDetailState.reduce((total, item) => {
+        const itemDiscountTotal = item.Items.reduce((itemTotal, product) => {
+          const unitPrice = product.UnitPrice;
+          const discountPercentage = product.Discount;
+          const quantity = product.Quantity;
+          const itemDiscount = (unitPrice * quantity * discountPercentage) / 100;
+          return itemTotal + itemDiscount;
         }, 0);
-
-        return discountTotal
+        return total + itemDiscountTotal;
+      }, 0);
+  
+      // Sonucu iki ondalık basamağa yuvarlayarak düzeltebiliriz.
+      return Math.round(discountTotal * 100) / 100;
     }
-})
+  });
+  
 
-const cartDetailHostingTotal = selector({
+  const cartDetailHostingTotal = selector({
     key: 'cartDetailHostingTotal',
     get: ({ get }) => {
         const cartDetailState = get(cartDetail);
-        var hostingTotal = cartDetailState.map(function (item) {
-            return item.Items[1]?.UnitPrice ?? 0;
-        });
-        return hostingTotal
+        const hostingTotal = cartDetailState.reduce((total, order) => {
+            return total + (order.Items.reduce((itemTotal, item) => {
+                if (item.Type === 'Hosting') {
+                    return itemTotal + (item.UnitPrice ?? 0);
+                }
+                return itemTotal;
+            }, 0));
+        }, 0);
+
+        return Math.round(hostingTotal);
     }
-})
+});
+
+
 
 const cartLength = selector({
     key: 'cartLength',

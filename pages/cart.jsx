@@ -307,7 +307,7 @@ const Cart = (props) => {
       //addRandomLicenseKey(tcxResponses);
       mergeJSONObjects(cartDetailState, tcxResponses);
 
-      await axios.post("/api/sendmail", tcxResponses);
+      //await axios.post("/api/sendmail", tcxResponses);
 
       //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
 
