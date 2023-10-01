@@ -22,7 +22,7 @@ import { getPartners } from "../../getpartners";
         });
   
           let mailData = {
-            from: "info@k2mbilisim.com",
+            from: 'K2M Bilişim Bilgilendirme <info@k2mbilisim.com>',
             to: emailData.address,
             subject: emailData.title,
             text: "",

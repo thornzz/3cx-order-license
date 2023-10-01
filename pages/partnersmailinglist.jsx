@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
+  Alert,
+  AlertIcon,
   Box,
   Flex,
   Button,
@@ -23,6 +25,10 @@ import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import Head from "next/head";
 import { toast } from "react-toastify";
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+
 
 const QuillNoSSRWrapper = dynamic(import("react-quill"), {
   ssr: false,
@@ -46,44 +52,63 @@ const modules = {
 };
 const PartnersMailingList = (props) => {
   const router = useRouter();
-  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
   const { isOpen, onToggle, onClose } = useDisclosure();
   const { data: session, status: isLoaded } = useSession();
-  function submitHandler(event) {
-    event.preventDefault();
 
-    // popover kapat
-    onToggle();
+  const validationSchema = Yup.object().shape({
+    title: Yup.string().required('Konu başlığı girilmeli'),
+    address: Yup.string().email('Geçersiz adres').required('Email adresi gerekiyor')
+  });
+  const formik = useFormik({
+    initialValues: {
+      title: '',
+      address: ''
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      if (formik.isValid) {
+        console.log('form valid')
+        onToggle();
 
-    var requestObj = {
-      title: title,
-      content: content,
-      address: address,
-    };
+        var requestObj = {
+          title: values.title,
+          content: content,
+          address: values.address,
+        };
 
-    fetch("/api/sendmail/partners/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestObj),
-    }).then((data) => console.log(data));
-    setContent("");
-    setTitle("");
-    setAddress("");
-    toast.success("İşlem başarıyla tamamlandı", {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-  }
+        fetch("/api/sendmail/partners/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestObj),
+        }).then((data) => console.log(data));
+
+        setLoading(true); // Gönderme işlemi başladığında isLoading'i true olarak ayarla
+
+        // 3 saniye beklemeyi simüle et
+        setTimeout(() => {
+          formik.resetForm()
+          setLoading(false); // 3 saniye sonra isLoading'i false olarak ayarla
+          setContent("");
+          toast.success("İşlem başarıyla tamamlandı", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        }, 3000);
+
+      }
+
+    },
+  });
 
   useEffect(() => {
     if (isLoaded !== "authenticated") {
@@ -118,28 +143,46 @@ const PartnersMailingList = (props) => {
                       Bayi İletişim Formu (Test MODE)
                     </h1>
 
-                    <form onSubmit={submitHandler}>
+                    <form>
                       <Flex align="center" justify="center" width="100%">
-                        <Input
-                          type="text"
-                          value={title}
-                          name="title"
-                          placeholder="Konu başlığı..."
-                          onChange={(e) => setTitle(e.target.value)}
-                          required
-                          flex="1"
-                          mr="2"
-                        />
-                        <Input
-                          type="text"
-                          value={address}
-                          name="address"
-                          placeholder="Email gönderilecek adres..."
-                          onChange={(e) => setAddress(e.target.value)}
-                          required
-                          flex="1"
-                          mr="2"
-                        />
+                        <Box flex="1" mr="2">
+                          <Input
+                            type="text"
+                            name="title"
+                            placeholder="Konu başlığı..."
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.title}
+                            required
+                          />
+                          {formik.touched.title && formik.errors.title ? (
+                            <div className="error" style={{ marginTop: "5px" }}>
+                              <Alert status='error'>
+                                <AlertIcon />
+                                {formik.errors.title}
+                              </Alert>
+                            </div>
+                          ) : null}
+                        </Box>
+                        <Box flex="1" mr="2">
+                          <Input
+                            type="text"
+                            name="address"
+                            placeholder="Email gönderilecek adres..."
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.address}
+                            required
+                          />
+                          {formik.touched.address && formik.errors.address ? (
+                            <div className="error" style={{ marginTop: "5px" }}>
+                              <Alert status='error'>
+                                <AlertIcon />
+                                {formik.errors.address}
+                              </Alert>
+                            </div>
+                          ) : null}
+                        </Box>
                         <Popover
                           returnFocusOnClose={false}
                           isOpen={isOpen}
@@ -149,11 +192,13 @@ const PartnersMailingList = (props) => {
                         >
                           <PopoverTrigger>
                             <Button
+                              isLoading={loading}
                               onClick={onToggle}
                               size="md"
                               colorScheme="twitter"
                               leftIcon={<TfiEmail />}
                               marginBottom={"5px"}
+
                             >
                               Email Gönder
                             </Button>
@@ -181,7 +226,7 @@ const PartnersMailingList = (props) => {
                               <ButtonGroup size="sm">
                                 <Button
                                   colorScheme="green"
-                                  onClick={submitHandler}
+                                  onClick={formik.handleSubmit}
                                 >
                                   Onayla
                                 </Button>
@@ -202,6 +247,7 @@ const PartnersMailingList = (props) => {
                         spellcheck="false"
                         placeholder={"E-mail içeriği..."}
                       />
+
                     </form>
                   </Box>
                 </Flex>
