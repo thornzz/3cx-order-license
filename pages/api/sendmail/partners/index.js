@@ -14,7 +14,7 @@ import { getPartners } from "../../getpartners";
           port: 587,
           host: "mail.buluttel.com",
           auth: {
-            user: "order@k2msoftware.com",
+            user: "info@k2mbilisim.com",
             pass: process.env.NEXT_PUBLIC_MAILPASS,
           },
           ignoreTLS: false,
@@ -22,14 +22,15 @@ import { getPartners } from "../../getpartners";
         });
   
           let mailData = {
-            from: "order@k2msoftware.com",
+            from: "info@k2mbilisim.com",
             to: emailData.address,
-            subject: "Test Email",
+            subject: emailData.title,
             text: "",
             html: emailData.content
           };
   
           transporter.sendMail(mailData, function (err, info) {
+            console.log(info)
             if (err) console.log(err);
           });
      
