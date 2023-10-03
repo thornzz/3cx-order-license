@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
+  Select,
   Alert,
   AlertIcon,
   Box,
@@ -56,58 +57,90 @@ const PartnersMailingList = (props) => {
   const [loading, setLoading] = useState(false);
   const { isOpen, onToggle, onClose } = useDisclosure();
   const { data: session, status: isLoaded } = useSession();
+  const [selectedPartner, setSelectedPartner] = useState("");
+
+  const handleChange = (event) => {
+    const { value } = event.target;
+    setSelectedPartner(value);
+  };
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required('Konu başlığı girilmeli'),
-    address: Yup.string().email('Geçersiz adres').required('Email adresi gerekiyor')
+    title: Yup.string().required('Konu başlığı girilmeli')
   });
+
+
   const formik = useFormik({
     initialValues: {
-      title: '',
-      address: ''
+      title: ''
     },
     validationSchema,
-    onSubmit: (values) => {
-      if (formik.isValid) {
-        console.log('form valid')
-        onToggle();
-
-        var requestObj = {
-          title: values.title,
-          content: content,
-          address: values.address,
-        };
-
-        fetch("/api/sendmail/partners/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestObj),
-        }).then((data) => console.log(data));
-
-        setLoading(true); // Gönderme işlemi başladığında isLoading'i true olarak ayarla
-
-        // 3 saniye beklemeyi simüle et
-        setTimeout(() => {
-          formik.resetForm()
-          setLoading(false); // 3 saniye sonra isLoading'i false olarak ayarla
-          setContent("");
-          toast.success("İşlem başarıyla tamamlandı", {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
+    onSubmit: async (values) => {
+      try {
+        if (formik.isValid) {
+          setLoading(true);
+          onToggle();
+          var requestObj = {
+            title: values.title,
+            content: content,
+            selectedPartner: selectedPartner
+          };
+          const response = await fetch("/api/sendmail/partners/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestObj),
           });
-        }, 3000);
 
+
+          if (response.ok) {
+            // İstek başarıyla tamamlandı, beklemek gerekmiyor
+            formik.resetForm();
+            setLoading(false);
+            setContent("");
+            setSelectedPartner("");
+            toast.success("İşlem başarıyla tamamlandı", {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            });
+          } else {
+            setLoading(false);
+            setContent("");
+            setSelectedPartner("");
+            // İstek başarısız oldu, hata mesajını kullanıcıya göster
+            const errorData = await response.json();
+            toast.error(errorData.error, {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            });
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Bir hata oluştu, lütfen tekrar deneyin.", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
-
-    },
+    }
   });
 
   useEffect(() => {
@@ -165,24 +198,15 @@ const PartnersMailingList = (props) => {
                           ) : null}
                         </Box>
                         <Box flex="1" mr="2">
-                          <Input
-                            type="text"
-                            name="address"
-                            placeholder="Email gönderilecek adres..."
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            value={formik.values.address}
-                            required
-                          />
-                          {formik.touched.address && formik.errors.address ? (
-                            <div className="error" style={{ marginTop: "5px" }}>
-                              <Alert status='error'>
-                                <AlertIcon />
-                                {formik.errors.address}
-                              </Alert>
-                            </div>
-                          ) : null}
+                          <Select placeholder='Bayi Seviyesini Seçiniz...' size='md' onChange={handleChange} value={selectedPartner} >
+                            <option value='Bronze'>Bronze</option>
+                            <option value='Silver'>Silver</option>
+                            <option value='Gold'>Gold</option>
+                            <option value='Platinium'>Platinium</option>
+                            <option value='Titanium'>Titanium</option>
+                          </Select>
                         </Box>
+
                         <Popover
                           returnFocusOnClose={false}
                           isOpen={isOpen}
