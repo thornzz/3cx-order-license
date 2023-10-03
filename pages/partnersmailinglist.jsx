@@ -199,6 +199,7 @@ const PartnersMailingList = (props) => {
                         </Box>
                         <Box flex="1" mr="2">
                           <Select placeholder='Bayi Seviyesini Seçiniz...' size='md' onChange={handleChange} value={selectedPartner} >
+                          <option value='Trainee'>Trainee</option>
                             <option value='Bronze'>Bronze</option>
                             <option value='Silver'>Silver</option>
                             <option value='Gold'>Gold</option>
