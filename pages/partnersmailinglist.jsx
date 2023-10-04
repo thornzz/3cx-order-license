@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
@@ -22,36 +22,70 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
-import dynamic from "next/dynamic";
-import "react-quill/dist/quill.snow.css";
 import Head from "next/head";
 import { toast } from "react-toastify";
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import "jodit";
+import "jodit/build/jodit.min.css";
+import dynamic from "next/dynamic";
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
-
-
-const QuillNoSSRWrapper = dynamic(import("react-quill"), {
-  ssr: false,
-  loading: () => <p>Editör yükleniyor ...</p>,
-});
-const modules = {
-  toolbar: [
-    [{ header: "1" }, { header: "2" }, { header: "3" }, { font: [] }],
-    [{ size: [] }],
-    ["bold", "italic", "underline", "blockquote"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["link", "image"],
-    [{ align: [] }],
-    [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-
-  ],
-  clipboard: {
-    // toggle to add extralökkğiş line breaks when pasting HTML:
-    matchVisual: false,
-  },
-};
 const PartnersMailingList = (props) => {
+  const editor = useRef(null);
+  const buttons = [
+    "undo",
+    "redo",
+    "|",
+    "bold",
+    "underline",
+    "italic",
+    "|",
+    "align",
+    "|",
+    "ul",
+    "ol",
+    "outdent",
+    "indent",
+    "|",
+    "font",
+    "fontsize",
+    "brush",
+    "paragraph",
+    "|",
+    "image",
+    "link",
+    "table",
+    "|",
+    "hr",
+    "eraser",
+    "copyformat",
+    "|",
+    "fullsize",
+    "selectall",
+    "|",
+    "source",
+    "|"];
+  const editorConfig = {
+    readonly: false,
+    toolbar: true,
+    spellcheck: true,
+    language: "tr",
+    toolbarButtonSize: "medium",
+    toolbarAdaptive: false,
+    showCharsCounter: true,
+    showWordsCounter: true,
+    showXPathInStatusbar: false,
+    askBeforePasteHTML: true,
+    askBeforePasteFromWord: true,
+    //defaultActionOnPaste: "insert_clear_html",
+    buttons: buttons,
+    uploader: {
+      insertImageAsBase64URI: true
+    },
+    width: 1250,
+    height: 600
+  };
   const router = useRouter();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,13 +99,12 @@ const PartnersMailingList = (props) => {
   };
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required('Konu başlığı girilmeli')
+    title: Yup.string().required("Konu başlığı girilmeli"),
   });
-
 
   const formik = useFormik({
     initialValues: {
-      title: ''
+      title: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -82,7 +115,7 @@ const PartnersMailingList = (props) => {
           var requestObj = {
             title: values.title,
             content: content,
-            selectedPartner: selectedPartner
+            selectedPartner: selectedPartner,
           };
           const response = await fetch("/api/sendmail/partners/", {
             method: "POST",
@@ -91,7 +124,6 @@ const PartnersMailingList = (props) => {
             },
             body: JSON.stringify(requestObj),
           });
-
 
           if (response.ok) {
             // İstek başarıyla tamamlandı, beklemek gerekmiyor
@@ -140,7 +172,7 @@ const PartnersMailingList = (props) => {
           theme: "dark",
         });
       }
-    }
+    },
   });
 
   useEffect(() => {
@@ -171,7 +203,7 @@ const PartnersMailingList = (props) => {
                 height="800px" // Yükseklik ayarı (örnek olarak 90vh)
               >
                 <Flex justify="center" align="center" width="100%">
-                  <Box width="90%">
+                  <Box width="95%" height="90%">
                     <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>
                       Bayi İletişim Formu (Test MODE)
                     </h1>
@@ -190,7 +222,7 @@ const PartnersMailingList = (props) => {
                           />
                           {formik.touched.title && formik.errors.title ? (
                             <div className="error" style={{ marginTop: "5px" }}>
-                              <Alert status='error'>
+                              <Alert status="error">
                                 <AlertIcon />
                                 {formik.errors.title}
                               </Alert>
@@ -198,12 +230,17 @@ const PartnersMailingList = (props) => {
                           ) : null}
                         </Box>
                         <Box flex="1" mr="2">
-                          <Select placeholder='Bayi Seviyesini Seçiniz...' size='md' onChange={handleChange} value={selectedPartner} >
-                            <option value='Bronze'>Bronze</option>
-                            <option value='Silver'>Silver</option>
-                            <option value='Gold'>Gold</option>
-                            <option value='Platinium'>Platinium</option>
-                            <option value='Titanium'>Titanium</option>
+                          <Select
+                            placeholder="Bayi Seviyesini Seçiniz..."
+                            size="md"
+                            onChange={handleChange}
+                            value={selectedPartner}
+                          >
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinium">Platinium</option>
+                            <option value="Titanium">Titanium</option>
                           </Select>
                         </Box>
 
@@ -222,7 +259,6 @@ const PartnersMailingList = (props) => {
                               colorScheme="twitter"
                               leftIcon={<TfiEmail />}
                               marginBottom={"5px"}
-
                             >
                               Email Gönder
                             </Button>
@@ -262,16 +298,16 @@ const PartnersMailingList = (props) => {
                           </PopoverContent>
                         </Popover>
                       </Flex>
-                      <QuillNoSSRWrapper
-                        modules={modules}
-                        onChange={setContent}
-                        value={content}
-                        theme="snow"
-                        style={{ height: "500px" }}
-                        spellcheck="false"
-                        placeholder={"E-mail içeriği..."}
-                      />
 
+                      <JoditEditor
+                      config={editorConfig}
+                        ref={editor}
+                        value={content}
+                        tabIndex={1} // tabIndex of textarea
+                        onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
+                        onChange={(newContent) => {}}
+                       
+                      />
                     </form>
                   </Box>
                 </Flex>
