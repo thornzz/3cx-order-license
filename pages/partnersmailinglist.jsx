@@ -230,17 +230,13 @@ const PartnersMailingList = (props) => {
                           ) : null}
                         </Box>
                         <Box flex="1" mr="2">
-                          <Select
-                            placeholder="Bayi Seviyesini Seçiniz..."
-                            size="md"
-                            onChange={handleChange}
-                            value={selectedPartner}
-                          >
-                            <option value="Bronze">Bronze</option>
-                            <option value="Silver">Silver</option>
-                            <option value="Gold">Gold</option>
-                            <option value="Platinium">Platinium</option>
-                            <option value="Titanium">Titanium</option>
+                          <Select placeholder='Bayi Seviyesini Seçiniz...' size='md' onChange={handleChange} value={selectedPartner} >
+                          <option value='Trainee'>Trainee</option>
+                            <option value='Bronze'>Bronze</option>
+                            <option value='Silver'>Silver</option>
+                            <option value='Gold'>Gold</option>
+                            <option value='Platinium'>Platinium</option>
+                            <option value='Titanium'>Titanium</option>
                           </Select>
                         </Box>
 
