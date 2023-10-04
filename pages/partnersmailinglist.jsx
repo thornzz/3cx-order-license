@@ -1,9 +1,8 @@
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
+  Form,
   Select,
   Alert,
   AlertIcon,
@@ -31,7 +30,6 @@ import dynamic from "next/dynamic";
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const PartnersMailingList = (props) => {
- 
   const editor = useRef(null);
   const buttons = [
     "undo",
@@ -65,7 +63,8 @@ const PartnersMailingList = (props) => {
     "selectall",
     "|",
     "source",
-    "|"];
+    "|",
+  ];
   const editorConfig = {
     readonly: false,
     toolbar: true,
@@ -76,21 +75,81 @@ const PartnersMailingList = (props) => {
     showCharsCounter: true,
     showWordsCounter: true,
     showXPathInStatusbar: false,
-    askBeforePasteHTML: true,
-    askBeforePasteFromWord: true,
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
     //defaultActionOnPaste: "insert_clear_html",
     buttons: buttons,
+    // uploader: {
+    //   insertImageAsBase64URI: true,
+    // },
     uploader: {
-      insertImageAsBase64URI: true
+      url: '/api/upload',  //your upload api url
+      insertImageAsBase64URI: false, 
+      imagesExtensions: ['jpg', 'png', 'jpeg', 'gif'],
+      //headers: {"token":`${db.token}`},
+      filesVariableName: function (t) {
+        return 'files[' + t + ']';
+      }, //"files",
+      withCredentials: false,
+      pathVariableName: 'path',
+      format: 'json',
+      method: 'POST',
+      prepareData: function (formdata) {
+        return formdata;
+      },
+      isSuccess: function (e) {
+        console.log(e)
+        return e.success
+      },
+      getMessage: function (e) {
+        return void 0 !== e.data.messages && Array.isArray(e.data.messages)
+          ? e.data.messages.join('')
+          : '';
+      },
+      process: function (resp) {
+        console.log('resp',resp) //success callback transfrom data to defaultHandlerSuccess use.it's up to you.
+        let files = [];
+        files.unshift(resp.data);
+        return {
+          files: resp.data,
+          error: resp.msg,
+          msg: resp.msg,
+        };
+      },
+      error(e) { 
+        this.j.e.fire('errorMessage', e.message, 'error', 4000);
+      },
+      defaultHandlerSuccess(resp) { // `this` is the editor.
+        const j = this;
+        
+        if (resp.files && resp.files.length) {
+          const tagName = 'img';
+          resp.files.forEach((filename, index) => { //edetor insertimg function
+            const elm = j.createInside.element(tagName);
+            elm.setAttribute('src', filename);
+            j.s.insertImage(elm, null, j.o.imageDefaultWidth);
+          });
+        }
+      },
+      defaultHandlerError(e) {
+        this.j.e.fire('errorMessage', e.message);
+      },
+      contentType: function (e) {
+        return (
+          (void 0 === this.jodit.ownerWindow.FormData || 'string' == typeof e) &&
+          'application/x-www-form-urlencoded; charset=UTF-8'
+        );
+      },
     },
-    width: '100%',
-    height: 600
+   
+    width: "100%",
+    height: 600,
   };
-  const router = useRouter();
+
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const { isOpen, onToggle, onClose } = useDisclosure();
-  const { data: session, status: isLoaded } = useSession();
+
   const [selectedPartner, setSelectedPartner] = useState("");
 
   const handleChange = (event) => {
@@ -175,15 +234,7 @@ const PartnersMailingList = (props) => {
     },
   });
 
-  useEffect(() => {
-    if (isLoaded !== "authenticated") {
-      router.push("/login");
-    }
-  }, [isLoaded, session]);
-
-  return isLoaded !== "authenticated" ? (
-    <div>Sayfa yükleniyor...</div>
-  ) : (
+  return (
     <>
       <div>
         <Head>
@@ -230,13 +281,18 @@ const PartnersMailingList = (props) => {
                           ) : null}
                         </Box>
                         <Box flex="1" mr="2">
-                          <Select placeholder='Bayi Seviyesini Seçiniz...' size='md' onChange={handleChange} value={selectedPartner} >
-                          <option value='Trainee'>Trainee</option>
-                            <option value='Bronze'>Bronze</option>
-                            <option value='Silver'>Silver</option>
-                            <option value='Gold'>Gold</option>
-                            <option value='Platinium'>Platinium</option>
-                            <option value='Titanium'>Titanium</option>
+                          <Select
+                            placeholder="Bayi Seviyesini Seçiniz..."
+                            size="md"
+                            onChange={handleChange}
+                            value={selectedPartner}
+                          >
+                            <option value="Trainee">Trainee</option>
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinium">Platinium</option>
+                            <option value="Titanium">Titanium</option>
                           </Select>
                         </Box>
 
@@ -294,17 +350,15 @@ const PartnersMailingList = (props) => {
                           </PopoverContent>
                         </Popover>
                       </Flex>
-
-                      <JoditEditor
-                      config={editorConfig}
-                        ref={editor}
-                        value={content}
-                        tabIndex={1} // tabIndex of textarea
-                        onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
-                        onChange={(newContent) => {}}
-                       
-                      />
                     </form>
+                    <JoditEditor
+                      config={editorConfig}
+                      ref={editor}
+                      value={content}
+                      tabIndex={1} // tabIndex of textarea
+                      onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
+                      onChange={(newContent) => {}}
+                    />
                   </Box>
                 </Flex>
               </Box>
