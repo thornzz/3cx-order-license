@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
-  Form,
   Select,
   Alert,
   AlertIcon,
@@ -83,31 +82,30 @@ const PartnersMailingList = (props) => {
     //   insertImageAsBase64URI: true,
     // },
     uploader: {
-      url: '/api/upload',  //your upload api url
-      insertImageAsBase64URI: false, 
-      imagesExtensions: ['jpg', 'png', 'jpeg', 'gif'],
+      url: "/api/upload", //your upload api url
+      insertImageAsBase64URI: false,
+      imagesExtensions: ["jpg", "png", "jpeg", "gif"],
       //headers: {"token":`${db.token}`},
       filesVariableName: function (t) {
-        return 'files[' + t + ']';
+        return "files[" + t + "]";
       }, //"files",
       withCredentials: false,
-      pathVariableName: 'path',
-      format: 'json',
-      method: 'POST',
+      pathVariableName: "path",
+      format: "json",
+      method: "POST",
       prepareData: function (formdata) {
         return formdata;
       },
       isSuccess: function (e) {
-        console.log(e)
-        return e.success
+        return e.success;
       },
       getMessage: function (e) {
         return void 0 !== e.data.messages && Array.isArray(e.data.messages)
-          ? e.data.messages.join('')
-          : '';
+          ? e.data.messages.join("")
+          : "";
       },
       process: function (resp) {
-        console.log('resp',resp) //success callback transfrom data to defaultHandlerSuccess use.it's up to you.
+       //success callback transfrom data to defaultHandlerSuccess use.it's up to you.
         let files = [];
         files.unshift(resp.data);
         return {
@@ -116,32 +114,37 @@ const PartnersMailingList = (props) => {
           msg: resp.msg,
         };
       },
-      error(e) { 
-        this.j.e.fire('errorMessage', e.message, 'error', 4000);
+      error(e) {
+        this.j.e.fire("errorMessage", e.message, "error", 4000);
       },
-      defaultHandlerSuccess(resp) { // `this` is the editor.
+      defaultHandlerSuccess(resp) {
+        // `this` is the editor.
         const j = this;
-        
+       console.log("resp", resp);
+      
+
         if (resp.files && resp.files.length) {
-          const tagName = 'img';
-          resp.files.forEach((filename, index) => { //edetor insertimg function
+          const tagName = "img";
+          resp.files.forEach((filename, index) => {
+            //edetor insertimg function
             const elm = j.createInside.element(tagName);
-            elm.setAttribute('src', filename);
+            elm.setAttribute("src", filename);
             j.s.insertImage(elm, null, j.o.imageDefaultWidth);
           });
         }
       },
       defaultHandlerError(e) {
-        this.j.e.fire('errorMessage', e.message);
+        this.j.e.fire("errorMessage", e.message);
       },
       contentType: function (e) {
         return (
-          (void 0 === this.jodit.ownerWindow.FormData || 'string' == typeof e) &&
-          'application/x-www-form-urlencoded; charset=UTF-8'
+          (void 0 === this.jodit.ownerWindow.FormData ||
+            "string" == typeof e) &&
+          "application/x-www-form-urlencoded; charset=UTF-8"
         );
       },
     },
-   
+
     width: "100%",
     height: 600,
   };

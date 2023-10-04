@@ -6,9 +6,11 @@ export default async function handler(req, res) {
     const emailData = await req.body;
 
     //const partners = await getPartners();
+    
     const partners = [
       {
         PartnerId: '205522',
+        ContactName: 'İbrahim AKGÜN',
         CompanyName: 'Bilisim Bilgisayar Ltd.Sti.',
         PartnerLevelName: 'Bronze Partner',
         Email: 'ibrahimak@gmail.com'
@@ -16,19 +18,19 @@ export default async function handler(req, res) {
      
       {
         PartnerId: '219991',
+        ContactName: 'Esra AYBEK',
         CompanyName: 'Pro-Sistem Bilgisayar',
         PartnerLevelName: 'Gold Partner',
         Email: 'esra@k2mbilisim.com'
       },
       {
         PartnerId: '227218',
+        ContactName: 'Mustafa GÖZTÜR',
         CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
         PartnerLevelName: 'Silver Partner',
         Email: 'mustafa@k2mbilisim.com'
       }]
 
-    console.log(partners)
-    console.log(partners.length)
     const filteredPartnerData = partners.filter(partner => partner.PartnerLevelName.includes(emailData.selectedPartner));
 
     for (const partner of filteredPartnerData) {
@@ -74,7 +76,7 @@ export default async function handler(req, res) {
           to: partner.Email,
           subject: emailData.title,
           text: "",
-          html: emailData.content
+          html: emailData.content.replace('#CONTACT_NAME#', partner.ContactName).replace('#PARTNER_NAME#', partner.CompanyName)
         };
 
         return new Promise((resolve, reject) => {
