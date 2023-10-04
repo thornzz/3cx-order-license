@@ -26,12 +26,12 @@ import Head from "next/head";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import "jodit";
-import "jodit/build/jodit.min.css";
 import dynamic from "next/dynamic";
+
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const PartnersMailingList = (props) => {
+ 
   const editor = useRef(null);
   const buttons = [
     "undo",
