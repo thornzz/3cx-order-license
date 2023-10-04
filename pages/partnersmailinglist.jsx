@@ -83,7 +83,7 @@ const PartnersMailingList = (props) => {
     uploader: {
       insertImageAsBase64URI: true
     },
-    width: 1250,
+    width: '100%',
     height: 600
   };
   const router = useRouter();
