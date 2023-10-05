@@ -123,7 +123,7 @@ export default async function handler(req, res) {
           to: email,
           subject: emailData.title,
           text: "",
-          html: emailData.content
+          html: emailData.content.replace('#CONTACT_NAME#', 'Yetkili').replace('#PARTNER_NAME#', 'Yetkili')
         };
 
         const sendPromise = new Promise((resolve, reject) => {

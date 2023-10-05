@@ -80,7 +80,25 @@ const PartnersMailingList = (props) => {
     askBeforePasteFromWord: false,
     placeholder: "",
     //defaultActionOnPaste: "insert_clear_html",
+    controls: {
+      params: {
+        name: "Params",
+        list: {
+          first: "first",
+          second: "second",
+        },
+        childTemplate: (editor, key,value) => {
+          return `<span>${key}</span>`;
+        },
+        exec: function (editor, t, { control }) {
+          console.log(control.args);
+          editor.selection.insertHTML(control.args);
+        },
+      },
+    },
     buttons: buttons,
+    extraButtons: ["params"],
+
     // uploader: {
     //   insertImageAsBase64URI: true,
     // },
@@ -204,7 +222,7 @@ const PartnersMailingList = (props) => {
         // İstek başarıyla tamamlandı, beklemek gerekmiyor
         setLoading(false);
         setContent("");
-       handleTitleChange("");
+        handleTitleChange("");
         setSelectedPartner([]);
         setOptionalPartnerEmails([]);
         setTriggerEmailReset(triggerEmailReset + 1);
@@ -221,11 +239,7 @@ const PartnersMailingList = (props) => {
         });
       } else {
         setLoading(false);
-        setContent("");
-        handleTitleChange("");
-        setSelectedPartner([]);
-        setOptionalPartnerEmails([]);
-        setTriggerEmailReset(triggerEmailReset + 1);
+
         // İstek başarısız oldu, hata mesajını kullanıcıya göster
         const errorData = await response.json();
         toast.error(errorData.error, {
@@ -242,11 +256,7 @@ const PartnersMailingList = (props) => {
     } catch (error) {
       console.error(error);
       setLoading(false);
-      setContent("");
-      handleTitleChange("");
-      setSelectedPartner([]);
-      setOptionalPartnerEmails([]);
-      setTriggerEmailReset(triggerEmailReset + 1);
+
       toast.error("Bir hata oluştu, lütfen tekrar deneyin.", {
         position: "top-center",
         autoClose: 1500,
@@ -358,7 +368,6 @@ const PartnersMailingList = (props) => {
                             handleTitleChange(e.target.value);
                           }}
                           value={title}
-                          
                         />
                         {/* {title === null || title === "" ? (
                           <div className="error" style={{ marginTop: "5px" }}>
