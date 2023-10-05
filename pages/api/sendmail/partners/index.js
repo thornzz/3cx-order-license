@@ -4,9 +4,9 @@ export default async function handler(req, res) {
   try {
 
     const emailData = await req.body;
-
+    console.log(emailData);
     //const partners = await getPartners();
-    
+
     const partners = [
       {
         PartnerId: '205522',
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         PartnerLevelName: 'Bronze Partner',
         Email: 'ibrahimak@gmail.com'
       },
-     
+
       {
         PartnerId: '219991',
         ContactName: 'Esra AYBEK',
@@ -29,13 +29,32 @@ export default async function handler(req, res) {
         CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
         PartnerLevelName: 'Silver Partner',
         Email: 'mustafa@k2mbilisim.com'
-      }]
+      },
+      {
+        PartnerId: '219991',
+        ContactName: 'Emre Dikici',
+        CompanyName: 'Pro-System',
+        PartnerLevelName: 'Platinium Partner',
+        Email: 'emre@k2mbilisim.com'
+      },
+      {
+        PartnerId: '219991',
+        ContactName: 'Recep Karabacak',
+        CompanyName: 'K2M Bilişim',
+        PartnerLevelName: 'Titanium Partner',
+        Email: 'recep@k2mbilisim.com'
+      },
+    ]
 
-    const filteredPartnerData = partners.filter(partner => partner.PartnerLevelName.includes(emailData.selectedPartner));
+    const selectedPartners = emailData.selectedPartner.map(item => item.label);
 
-    for (const partner of filteredPartnerData) {
-      console.log(partner.CompanyName);
-    }
+    const filteredPartnerData = partners.filter(partner => selectedPartners.some(label => partner.PartnerLevelName.includes(label)));
+
+    // console.log(filteredPartnerData);
+
+    // for (const partner of filteredPartnerData) {
+    //   console.log(partner.CompanyName);
+    // }
 
     // const countsByPartnerLevel = {};
 
@@ -52,7 +71,7 @@ export default async function handler(req, res) {
     // Log the counts to the console
     // console.log('Counts by PartnerLevelName:', countsByPartnerLevel);
 
-    if (filteredPartnerData.length === 0) {
+    if (filteredPartnerData.length === 0 && emailData.optionalPartnerEmails.length === 0) {
       throw new Error('No matching partners found.');
     }
 
@@ -70,7 +89,10 @@ export default async function handler(req, res) {
         requireTLS: true,
       });
 
-      const sendEmailPromises = filteredPartnerData.map(partner => {
+      const sendEmailPromises = [];
+
+      // filteredPartnerData içindeki partnerlere e-posta gönderin
+      for (const partner of filteredPartnerData) {
         const mailData = {
           from: 'K2M Bilişim Bilgilendirme <info@k2mbilisim.com>',
           to: partner.Email,
@@ -79,7 +101,7 @@ export default async function handler(req, res) {
           html: emailData.content.replace('#CONTACT_NAME#', partner.ContactName).replace('#PARTNER_NAME#', partner.CompanyName)
         };
 
-        return new Promise((resolve, reject) => {
+        const sendPromise = new Promise((resolve, reject) => {
           transporter.sendMail(mailData, function (err, info) {
             if (err) {
               console.error(`Error sending email to ${partner.CompanyName}: ${err.message}`);
@@ -90,8 +112,36 @@ export default async function handler(req, res) {
             }
           });
         });
-      });
 
+        sendEmailPromises.push(sendPromise);
+      }
+
+      // optionalPartnerEmails içindeki e-posta adreslerine de e-posta gönderin
+      for (const email of emailData.optionalPartnerEmails) {
+        const mailData = {
+          from: 'K2M Bilişim Bilgilendirme <info@k2mbilisim.com>',
+          to: email,
+          subject: emailData.title,
+          text: "",
+          html: emailData.content
+        };
+
+        const sendPromise = new Promise((resolve, reject) => {
+          transporter.sendMail(mailData, function (err, info) {
+            if (err) {
+              console.error(`Error sending email to ${email}: ${err.message}`);
+              reject(err);
+            } else {
+              console.log(`Email sent to ${email}: ${info.response}`);
+              resolve(info.response);
+            }
+          });
+        });
+
+        sendEmailPromises.push(sendPromise);
+      };
+
+      // Tüm e-posta gönderimlerini bekleyin
       try {
         const sendResults = await Promise.all(sendEmailPromises);
         console.log('All emails sent successfully.');

@@ -4,11 +4,17 @@ import { RecoilRoot } from "recoil";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { SessionProvider } from "next-auth/react";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider ,extendTheme} from "@chakra-ui/react";
+import {  MultiSelectTheme } from 'chakra-multiselect'
 
 function MyApp({ Component, pageProps }) {
+  const theme = extendTheme({
+    components: {
+      MultiSelect: MultiSelectTheme
+    }
+  })
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <RecoilRoot>
         <SessionProvider session={pageProps.session}>
           <Component {...pageProps} />
