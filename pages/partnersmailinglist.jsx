@@ -82,17 +82,21 @@ const PartnersMailingList = (props) => {
     //defaultActionOnPaste: "insert_clear_html",
     controls: {
       params: {
-        name: "Params",
+        name: "Parametreler",
         list: {
-          first: "first",
-          second: "second",
+          PARTNER_NAME: "#PARTNER_NAME#",
+          CONTACT_NAME: "#CONTACT_NAME#",
         },
         childTemplate: (editor, key,value) => {
           return `<span>${key}</span>`;
         },
         exec: function (editor, t, { control }) {
-          console.log(control.args);
-          editor.selection.insertHTML(control.args);
+          if (!control || !control.args || control.args.length === 0) {
+            console.error("control.args boş veya tanımsız.");
+            return;
+          }
+          editor.selection.insertHTML(control.args[1]);
+          
         },
       },
     },

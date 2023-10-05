@@ -9,7 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 import { Dropdown } from "flowbite-react";
 import { HiLogout, HiOutlineDocumentReport, HiViewGrid } from "react-icons/hi";
 import { FiMail } from "react-icons/fi";
-import { AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser,AiOutlineHistory } from "react-icons/ai";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { cartLength } from "../atoms/shoppingCartAtom";
 import { useRecoilValue } from "recoil";
@@ -36,7 +36,7 @@ import {
   HStack,
   Spacer,
 } from "@chakra-ui/react";
-import { Container } from "postcss";
+
 
 function Navbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -88,7 +88,13 @@ function Navbar() {
               <Box ml={1}>
                 <Link href={"/partnersmailinglist"}>
                  
-                  <Icon as={FiMail} w="7" h="7" /> Mailing List
+                  <Icon as={FiMail} w="7" h="7" /> Mail Formu
+                </Link>
+              </Box>
+              <Box ml={1}>
+                <Link href={"/mailhistory"}>
+                 
+                  <Icon as={AiOutlineHistory} w="7" h="7" /> Mail Geçmişi
                 </Link>
               </Box>
               <Flex ml={1} alignItems="flex-start">
