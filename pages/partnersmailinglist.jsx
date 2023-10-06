@@ -1,4 +1,9 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
+import {
+  addDoc,
+  collection,
+} from "firebase/firestore";
+import { db } from "../firebase/index";
 import { TfiEmail } from "react-icons/tfi";
 import {
   Input,
@@ -28,6 +33,7 @@ import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { debounce } from "lodash";
 import { EmailChipInput } from "../utility/Components/EmailChipInput";
+import { DateTime } from "luxon";
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 const PartnersMailingList = (props) => {
@@ -174,7 +180,8 @@ const PartnersMailingList = (props) => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const { isOpen, onToggle, onClose } = useDisclosure();
-
+  const moment = require("moment");
+  const currentDatetime = moment().format('DD.MM.YYYY HH:mm');
   const [selectedPartner, setSelectedPartner] = useState([]);
 
   const partnerLevels = [
@@ -213,6 +220,7 @@ const PartnersMailingList = (props) => {
         content: content,
         selectedPartner: selectedPartner,
         optionalPartnerEmails: optionalPartnerEmails,
+        DateTime: currentDatetime
       };
       const response = await fetch("/api/sendmail/partners/", {
         method: "POST",
@@ -223,6 +231,10 @@ const PartnersMailingList = (props) => {
       });
 
       if (response.ok) {
+        //request objesini mail history collection'ına kaydet
+
+        await addDoc(collection(db, "mailhistory"), { requestObj });
+
         // İstek başarıyla tamamlandı, beklemek gerekmiyor
         setLoading(false);
         setContent("");
@@ -230,6 +242,8 @@ const PartnersMailingList = (props) => {
         setSelectedPartner([]);
         setOptionalPartnerEmails([]);
         setTriggerEmailReset(triggerEmailReset + 1);
+
+       
 
         toast.success("İşlem başarıyla tamamlandı", {
           position: "top-center",
@@ -261,7 +275,7 @@ const PartnersMailingList = (props) => {
       console.error(error);
       setLoading(false);
 
-      toast.error("Bir hata oluştu, lütfen tekrar deneyin.", {
+      toast.error(error, {
         position: "top-center",
         autoClose: 1500,
         hideProgressBar: false,
