@@ -89,6 +89,7 @@ const LicensesTable = (props) => {
     setlicenseRenewModal(!openLicenseRenewModal);
   };
   const sortDateTime = (rowA, rowB) => {
+  
     let moment = require("moment");
     return (
       moment(rowA.DateTime, "DD.MM.YYYY").unix() -
