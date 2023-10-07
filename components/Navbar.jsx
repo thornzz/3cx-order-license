@@ -129,7 +129,7 @@ function Navbar() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <nav className="flex items-center justify-between bg-gray-900 shadow shadow-xl">
+      <nav className="flex items-center justify-between bg-gray-900 shadow shadow-xl w-full">
         <div className="flex items-center flex-shrink-0 text-white mr-6 mt-2">
           <Image
             src="/logo.png"

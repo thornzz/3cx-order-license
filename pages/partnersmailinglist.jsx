@@ -4,13 +4,12 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { addDoc, collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase/index";
 import { TfiEmail } from "react-icons/tfi";
+import { MdPersonSearch } from "react-icons/md";
 import {
   Input,
-  SimpleGrid,
-  VStack,
-  StackDivider,
-  Alert,
-  AlertIcon,
+  IconButton,
+  Spacer,
+  HStack,
   Box,
   Flex,
   Button,
@@ -24,6 +23,13 @@ import {
   PopoverArrow,
   PopoverCloseButton,
   useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { MultiSelect } from "chakra-multiselect";
 import Navbar from "../components/Navbar";
@@ -32,13 +38,16 @@ import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { debounce, get, set } from "lodash";
 import { EmailChipInput } from "../utility/Components/EmailChipInput";
+import DataTable from "react-data-table-component";
+import { getPartners } from "./api/getpartners";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
-const PartnersMailingList = () => {
+const PartnersMailingList = ({ partners }) => {
   //getting searchParams
   const searchParams = useSearchParams();
   const mail_id = searchParams.get("mail_id");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -58,7 +67,6 @@ const PartnersMailingList = () => {
       setOptionalPartnerEmails(
         getMailHistoryData[0].requestObj.optionalPartnerEmails
       );
-     
     }
 
     fetchData();
@@ -117,8 +125,8 @@ const PartnersMailingList = () => {
       params: {
         name: "Parametreler",
         list: {
-          PARTNER_NAME: "#PARTNER_NAME#",
-          CONTACT_NAME: "#CONTACT_NAME#",
+          FIRMA: "#PARTNER_NAME#",
+          "YETKILI KISI": "#CONTACT_NAME#",
         },
         childTemplate: (editor, key, value) => {
           return `<span>${key}</span>`;
@@ -200,9 +208,46 @@ const PartnersMailingList = () => {
     height: 500,
   };
 
+  const columns = [
+    {
+      name: "Bayi",
+      selector: (row) => row.CompanyName,
+    },
+    {
+      name: "Yetkili Kişi",
+      selector: (row) => row.ContactName,
+    },
+    {
+      name: "Telefon Numarası",
+      selector: (row) => row.ContactPhone,
+    },
+    {
+      name: "E-mail",
+      selector: (row) => row.Email,
+    },
+    {
+      name: "Partner Seviyesi",
+      selector: (row) => row.PartnerLevelName,
+    },
+  ];
+
+  const tableStyle = {
+    headCells: {
+      style: {
+        fontSize: "15px",
+        fontWeight: "bold",
+        color: "white",
+        backgroundColor: "#1C2541", // Pastel mavi tonuna karşılık gelen renk kodu
+      },
+    },
+  };
+
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const { isOpen, onToggle, onClose } = useDisclosure();
+  //const { isOpen, onToggle, onClose } = useDisclosure();
+  const modalDisclosure = useDisclosure(); // Modal için useDisclosure hook'u
+  const popoverDisclosure = useDisclosure(); // Popover için useDisclosure hook'u
+
   const moment = require("moment");
   const currentDatetime = moment().format("DD.MM.YYYY HH:mm");
   const [selectedPartner, setSelectedPartner] = useState([]);
@@ -219,14 +264,7 @@ const PartnersMailingList = () => {
     label,
     value: label.toLowerCase(),
   }));
-
-  // const handleChange = (event) => {
-  //   const { value } = event.target;
-  //   setSelectedPartner(value);
-  // };
-
   const [title, setTitle] = useState("");
-
   const handleTitleChange = debounce((value) => {
     setTitle(value);
   }, 3); // 3
@@ -234,10 +272,16 @@ const PartnersMailingList = () => {
   const [optionalPartnerEmails, setOptionalPartnerEmails] = useState([]);
   const [triggerEmailReset, setTriggerEmailReset] = useState(0);
 
+  const filteredPartners = partners?.filter((item) =>
+    [item.CompanyName, item.ContactName,item.PartnerLevelName]
+      .map((val) => val.toLowerCase())
+      .some((val) => val.includes(searchText.toLowerCase()))
+  );
+
   const submitHandler = async () => {
     try {
       setLoading(true);
-      onToggle();
+      popoverDisclosure.onToggle();
       var requestObj = {
         title: title,
         content: content,
@@ -311,132 +355,190 @@ const PartnersMailingList = () => {
 
   return (
     <>
+      <Modal
+        onClose={modalDisclosure.onClose}
+        size={"5xl"}
+        isOpen={modalDisclosure.isOpen}
+      >
+        <ModalOverlay
+          bg="none"
+          backdropFilter="auto"
+          backdropInvert="80%"
+          backdropBlur="2px"
+        />
+        <ModalContent>
+          <ModalHeader>Bayi Listesi</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <div
+              style={{
+                flex: "1",
+                width: "100%",
+                maxHeight: "50vh", // İçeriğin maksimum yüksekliği
+                overflowY: "auto", // Yalnızca dikey scrollbar görüntülenir
+              }}
+            >
+              <DataTable
+                customStyles={tableStyle}
+                columns={columns}
+                data={filteredPartners}
+                noDataComponent={"Herhangi bir kayıt bulunamadı"}
+                subHeader
+                subHeaderComponent={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <h3 style={{ margin: "0 10px" }}>Ara :</h3>
+                    <input
+                      type="text"
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      style={{
+                        border: "none",
+                        borderBottom: "1px solid black",
+                      }}
+                    />
+                  </div>
+                }
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={modalDisclosure.onClose}>
+              Kapat
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <div>
         <Head>
           <title>Bayi İletişim</title>
           <meta name="description" content="3CX Order License" />
         </Head>
         <main>
-          <Navbar />
-          <div style={{ paddingTop: "50px" }}>
-            <Flex justify="center" align="center" h="85vh">
-              <Box
-                bg="white" // Arka plan rengi
-                p="6" // Padding
-                borderRadius="md" // Köşe yuvarlama
-                boxShadow="lg" // Gölge efekti
-                width="70%" // Genişlik ayarı (örnek olarak %90)
-                height="92h" // Yükseklik ayarı (örnek olarak 90vh)
-              >
-                <Flex justify="center" align="center" width="100%">
-                  <Box width="95%" height="90%">
-                    <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>
-                      Bayi İletişim Formu (Test)
-                    </h1>
-                    <Box className="flex justify-end">
-                      <Popover
-                        returnFocusOnClose={false}
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        placement="bottom"
-                        closeOnBlur={false}
-                      >
-                        <PopoverTrigger>
-                          <Button
-                            isLoading={loading}
-                            onClick={onToggle}
-                            size="md"
-                            colorScheme="twitter"
-                            leftIcon={<TfiEmail />}
-                            marginBottom={"5px"}
-                          >
-                            Gönderme işlemini başlat
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          color="white"
-                          bg="blue.800"
-                          borderColor="blue.800"
-                        >
-                          <PopoverHeader pt={4} fontWeight="bold" border="0">
-                            İşlem onayı
-                          </PopoverHeader>
-                          <PopoverArrow />
-                          <PopoverCloseButton />
-                          <PopoverBody>
-                            Gönderme işlemine devam edilsin mi?
-                          </PopoverBody>
-                          <PopoverFooter
-                            border="0"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            pb={4}
-                          >
-                            <ButtonGroup size="sm">
-                              <Button
-                                colorScheme="green"
-                                onClick={submitHandler}
-                              >
-                                Onayla
-                              </Button>
-                              <Button colorScheme="red" onClick={onToggle}>
-                                İptal
-                              </Button>
-                            </ButtonGroup>
-                          </PopoverFooter>
-                        </PopoverContent>
-                      </Popover>
-                    </Box>
-                    <form>
-                      <Box mt="2">
-                        <MultiSelect
-                          options={optionsPartners}
-                          value={selectedPartner}
-                          label="Bayi seviyesini seçiniz..."
-                          onChange={setSelectedPartner}
-                        />
-                      </Box>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column", // Dikey hizalama
+              alignItems: "center", // Ortaya hizalama
+              minHeight: "100vh",
+            }}
+          >
+            <Navbar />
 
-                      <Box mt="2" mb="2">
-                        <Input
-                          type="text"
-                          name="title"
-                          placeholder="Konu başlığı..."
-                          onChange={(e) => {
-                            handleTitleChange(e.target.value);
-                          }}
-                          value={title}
-                        />
-                        {/* {title === null || title === "" ? (
-                          <div className="error" style={{ marginTop: "5px" }}>
-                            <Alert status="error">
-                              <AlertIcon />
-                              Konu başlığı girilmeli
-                            </Alert>
-                          </div>
-                        ) : null} */}
-                      </Box>
-                      <Box>
-                        <EmailChipInput
-                          setOptionalPartnerEmails={setOptionalPartnerEmails}
-                          triggerEmailReset={triggerEmailReset}
-                          triggerEmailAdd={optionalPartnerEmails}
-                        />
-                      </Box>
-                    </form>
-                    <JoditEditor
-                      config={editorConfig}
-                      ref={editor}
-                      value={content}
-                      tabIndex={1} // tabIndex of textarea
-                      onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
-                      onChange={(newContent) => {}}
-                    />
-                  </Box>
-                </Flex>
-              </Box>
-            </Flex>
+            <Box
+              bg="white" // Arka plan rengi
+              p="4" // Padding
+              borderRadius="md" // Köşe yuvarlama
+              boxShadow="lg" // Gölge efekti
+              height="100h"
+              mt="5" // Yükseklik ayarı (örnek olarak 90vh)
+            >
+              <HStack spacing="24px">
+                <IconButton
+                  colorScheme="red"
+                  aria-label="Bayi listesi"
+                  icon={<MdPersonSearch />}
+                  onClick={modalDisclosure.onOpen}
+                />
+                <Spacer />
+                <Box>
+                  <Popover
+                    returnFocusOnClose={false}
+                    isOpen={popoverDisclosure.isOpen}
+                    onClose={popoverDisclosure.onClose}
+                    placement="bottom"
+                    closeOnBlur={false}
+                  >
+                    <PopoverTrigger>
+                      <Button
+                        isLoading={loading}
+                        onClick={popoverDisclosure.onToggle}
+                        size="md"
+                        colorScheme="twitter"
+                        leftIcon={<TfiEmail />}
+                        marginBottom={"5px"}
+                      >
+                        Gönder
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      color="white"
+                      bg="blue.800"
+                      borderColor="blue.800"
+                    >
+                      <PopoverHeader pt={4} fontWeight="bold" border="0">
+                        İşlem onayı
+                      </PopoverHeader>
+                      <PopoverArrow />
+                      <PopoverCloseButton />
+                      <PopoverBody>
+                        Gönderme işlemine devam edilsin mi?
+                      </PopoverBody>
+                      <PopoverFooter
+                        border="0"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        pb={4}
+                      >
+                        <ButtonGroup size="sm">
+                          <Button colorScheme="green" onClick={submitHandler}>
+                            Onayla
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            onClick={popoverDisclosure.onToggle}
+                          >
+                            İptal
+                          </Button>
+                        </ButtonGroup>
+                      </PopoverFooter>
+                    </PopoverContent>
+                  </Popover>
+                </Box>
+              </HStack>
+              <Flex justify="center" align="center" width="100%">
+                <Box width="100%" height="90%">
+                  <form>
+                    <Box mt="2">
+                      <MultiSelect
+                        options={optionsPartners}
+                        value={selectedPartner}
+                        label="Bayi seviyesini seçiniz..."
+                        onChange={setSelectedPartner}
+                      />
+                    </Box>
+
+                    <Box mt="2" mb="2">
+                      <Input
+                        type="text"
+                        name="title"
+                        placeholder="Konu başlığı..."
+                        onChange={(e) => {
+                          handleTitleChange(e.target.value);
+                        }}
+                        value={title}
+                      />
+                    </Box>
+                    <Box>
+                      <EmailChipInput
+                        setOptionalPartnerEmails={setOptionalPartnerEmails}
+                        triggerEmailReset={triggerEmailReset}
+                        triggerEmailAdd={optionalPartnerEmails}
+                      />
+                    </Box>
+                  </form>
+                  <JoditEditor
+                    config={editorConfig}
+                    ref={editor}
+                    value={content}
+                    tabIndex={1}
+                    onBlur={(newContent) => setContent(newContent)}
+                    onChange={(newContent) => {}}
+                  />
+                </Box>
+              </Flex>
+            </Box>
           </div>
         </main>
       </div>
@@ -444,3 +546,12 @@ const PartnersMailingList = () => {
   );
 };
 export default PartnersMailingList;
+
+export async function getServerSideProps(context) {
+  // Get Partners
+  const partners = await getPartners();
+
+  return {
+    props: { partners },
+  };
+}

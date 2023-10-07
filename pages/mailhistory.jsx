@@ -79,7 +79,7 @@ const MailHistory = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [mailContent, setMailContent] = useState("");
   const [mailTitle, setMailTitle] = useState("");
-  const moment = require("moment");
+ 
   const handleShowMailContent = (requestObject) => {
     setMailContent(requestObject.content);
     setMailTitle(requestObject.title);
@@ -182,7 +182,7 @@ const MailHistory = (props) => {
 
   return (
     <>
-      <Navbar />
+     
 
       <Modal onClose={onClose} size={"5xl"} isOpen={isOpen}>
         <ModalOverlay
@@ -213,6 +213,9 @@ const MailHistory = (props) => {
           minHeight: "100vh",
         }}
       >
+        <div className="flex flex-col items-center justify-center w-full h-20 text-3xl text-white bg-blue-500">
+         <Navbar />
+        </div>
         <div
           style={{
             flex: "1",

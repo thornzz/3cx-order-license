@@ -13,13 +13,15 @@ export async function getPartners(){
         });
 
         const data = await response.json();
+       
         // Extract only the PartnerId and CompanyName fields from each object in the array
         const filteredData = data.map(partner => ({
             PartnerId: partner.PartnerId,
             CompanyName: partner.CompanyName,
             ContactName: partner.ContactName,
             PartnerLevelName:partner.PartnerLevelName,
-            Email:partner.ContactEmail
+            Email:partner.ContactEmail,
+            ContactPhone:partner.ContactPhone
         }));
 
         // Send the filtered data as the response
