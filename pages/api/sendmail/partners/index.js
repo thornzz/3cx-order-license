@@ -150,7 +150,7 @@ const handleEmailData = async (emailData, token) => {
 
       }
       delete timeouts[token];
-    }, 1 * 30 * 1000); // 1 dakika
+    }, 1 * 1 * 1000); // 1 dakika
 
   });
 }
