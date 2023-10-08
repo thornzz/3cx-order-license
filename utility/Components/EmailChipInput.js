@@ -50,18 +50,16 @@ export const ChipEmailInput = ({ ...rest }) => (
  */
 export const EmailChipInput = ({ initialEmails = [], triggerEmailReset, triggerEmailAdd, setOptionalPartnerEmails }) => {
 
-  //trigger reset and add emails
+
   useEffect(() => {
-    if (triggerEmailReset) {
-      setEmails([]);
-    }
-    else if (triggerEmailAdd) {
+    if (triggerEmailAdd) {
+  
+
       setEmails(triggerEmailAdd);
     }
 
-  }, [triggerEmailReset, triggerEmailAdd]);
-
-
+  }, [triggerEmailAdd]);
+  
   const [inputValue, setInputValue] = useState("");
   const [emails, setEmails] = useState(initialEmails);
 

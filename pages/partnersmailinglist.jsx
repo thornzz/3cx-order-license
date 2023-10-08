@@ -273,7 +273,7 @@ const PartnersMailingList = ({ partners }) => {
   const [triggerEmailReset, setTriggerEmailReset] = useState(0);
 
   const filteredPartners = partners?.filter((item) =>
-    [item.CompanyName, item.ContactName,item.PartnerLevelName]
+    [item.CompanyName, item.ContactName, item.PartnerLevelName]
       .map((val) => val.toLowerCase())
       .some((val) => val.includes(searchText.toLowerCase()))
   );
@@ -325,7 +325,9 @@ const PartnersMailingList = ({ partners }) => {
 
         // İstek başarısız oldu, hata mesajını kullanıcıya göster
         const errorData = await response.json();
-        toast.error(errorData.error, {
+        const errorString = JSON.stringify(errorData); // Convert errorData to a string
+
+        toast.error(errorString, {
           position: "top-center",
           autoClose: 1500,
           hideProgressBar: false,
@@ -337,7 +339,6 @@ const PartnersMailingList = ({ partners }) => {
         });
       }
     } catch (error) {
-      console.error(error);
       setLoading(false);
 
       toast.error(error, {
