@@ -300,7 +300,7 @@ const PartnersMailingList = ({ partners }) => {
       if (response.ok) {
         //request objesini mail history collection'ına kaydet
 
-        await addDoc(collection(db, "mailhistory"), { requestObj });
+      await addDoc(collection(db, "mailhistory"), { requestObj });
 
         // İstek başarıyla tamamlandı, beklemek gerekmiyor
         setLoading(false);
