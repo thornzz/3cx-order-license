@@ -99,6 +99,7 @@ const handleEmailData = async (emailData) => {
               subject: emailData.title,
               text: "",
               html: emailData.content.replace('#CONTACT_NAME#', partner.ContactName).replace('#PARTNER_NAME#', partner.CompanyName)
+              
             };
             const sendPromise = new Promise((resolve, reject) => {
               transporter.sendMail(mailData, function (err, info) {

@@ -48,6 +48,7 @@ const PartnersMailingList = ({ partners }) => {
   const searchParams = useSearchParams();
   const mail_id = searchParams.get("mail_id");
   const [searchText, setSearchText] = useState("");
+const [files, setFiles] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -94,6 +95,7 @@ const PartnersMailingList = ({ partners }) => {
     "paragraph",
     "|",
     "image",
+    "file",
     "link",
     "table",
     "|",
@@ -159,40 +161,57 @@ const PartnersMailingList = ({ partners }) => {
         return formdata;
       },
       isSuccess: function (e) {
+        console.log('isSuccess',e);
+
         return e.success;
       },
       getMessage: function (e) {
+        console.log('getMessage',e);
         return void 0 !== e.data.messages && Array.isArray(e.data.messages)
           ? e.data.messages.join("")
           : "";
       },
       process: function (resp) {
+        console.log('process',resp);
         //success callback transfrom data to defaultHandlerSuccess use.it's up to you.
         let files = [];
         files.unshift(resp.data);
         return {
+          type:resp.type,
           files: resp.data,
           error: resp.msg,
           msg: resp.msg,
         };
       },
       error(e) {
+        console.log('error',e)
         this.j.e.fire("errorMessage", e.message, "error", 4000);
       },
       defaultHandlerSuccess(resp) {
-        // `this` is the editor.
+        console.log('defaultHandlerSuccess',resp);
+    
         const j = this;
-        if (resp.files && resp.files.length) {
-          const tagName = "img";
-          resp.files.forEach((filename, index) => {
-            //edetor insertimg function
-            const elm = j.createInside.element(tagName);
-            elm.setAttribute("src", filename);
-            j.s.insertImage(elm, null, j.o.imageDefaultWidth);
-          });
+
+        if(resp.type === 'image') {
+          if (resp.files && resp.files.length) {
+            const tagName = "img";
+            resp.files.forEach((filename, index) => {
+              //edetor insertimg function
+              const elm = j.createInside.element(tagName);
+              elm.setAttribute("src", filename);
+              j.s.insertImage(elm, null, j.o.imageDefaultWidth);
+            });
+          }
         }
+        else{
+          setFiles((prevFiles) => [...prevFiles, ...resp.files]);
+console.log('files',files)
+        }
+      
+       
       },
       defaultHandlerError(e) {
+        console.log('defaultHandlerError',e)
         this.j.e.fire("errorMessage", e.message);
       },
       contentType: function (e) {

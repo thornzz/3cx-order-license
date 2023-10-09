@@ -19,6 +19,8 @@ export const config = {
 export default async function handler(req, res) {
 
   try {
+    const imageMimeTypes = ['image/png', 'image/jpeg', 'image/gif','image/jpg'];
+
     const file = await new Promise((resolve, reject) => {
       const form = formidable();
       form.parse(req, (err, fields, files) => {
@@ -28,16 +30,37 @@ export default async function handler(req, res) {
         resolve(file);
       });
     });
-    const data = await cloudinary.uploader.unsigned_upload(
-      file.filepath,
-      process.env.CLOUDINARY_UPLOAD_PRESET
-    );
-    res.status(200).json({
-      success: true,
-      data: [data.secure_url],
-      error: '',
-      msg: ''
-    });
+    
+   
+    if (imageMimeTypes.includes(file.mimetype)) {
+      const data = await cloudinary.uploader.unsigned_upload(
+        file.filepath,
+        process.env.CLOUDINARY_UPLOAD_PRESET
+      );
+      res.status(200).json({
+        success: true,
+        type:'Image',
+        data: [data.secure_url],
+        error: '',
+        msg: ''
+      });
+    }
+    else {
+console.log('filepath',file.filepath);
+console.log('fileName',file.originalFilename);
+
+      res.status(200).json({
+        success: true,
+        type:'File',
+        data: {
+          url:file.filepath,
+          name:file.originalFilename
+        },
+        error: '',
+        msg: ''
+      });
+    }
+   
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server upload error' });
