@@ -53,8 +53,6 @@ export const EmailChipInput = ({ initialEmails = [], triggerEmailReset, triggerE
 
   useEffect(() => {
     if (triggerEmailAdd) {
-  
-
       setEmails(triggerEmailAdd);
     }
 

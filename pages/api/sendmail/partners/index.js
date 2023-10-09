@@ -1,5 +1,14 @@
 import { getPartners } from "../../getpartners";
+import { getAdditionalPartners } from "../../getadditionalpartners";
+
 const timeouts = {};
+
+
+
+const startEmailSendProcess = (res, emailData) => {
+  handleEmailData(emailData, timeouts);
+  return res.status(200).json({ message: 'E-mail gönderme işlemi başladı.' });
+}
 
 const cancelEmail = (token) => {
 
@@ -9,15 +18,10 @@ const cancelEmail = (token) => {
     delete timeouts[token];
   }
 };
-
-const startEmailSendProcess = (res, emailData) => {
-  handleEmailData(emailData, timeouts);
-  return res.status(200).json({ message: 'E-mail gönderme işlemi başladı.' });
-}
-
 const handleEmailData = async (emailData) => {
 
   const token = emailData.token;
+  const fs = require("fs");
 
   // E-posta gönderme işlemini iptal etmek için mevcut zamanlayıcıyı temizleyin
   if (timeouts[token]) {
@@ -56,6 +60,13 @@ const handleEmailData = async (emailData) => {
             CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
             PartnerLevelName: 'Silver Partner',
             Email: 'mustafa@k2mbilisim.com'
+          },
+          {
+            PartnerId: '227213',
+            ContactName: 'İbrahim Akgün',
+            CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
+            PartnerLevelName: 'Fanvil Partner',
+            Email: 'ibrahimak@gmail.com'
           },
           {
             PartnerId: '219991',
@@ -99,8 +110,18 @@ const handleEmailData = async (emailData) => {
               subject: emailData.title,
               text: "",
               html: emailData.content.replace('#CONTACT_NAME#', partner.ContactName).replace('#PARTNER_NAME#', partner.CompanyName)
-              
+
+
             };
+            // Dosya varsa attachments ekle
+            if (emailData.files && emailData.files.length > 0) {
+              mailData.attachments = emailData.files.map(file => {
+                return {
+                  filename: file.name,
+                  path: file.url,
+                };
+              });
+            }
             const sendPromise = new Promise((resolve, reject) => {
               transporter.sendMail(mailData, function (err, info) {
                 if (err) {
@@ -122,8 +143,17 @@ const handleEmailData = async (emailData) => {
               to: email,
               subject: emailData.title,
               text: "",
-              html: emailData.content.replace('#CONTACT_NAME#', 'Yetkili').replace('#PARTNER_NAME#', 'Yetkili')
+              html: emailData.content.replace('#CONTACT_NAME#', 'Yetkili').replace('#PARTNER_NAME#', 'Yetkili'),
             };
+            // Dosya varsa attachments ekle
+            if (emailData.files && emailData.files.length > 0) {
+              mailData.attachments = emailData.files.map(file => {
+                return {
+                  filename: file.name,
+                  path: file.url,
+                };
+              });
+            }
             const sendPromise = new Promise((resolve, reject) => {
               transporter.sendMail(mailData, function (err, info) {
                 if (err) {
@@ -164,9 +194,13 @@ const handleEmailData = async (emailData) => {
 }
 export default async function handler(req, res) {
   try {
+//     const additionalPartners = await getAdditionalPartners();
+// console.log('getAdditionalPartners', additionalPartners);
+// const partners = await getPartners();
+// console.log('getPartners', partners);
 
     const emailData = req.body;
-    emailData.token="123456789";
+    emailData.token = "123456789";
 
     if (emailData.status === 'Canceled') {
 

@@ -9,7 +9,7 @@ import {
   deleteDoc,
   getDocs,
   query,
-  onSnapshot
+  onSnapshot,
 } from "firebase/firestore";
 import { Container, Button, HStack } from "@chakra-ui/react";
 import DataTable from "react-data-table-component";
@@ -99,20 +99,18 @@ const MailHistory = (props) => {
         objectId: d.id,
         ...d.data(),
       }));
-      
+
       setmailHistoryData(arr);
     });
   };
 
-
   const handleCancelMailRequest = async (row) => {
-
     row.requestObj.status = "Canceled";
     row.requestObj.token = "123456789";
- 
+
     if (row && row.objectId) {
       const documentRef = doc(db, "mailhistory", row.objectId);
-    
+
       await deleteDoc(documentRef)
         .then(() => {
           console.log("Document successfully deleted!");
@@ -123,7 +121,6 @@ const MailHistory = (props) => {
     } else {
       console.error("Invalid requestObject or missing 'id' property.");
     }
-    
 
     const response = await fetch("/api/sendmail/partners/", {
       method: "POST",
@@ -163,19 +160,17 @@ const MailHistory = (props) => {
     (async () => {
       try {
         await getMailHistoryData();
-       
       } catch (e) {
         console.log(e);
       }
     })();
-
   }, []);
 
   const sortDateTime = (rowA, rowB) => {
     let moment = require("moment");
     return (
-      moment(rowA.requestObj.DateTime, "DD.MM.YYYY").unix() -
-      moment(rowB.requestObj.DateTime, "DD.MM.YYYY").unix()
+      moment(rowA.requestObj.DateTime, "DD.MM.YYYY hh:mm").unix() -
+      moment(rowB.requestObj.DateTime, "DD.MM.YYYY hh:mm").unix()
     );
   };
 
@@ -226,24 +221,26 @@ const MailHistory = (props) => {
       name: "İşlemler",
       cell: (row) => {
         const now = moment();
-        const requestDateTime = moment(row.requestObj.DateTime, "DD.MM.YYYY HH:mm");
-        const timeDifference =  now.diff(requestDateTime, 'minutes');
-        console.log('timediff',timeDifference)
-        
+        const requestDateTime = moment(
+          row.requestObj.DateTime,
+          "DD.MM.YYYY HH:mm"
+        );
+        const timeDifference = now.diff(requestDateTime, "minutes");
+
         return (
           <HStack spacing="15px">
             <Link
               href={{
                 pathname: "/partnersmailinglist",
                 query: {
-                  mail_id: row.id,
+                  mail_id: row.objectId,
                 },
               }}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
               Tekrarla
             </Link>
-    
+
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               onClick={() => handleShowMailContent(row.requestObj)}
@@ -261,8 +258,8 @@ const MailHistory = (props) => {
           </HStack>
         );
       },
-      grow: "0.8",
-    }
+      grow: "1",
+    },
   ];
 
   const tableStyle = {
@@ -319,9 +316,12 @@ const MailHistory = (props) => {
           }}
         >
           <DataTable
+            highlightOnHover={true}
             customStyles={tableStyle}
             columns={columns}
             data={mailHistoryData}
+            defaultSortFieldId={5}
+            defaultSortAsc={false}
             noDataComponent={"Herhangi bir kayıt bulunamadı"}
           />
         </div>
@@ -346,23 +346,3 @@ const MailHistory = (props) => {
 };
 
 export default MailHistory;
-
-// export async function getServerSideProps(context) {
-//   // Get Mail History Data
-
-//   const getMailHistory = async () => {
-//     const collectionRef = collection(db, "mailhistory");
-//     const q = query(collectionRef);
-//     const querySnapshot = await getDocs(q);
-//     const getMailHistoryData = querySnapshot.docs.map((d) => ({
-//       objectId: d.id,
-//       ...d.data(),
-//     }));
-//     return getMailHistoryData;
-//   };
-//   const allMailHistoryData = await getMailHistory();
-
-//   return {
-//     props: { allMailHistoryData }, // will be passed to the page component as props
-//   };
-// }

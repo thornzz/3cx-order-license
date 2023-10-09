@@ -4,12 +4,16 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { addDoc, collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase/index";
 import { TfiEmail } from "react-icons/tfi";
-import { MdPersonSearch } from "react-icons/md";
+import { MdPersonSearch, MdPermContactCalendar } from "react-icons/md";
 import {
   Input,
   IconButton,
   Spacer,
   HStack,
+  Stack,
+  Tag,
+  TagCloseButton,
+  TagLabel,
   Box,
   Flex,
   Button,
@@ -30,6 +34,8 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { MultiSelect } from "chakra-multiselect";
 import Navbar from "../components/Navbar";
@@ -47,8 +53,95 @@ const PartnersMailingList = ({ partners }) => {
   //getting searchParams
   const searchParams = useSearchParams();
   const mail_id = searchParams.get("mail_id");
-  const [searchText, setSearchText] = useState("");
-const [files, setFiles] = useState([]);
+  const [modalPartnerSearchText, setSearchText] = useState("");
+  const [files, setFiles] = useState([]);
+
+  function isValidEmail(email) {
+    // Basit bir e-posta doğrulama deseni
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailPattern.test(email);
+  }
+  const initialFormData = {
+    CompanyName: "",
+    ContactName: "",
+    ContactPhone: "",
+    Email: "",
+    PartnerLevelName: "Fanvil Partner",
+  };
+  const [formData, setFormData] = useState({
+    CompanyName: "",
+    ContactName: "",
+    ContactPhone: "",
+    Email: "",
+    PartnerLevelName: "Fanvil Partner",
+  });
+
+  const handleAddPartnerChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  const handleAddPartnerSave = async (e) => {
+    try {
+      if (formData.companyName === "") {
+        toast.error("Lütfen firma adını boş bırakma", {
+          position: "top-center",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        return;
+      }
+      // Veritabanına kayıt ekleme işlemi
+      await addDoc(collection(db, "additionalpartners"), { ...formData });
+      // Başarılı mesajı göster
+      toast.success("İşlem başarıyla tamamlandı", {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      // Formu temizle
+      setFormData(initialFormData);
+    } catch (error) {
+      // Hata mesajını göster
+      toast.error(error.message, {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+  };
+
+  const handleFileRemove = (fileToRemove) => {
+    // Dosya listesinde verilen dosyanın index'ini bulun
+    const indexToRemove = files.findIndex(
+      (file) => file.name === fileToRemove.name
+    );
+
+    if (indexToRemove !== -1) {
+      // Dosya listesinden dosyayı kaldırma işlemi
+      const updatedFiles = [...files];
+      updatedFiles.splice(indexToRemove, 1);
+      // Dosya listesini güncelle
+      setFiles(updatedFiles);
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -94,8 +187,6 @@ const [files, setFiles] = useState([]);
     "brush",
     "paragraph",
     "|",
-    "image",
-    "file",
     "link",
     "table",
     "|",
@@ -161,57 +252,41 @@ const [files, setFiles] = useState([]);
         return formdata;
       },
       isSuccess: function (e) {
-        console.log('isSuccess',e);
-
         return e.success;
       },
       getMessage: function (e) {
-        console.log('getMessage',e);
         return void 0 !== e.data.messages && Array.isArray(e.data.messages)
           ? e.data.messages.join("")
           : "";
       },
       process: function (resp) {
-        console.log('process',resp);
         //success callback transfrom data to defaultHandlerSuccess use.it's up to you.
         let files = [];
         files.unshift(resp.data);
         return {
-          type:resp.type,
+          type: resp.type,
           files: resp.data,
           error: resp.msg,
           msg: resp.msg,
         };
       },
       error(e) {
-        console.log('error',e)
         this.j.e.fire("errorMessage", e.message, "error", 4000);
       },
       defaultHandlerSuccess(resp) {
-        console.log('defaultHandlerSuccess',resp);
-    
         const j = this;
-
-        if(resp.type === 'image') {
-          if (resp.files && resp.files.length) {
-            const tagName = "img";
-            resp.files.forEach((filename, index) => {
-              //edetor insertimg function
-              const elm = j.createInside.element(tagName);
-              elm.setAttribute("src", filename);
-              j.s.insertImage(elm, null, j.o.imageDefaultWidth);
-            });
-          }
+        if (resp.type === "Image") {
+          const tagName = "img";
+          const filename = resp.files[0];
+          const elm = j.jodit.createInside.element(tagName);
+          elm.setAttribute("src", filename);
+          j.jodit.s.insertImage(elm, null, j.o.imageDefaultWidth);
+        } else {
+          const newFile = [resp.files];
+          setFiles((prevFiles) => [...prevFiles, ...newFile]);
         }
-        else{
-          setFiles((prevFiles) => [...prevFiles, ...resp.files]);
-console.log('files',files)
-        }
-      
-       
       },
       defaultHandlerError(e) {
-        console.log('defaultHandlerError',e)
         this.j.e.fire("errorMessage", e.message);
       },
       contentType: function (e) {
@@ -227,7 +302,7 @@ console.log('files',files)
     height: 500,
   };
 
-  const columns = [
+  const modalPartnerListcolumns = [
     {
       name: "Bayi",
       selector: (row) => row.CompanyName,
@@ -264,7 +339,8 @@ console.log('files',files)
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   //const { isOpen, onToggle, onClose } = useDisclosure();
-  const modalDisclosure = useDisclosure(); // Modal için useDisclosure hook'u
+  const modalPartnerListDisclosure = useDisclosure();
+  const modalAdditionalPartnerListDisclosure = useDisclosure();
   const popoverDisclosure = useDisclosure(); // Popover için useDisclosure hook'u
 
   const moment = require("moment");
@@ -272,6 +348,7 @@ console.log('files',files)
   const [selectedPartner, setSelectedPartner] = useState([]);
 
   const partnerLevels = [
+    "Fanvil",
     "Trainee",
     "Bronze",
     "Silver",
@@ -291,12 +368,16 @@ console.log('files',files)
   const [optionalPartnerEmails, setOptionalPartnerEmails] = useState([]);
   const [triggerEmailReset, setTriggerEmailReset] = useState(0);
 
-  const filteredPartners = partners?.filter((item) =>
-    [item.CompanyName, item.ContactName, item.PartnerLevelName]
-      .map((val) => val.toLowerCase())
-      .some((val) => val.includes(searchText.toLowerCase()))
-  );
-
+  const filteredPartners = partners?.filter((item) => {
+    return (
+      ['CompanyName', 'ContactName', 'PartnerLevelName']
+        .map((field) => {
+          const val = item[field];
+          return val ? val.toLowerCase() : ''; // Convert to lowercase if not null, otherwise use an empty string
+        })
+        .some((val) => val.includes(modalPartnerSearchText.toLowerCase()))
+    );
+  });
   const submitHandler = async () => {
     try {
       setLoading(true);
@@ -307,6 +388,7 @@ console.log('files',files)
         selectedPartner: selectedPartner,
         optionalPartnerEmails: optionalPartnerEmails,
         DateTime: currentDatetime,
+        files: files,
       };
       const response = await fetch("/api/sendmail/partners/", {
         method: "POST",
@@ -319,7 +401,7 @@ console.log('files',files)
       if (response.ok) {
         //request objesini mail history collection'ına kaydet
 
-      await addDoc(collection(db, "mailhistory"), { requestObj });
+        await addDoc(collection(db, "mailhistory"), { requestObj });
 
         // İstek başarıyla tamamlandı, beklemek gerekmiyor
         setLoading(false);
@@ -376,9 +458,9 @@ console.log('files',files)
   return (
     <>
       <Modal
-        onClose={modalDisclosure.onClose}
+        onClose={modalPartnerListDisclosure.onClose}
         size={"5xl"}
-        isOpen={modalDisclosure.isOpen}
+        isOpen={modalPartnerListDisclosure.isOpen}
       >
         <ModalOverlay
           bg="none"
@@ -400,7 +482,7 @@ console.log('files',files)
             >
               <DataTable
                 customStyles={tableStyle}
-                columns={columns}
+                columns={modalPartnerListcolumns}
                 data={filteredPartners}
                 noDataComponent={"Herhangi bir kayıt bulunamadı"}
                 subHeader
@@ -409,7 +491,7 @@ console.log('files',files)
                     <h3 style={{ margin: "0 10px" }}>Ara :</h3>
                     <input
                       type="text"
-                      value={searchText}
+                      value={modalPartnerSearchText}
                       onChange={(e) => setSearchText(e.target.value)}
                       style={{
                         border: "none",
@@ -422,8 +504,85 @@ console.log('files',files)
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" onClick={modalDisclosure.onClose}>
+            <Button
+              colorScheme="blue"
+              onClick={modalPartnerListDisclosure.onClose}
+            >
               Kapat
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        onClose={modalAdditionalPartnerListDisclosure.onClose}
+        size={"3xl"}
+        isOpen={modalAdditionalPartnerListDisclosure.isOpen}
+      >
+        <ModalOverlay
+          bg="none"
+          backdropFilter="auto"
+          backdropInvert="80%"
+          backdropBlur="2px"
+        />
+        <ModalContent>
+          <ModalHeader>Fanvil Bayi Kişi Ekle</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Firma Adı</FormLabel>
+              <Input
+                type="text"
+                name="CompanyName"
+                value={formData.CompanyName}
+                onChange={handleAddPartnerChange}
+              />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Yetkili</FormLabel>
+              <Input
+                type="text"
+                name="ContactName"
+                value={formData.ContactName}
+                onChange={handleAddPartnerChange}
+              />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Telefon Numarası</FormLabel>
+              <Input
+                type="number"
+                name="ContactPhone"
+                value={formData.ContactPhone}
+                onChange={handleAddPartnerChange}
+              />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>E-mail</FormLabel>
+              <Input
+                type="email"
+                name="Email"
+                value={formData.Email}
+                onChange={handleAddPartnerChange}
+                onBlur={(e) => {
+                  if (!isValidEmail(e.target.value)) {
+                    alert("Geçerli bir e-posta adresi giriniz.");
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={2} onClick={handleAddPartnerSave}>
+              Kaydet
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={() => {
+                setFormData(initialFormData);
+              }}
+            >
+              Temizle
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -458,7 +617,13 @@ console.log('files',files)
                   colorScheme="red"
                   aria-label="Bayi listesi"
                   icon={<MdPersonSearch />}
-                  onClick={modalDisclosure.onOpen}
+                  onClick={modalPartnerListDisclosure.onOpen}
+                />
+                <IconButton
+                  colorScheme="blue"
+                  aria-label="Bayi listesi"
+                  icon={<MdPermContactCalendar />}
+                  onClick={modalAdditionalPartnerListDisclosure.onOpen}
                 />
                 <Spacer />
                 <Box>
@@ -547,6 +712,29 @@ console.log('files',files)
                         triggerEmailAdd={optionalPartnerEmails}
                       />
                     </Box>
+                    <Stack direction="row">
+                      <Box>Dosya listesi:</Box>
+                      {files.map((file, index) => {
+                        if (file.type !== "Image") {
+                          return (
+                            <Tag
+                              key={index}
+                              borderRadius="full"
+                              variant="solid"
+                              colorScheme="red"
+                            >
+                              <TagLabel>{file.name}</TagLabel>
+                              <TagCloseButton
+                                onClick={() => {
+                                  handleFileRemove(file);
+                                }}
+                              />
+                            </Tag>
+                          );
+                        }
+                        return null; // Eğer dosya türü 'Image' ise null döndür.
+                      })}
+                    </Stack>
                   </form>
                   <JoditEditor
                     config={editorConfig}
@@ -571,7 +759,22 @@ export async function getServerSideProps(context) {
   // Get Partners
   const partners = await getPartners();
 
+  const getAdditionalPartners = async () => {
+    const collectionRef = collection(db, "additionalpartners");
+    const q = query(collectionRef);
+    const querySnapshot = await getDocs(q);
+    const addPartners = querySnapshot.docs.map((d) => ({
+      PartnerId: d.id,
+      ...d.data(),
+    }));
+    return addPartners;
+  };
+  const addPartners = await getAdditionalPartners();
+
+  // Concatenate the two lists
+  const updatedPartners = [...partners, ...addPartners];
+
   return {
-    props: { partners },
+    props: { partners: updatedPartners },
   };
 }
