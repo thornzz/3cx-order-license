@@ -1,6 +1,6 @@
 import { getPartners } from "../../getpartners";
 
-const cancelEmail = (timeouts,token) => {
+const cancelEmail = (timeouts, token) => {
   // E-posta gönderme işlemini iptal etmek için mevcut zamanlayıcıyı temizleyin
   if (timeouts[token]) {
     console.log('mail gönderme iptal edildi')
@@ -10,6 +10,7 @@ const cancelEmail = (timeouts,token) => {
 };
 
 const handleEmailData = async (emailData, token) => {
+
 
   const timeouts = {};
   // E-posta gönderme işlemini iptal etmek için mevcut zamanlayıcıyı temizleyin
@@ -150,15 +151,24 @@ const handleEmailData = async (emailData, token) => {
 
       }
       delete timeouts[token];
-    }, 1 * 1 * 1000); // 1 dakika
+    }, 1 * 20 * 1000); // 1 dakika
 
   });
 }
 export default async function handler(req, res) {
   try {
+
     const emailData = req.body;
-    const result = await handleEmailData(emailData, "test1");
-    res.status(200).json({ success: result });
+
+    if (emailData.status === 'Canceled') {
+      cancelEmail(emailData.token);
+      res.status(200).json({ message: 'Email sending canceled.' });
+    }
+    else {
+      const result = await handleEmailData(emailData, "test1");
+      res.status(200).json({ success: result });
+    }
+
   } catch (error) {
     console.error('handler', error);
     res.status(500).json({ error });

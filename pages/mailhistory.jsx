@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase/index";
+import { toast } from "react-toastify";
 import {
   addDoc,
   collection,
@@ -79,11 +80,49 @@ const MailHistory = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [mailContent, setMailContent] = useState("");
   const [mailTitle, setMailTitle] = useState("");
- 
+
   const handleShowMailContent = (requestObject) => {
     setMailContent(requestObject.content);
     setMailTitle(requestObject.title);
     onOpen();
+  };
+
+  const handleCancelMailRequest = async (requestObject) => {
+    requestObject.status = "Canceled";
+    requestObject.token = requestObject.id;
+
+    const response = await fetch("/api/sendmail/partners/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestObject),
+    });
+
+    if (response.ok) {
+      toast.success("Mail iptali başarıyla tamamlandı", {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+    else {
+      toast.error("Mail iptali başarısız oldu", {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
   };
 
   useEffect(() => {
@@ -163,6 +202,12 @@ const MailHistory = (props) => {
           >
             Göster
           </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => handleCancelMailRequest(row.requestObj)}
+          >
+            İptal et
+          </button>
         </HStack>
       ),
       grow: "0.8",
@@ -182,8 +227,6 @@ const MailHistory = (props) => {
 
   return (
     <>
-     
-
       <Modal onClose={onClose} size={"5xl"} isOpen={isOpen}>
         <ModalOverlay
           bg="none"
@@ -214,7 +257,7 @@ const MailHistory = (props) => {
         }}
       >
         <div className="flex flex-col items-center justify-center w-full h-20 text-3xl text-white bg-blue-500">
-         <Navbar />
+          <Navbar />
         </div>
         <div
           style={{
