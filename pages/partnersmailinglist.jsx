@@ -1,7 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { addDoc, collection, query, getDocs } from "firebase/firestore";
+import { addDoc, collection, query, getDocs,onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/index";
 import { TfiEmail } from "react-icons/tfi";
 import { MdPersonSearch, MdPermContactCalendar } from "react-icons/md";
@@ -49,13 +49,14 @@ import { getPartners } from "./api/getpartners";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
-const PartnersMailingList = ({ partners }) => {
+const PartnersMailingList = ({ partnersFromAPI }) => {
   //getting searchParams
   const searchParams = useSearchParams();
   const mail_id = searchParams.get("mail_id");
   const [modalPartnerSearchText, setSearchText] = useState("");
   const [files, setFiles] = useState([]);
-
+  const [partners, setPartners] = useState([]);
+  const [additionalPartners, setAdditionalPartners] = useState([]);
   function isValidEmail(email) {
     // Basit bir e-posta doğrulama deseni
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -165,6 +166,29 @@ const PartnersMailingList = ({ partners }) => {
 
     fetchData();
   }, [mail_id]);
+
+  const getAdditionalPartners = async () => {
+    const q = query(collection(db, "additionalpartners"));
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const arr = querySnapshot.docs.map((d) => ({
+        PartnerId: d.id,
+        ...d.data(),
+      }));
+
+      setAdditionalPartners([...arr]);
+      setPartners((prev) => [...arr, ...partnersFromAPI]);
+    });
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await getAdditionalPartners();
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, []);
 
   const editor = useRef(null);
   const buttons = [
@@ -369,15 +393,14 @@ const PartnersMailingList = ({ partners }) => {
   const [triggerEmailReset, setTriggerEmailReset] = useState(0);
 
   const filteredPartners = partners?.filter((item) => {
-    return (
-      ['CompanyName', 'ContactName', 'PartnerLevelName']
-        .map((field) => {
-          const val = item[field];
-          return val ? val.toLowerCase() : ''; // Convert to lowercase if not null, otherwise use an empty string
-        })
-        .some((val) => val.includes(modalPartnerSearchText.toLowerCase()))
-    );
+    return ["CompanyName", "ContactName", "PartnerLevelName"]
+      .map((field) => {
+        const val = item[field];
+        return val ? val.toLowerCase() : ""; // Convert to lowercase if not null, otherwise use an empty string
+      })
+      .some((val) => val.includes(modalPartnerSearchText.toLowerCase()));
   });
+
   const submitHandler = async () => {
     try {
       setLoading(true);
@@ -410,7 +433,7 @@ const PartnersMailingList = ({ partners }) => {
         setSelectedPartner([]);
         setOptionalPartnerEmails([]);
         setTriggerEmailReset(triggerEmailReset + 1);
-
+        setFiles([]);
         toast.success("İşlem başarıyla tamamlandı", {
           position: "top-center",
           autoClose: 1500,
@@ -758,23 +781,9 @@ export default PartnersMailingList;
 export async function getServerSideProps(context) {
   // Get Partners
   const partners = await getPartners();
-
-  const getAdditionalPartners = async () => {
-    const collectionRef = collection(db, "additionalpartners");
-    const q = query(collectionRef);
-    const querySnapshot = await getDocs(q);
-    const addPartners = querySnapshot.docs.map((d) => ({
-      PartnerId: d.id,
-      ...d.data(),
-    }));
-    return addPartners;
-  };
-  const addPartners = await getAdditionalPartners();
-
-  // Concatenate the two lists
-  const updatedPartners = [...partners, ...addPartners];
+  console.log(partners);
 
   return {
-    props: { partners: updatedPartners },
+    props: { partnersFromAPI: partners },
   };
 }

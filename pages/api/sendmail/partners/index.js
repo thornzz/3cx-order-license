@@ -3,6 +3,44 @@ import { getAdditionalPartners } from "../../getadditionalpartners";
 
 const timeouts = {};
 
+const partners = [
+  {
+    PartnerId: '205522',
+    ContactName: 'İbrahim AKGÜN',
+    CompanyName: 'Bilisim Bilgisayar Ltd.Sti.',
+    PartnerLevelName: 'Bronze Partner',
+    Email: 'ibrahimak@gmail.com'
+  },
+
+  {
+    PartnerId: '219991',
+    ContactName: 'Esra AYBEK',
+    CompanyName: 'Pro-Sistem Bilgisayar',
+    PartnerLevelName: 'Gold Partner',
+    Email: 'esra@k2mbilisim.com'
+  },
+  {
+    PartnerId: '227218',
+    ContactName: 'Mustafa GÖZTÜR',
+    CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
+    PartnerLevelName: 'Silver Partner',
+    Email: 'mustafa@k2mbilisim.com'
+  },
+  {
+    PartnerId: '219991',
+    ContactName: 'Emre Dikici',
+    CompanyName: 'Pro-System',
+    PartnerLevelName: 'Platinium Partner',
+    Email: 'emre@k2mbilisim.com'
+  },
+  {
+    PartnerId: '219991',
+    ContactName: 'Recep Karabacak',
+    CompanyName: 'K2M Bilişim',
+    PartnerLevelName: 'Titanium Partner',
+    Email: 'recep@k2mbilisim.com'
+  },
+]
 
 
 const startEmailSendProcess = (res, emailData) => {
@@ -38,51 +76,7 @@ const handleEmailData = async (emailData) => {
       try {
         //const partners = await getPartners();
 
-        const partners = [
-          {
-            PartnerId: '205522',
-            ContactName: 'İbrahim AKGÜN',
-            CompanyName: 'Bilisim Bilgisayar Ltd.Sti.',
-            PartnerLevelName: 'Bronze Partner',
-            Email: 'ibrahimak@gmail.com'
-          },
-
-          {
-            PartnerId: '219991',
-            ContactName: 'Esra AYBEK',
-            CompanyName: 'Pro-Sistem Bilgisayar',
-            PartnerLevelName: 'Gold Partner',
-            Email: 'esra@k2mbilisim.com'
-          },
-          {
-            PartnerId: '227218',
-            ContactName: 'Mustafa GÖZTÜR',
-            CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
-            PartnerLevelName: 'Silver Partner',
-            Email: 'mustafa@k2mbilisim.com'
-          },
-          {
-            PartnerId: '227213',
-            ContactName: 'İbrahim Akgün',
-            CompanyName: 'VODACOM İLETİŞİM HİZMETLERİ SAN.ve TİC. LTD.ŞTİ.',
-            PartnerLevelName: 'Fanvil Partner',
-            Email: 'ibrahimak@gmail.com'
-          },
-          {
-            PartnerId: '219991',
-            ContactName: 'Emre Dikici',
-            CompanyName: 'Pro-System',
-            PartnerLevelName: 'Platinium Partner',
-            Email: 'emre@k2mbilisim.com'
-          },
-          {
-            PartnerId: '219991',
-            ContactName: 'Recep Karabacak',
-            CompanyName: 'K2M Bilişim',
-            PartnerLevelName: 'Titanium Partner',
-            Email: 'recep@k2mbilisim.com'
-          },
-        ]
+    
 
         const selectedPartners = emailData.selectedPartner.map(item => item.label);
         const filteredPartnerData = partners.filter(partner => selectedPartners.some(label => partner.PartnerLevelName.includes(label)));
@@ -194,8 +188,10 @@ const handleEmailData = async (emailData) => {
 }
 export default async function handler(req, res) {
   try {
-//     const additionalPartners = await getAdditionalPartners();
-// console.log('getAdditionalPartners', additionalPartners);
+
+  const additionalPartners = await getAdditionalPartners();
+  partners.push(...additionalPartners);
+
 // const partners = await getPartners();
 // console.log('getPartners', partners);
 
