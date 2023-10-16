@@ -29,6 +29,10 @@ import {
   IconButton,
   useColorMode,
 } from "@chakra-ui/react";
+import { AiOutlineEye } from "react-icons/ai";
+import { IoRepeat } from "react-icons/io5";
+import { FcCancel } from "react-icons/fc";
+
 import Link from "next/link";
 
 export const ChipEmail = ({ email }) => (
@@ -236,24 +240,24 @@ const MailHistory = (props) => {
                   mail_id: row.objectId,
                 },
               }}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
-              Tekrarla
+              <IconButton
+                aria-label="Göster"
+                icon={<IoRepeat className="w-7 h-7 text-red-500" />}
+              />
             </Link>
-
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            <IconButton
+              aria-label="Göster"
+              icon={<AiOutlineEye className="w-7 h-7 text-blue-500" />}
               onClick={() => handleShowMailContent(row.requestObj)}
-            >
-              Göster
-            </button>
+            />
+
             {timeDifference >= 0 && timeDifference <= 5 && (
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              <IconButton
+                aria-label="Göster"
+                icon={<FcCancel className="w-7 h-7 text-red-500" />}
                 onClick={() => handleCancelMailRequest(row)}
-              >
-                İptal et
-              </button>
+              />
             )}
           </HStack>
         );
