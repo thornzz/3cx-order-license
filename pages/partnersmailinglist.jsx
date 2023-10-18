@@ -1,10 +1,17 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { addDoc, collection, query, getDocs,onSnapshot } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  query,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../firebase/index";
 import { TfiEmail } from "react-icons/tfi";
 import { MdPersonSearch, MdPermContactCalendar } from "react-icons/md";
+import { z } from "zod";
 
 import {
   Input,
@@ -47,6 +54,7 @@ import { debounce, get, set } from "lodash";
 import { EmailChipInput } from "../utility/Components/EmailChipInput";
 import DataTable from "react-data-table-component";
 import { getPartners } from "./api/getpartners";
+import { data } from "autoprefixer";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
@@ -402,10 +410,36 @@ const PartnersMailingList = ({ partnersFromAPI }) => {
       .some((val) => val.includes(modalPartnerSearchText.toLowerCase()));
   });
 
+  const scheme = z
+    .object({
+      title: z.string().min(3,{message:"Konu başlığı için en az 3 karakter şartı var"}),
+      content: z.string().min(3,{message:"İçerik için en az 3 karakter şartı var."}),
+      selectedPartner: z.array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        })
+      ),
+      optionalPartnerEmails: z.array(z.string().email()),
+      DateTime: z.string(),
+      files: z.array(z.string()),
+    })
+    .refine(
+      (data) =>
+        (data.selectedPartner.length !== 0 && data.optionalPartnerEmails.length === 0)  ||
+        (data.selectedPartner.length === 0 && data.optionalPartnerEmails.length !== 0),
+      () => ({
+        message: `En az bir bayi seçilmeli veya e-posta adresi girilmelidir.`,
+        path: ["selectedPartner", "optionalPartnerEmails"],
+      })
+    );
+
+
   const submitHandler = async () => {
     try {
       setLoading(true);
       popoverDisclosure.onToggle();
+
       var requestObj = {
         title: title,
         content: content,
@@ -414,6 +448,25 @@ const PartnersMailingList = ({ partnersFromAPI }) => {
         DateTime: currentDatetime,
         files: files,
       };
+
+      const validate = scheme.safeParse(requestObj);
+      console.log(validate)
+      if(validate.success !== true) {
+        toast.error(validate.error.errors[0].message, {
+          position: "top-center",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        setLoading(false);
+        return;
+      }
+
+      console.log('işlemler başlıyor')
       const response = await fetch("/api/sendmail/partners/", {
         method: "POST",
         headers: {
