@@ -3,6 +3,7 @@ import {
     addDoc,
     collection,
 } from "firebase/firestore";
+
 import { generateCouponCode } from "../../../../utility/generateCoupon";
 
 export default async function handler(req, res) {
@@ -10,7 +11,7 @@ export default async function handler(req, res) {
     if (req.method === "POST") {
         try {
             const { licensekey } = req.body;
-            
+
             console.log(licensekey)
 
             const couponCode = generateCouponCode();

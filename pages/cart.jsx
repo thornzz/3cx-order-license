@@ -49,8 +49,6 @@ import { getPartners } from "./api/getpartners";
 import axios from "axios";
 
 const Cart = (props) => {
-  console.log("props", props);
-
   const [orderDetails, setOrderDetails] = useState(null);
   const [endUserLicenseKey, setendUserLicenseKey] = useState(null);
 
@@ -305,35 +303,57 @@ const Cart = (props) => {
         "/api/fakelicenseorder",
         JSON.stringify(postData)
       );
-      
- addRandomLicenseKey(tcxResponses);
 
+      addRandomLicenseKey(tcxResponses);
 
       // Tüm yeni lisanslar için kupon kodu oluştur ve kodu email at.
-      tcxResponses.Items.forEach(async (item) => {
-        if (item.Type === "NewLicense") {
-          
-          const matchingPartner = props.responsePartners.find(
-            (partner) => partner.PartnerId === item.ResellerId
-          );
-          if (matchingPartner) {
-            item.LicenseKeys.forEach(async (item)=>{
-              const requestBody = { licensekey: item.LicenseKey, partnerId: matchingPartner.PartnerId};
-              const requestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody),
-              };
-              const response = await fetch("/api/coupon/create", requestOptions);
-              const responseData = await response.json();
-              console.log(responseData);
-            })
-            
+      try {
+        tcxResponses.Items.forEach(async (item) => {
+          if (item.Type === "NewLicense") {
+            const matchingPartner = props.responsePartners.find(
+              (partner) => partner.PartnerId === item.ResellerId
+            );
+            if (matchingPartner) {
+              item.LicenseKeys.forEach(async (item) => {
+                const requestBody = {
+                  licensekey: item.LicenseKey,
+                  partnerId: matchingPartner.PartnerId,
+                };
+                const requestOptions = {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(requestBody),
+                };
+                const response = await fetch(
+                  "/api/coupon/create",
+                  requestOptions
+                );
+                const responseData = await response.json();
+
+                // Send email
+                const emailRequestOptions = {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    //email:matchingPartner.Email,
+                    email: "ibrahimak@gmail.com",
+                    coupon: responseData.couponCode,
+                  }),
+                };
+                const emailResponse = await fetch(
+                  "/api/coupon/sendmail",
+                  emailRequestOptions
+                );
+                const emailResponseData = await emailResponse.json();
+              
+              });
+            }
           }
-        }
-      });
- 
-     
+        });
+      } catch (error) {
+        console.error(error);
+      }
+
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await axios.post("/api/sendmail", tcxResponses);

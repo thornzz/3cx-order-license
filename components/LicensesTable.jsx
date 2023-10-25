@@ -10,6 +10,8 @@ import EndUserModal from "./EndUserModal";
 import { TbLicense } from "react-icons/tb";
 import { FaEdit } from "react-icons/fa";
 import { HiOutlineKey } from "react-icons/hi";
+import { SiMinutemailer } from "react-icons/si";
+import { ImQrcode } from "react-icons/im";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
@@ -25,9 +27,31 @@ import {
 } from "firebase/firestore";
 import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
+import {
+  HStack,
+  Center,
+  Portal,
+  FormControl,
+  FormLabel,
+  Input,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverFooter,
+  PopoverArrow,
+  PopoverCloseButton,
+  Stack,
+  ButtonGroup,
+  Button,
+  IconButton,
+} from "@chakra-ui/react";
+
 
 const LicensesTable = (props) => {
   const [searchText, setSearchText] = useState("");
+  const [altEmail, setAltEmail] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -41,7 +65,8 @@ const LicensesTable = (props) => {
   const [invoiceId, setInvoiceId] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const toast = useToast();
-
+  const inputRef = useRef(null);
+  
   const updateInvoiceIdInItemObject = async (
     invoiceId,
     documentId,
@@ -89,22 +114,12 @@ const LicensesTable = (props) => {
     setlicenseRenewModal(!openLicenseRenewModal);
   };
   const sortDateTime = (rowA, rowB) => {
-  
     let moment = require("moment");
     return (
       moment(rowA.DateTime, "DD.MM.YYYY").unix() -
       moment(rowB.DateTime, "DD.MM.YYYY").unix()
     );
-    // // Split the date strings into an array of [day, month, year]
-    // const a = rowA.DateTime.toLowerCase();
-    // const b = rowB.DateTime.toLowerCase();
-    // const date1 = a.split(".");
-    // const date2 = b.split(".");
-    // // Create new Date object with the year, month, day
-    // const newDate1 = new Date(date1[2], date1[1] - 1, date1[0]);
-    // const newDate2 = new Date(date2[2], date2[1] - 1, date2[0]);
-    // // Compare the two dates
-    // return newDate1 - newDate2;
+ 
   };
 
   const columns = [
@@ -189,15 +204,16 @@ const LicensesTable = (props) => {
 
     {
       name: "End User",
-      cell:  (row) => {
-        const endUser = allEnduserData.find((user)=> user.licenseKey === row.LicenseKey)
+      cell: (row) => {
+        const endUser = allEnduserData.find(
+          (user) => user.licenseKey === row.LicenseKey
+        );
         return (
           <button
             onClick={async () => {
-             
               // const endUser = await getEndUserFromFireStore(row.LicenseKey)
               if (endUser) {
-                setendUserData({endUser:endUser});
+                setendUserData({ endUser: endUser });
               } else {
                 setendUserData({
                   endUser: {
@@ -214,7 +230,13 @@ const LicensesTable = (props) => {
               //console.log(enduserData)
             }}
           >
-            <AiOutlineEye   className={endUser?.licenseKey ? "w-7 h-7 text-blue-500" : "w-7 h-7 text-red-500"}   />
+            <AiOutlineEye
+              className={
+                endUser?.licenseKey
+                  ? "w-7 h-7 text-blue-500"
+                  : "w-7 h-7 text-red-500"
+              }
+            />
           </button>
         );
       },
@@ -249,7 +271,7 @@ const LicensesTable = (props) => {
               color={"red.500"}
               _hover={{
                 cursor: "pointer",
-                color:"blue.500"
+                color: "blue.500",
               }}
               onClick={() => {
                 navigator.clipboard.writeText(row.LicenseKey);
@@ -341,6 +363,45 @@ const LicensesTable = (props) => {
                 <HiOutlineKey />
               </button>
             </Tooltip>
+            <Popover>
+              <PopoverTrigger>
+                <button
+                  type="button"
+                  className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  <SiMinutemailer />
+                </button>
+              </PopoverTrigger>
+              <Portal>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverHeader pt={4} fontWeight="bold" border="0">
+                  <HStack>
+                  <ImQrcode />
+                  <Text>Promosyon Kodu</Text></HStack>
+                  
+                  </PopoverHeader>
+                  <PopoverCloseButton />
+                  <PopoverBody>
+                    <FormControl>
+                      <FormLabel>Alternatif e-mail</FormLabel>
+                      <Input type="email" ref={inputRef}/>
+                    </FormControl>
+                  </PopoverBody>
+                  <PopoverFooter
+                    border="0"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    pb={4}
+                  >
+                    <ButtonGroup size="sm">
+                      <Button colorScheme="green" onClick={()=> alert(inputRef.current.value)}>Tekrar gönder</Button>
+                    </ButtonGroup>
+                  </PopoverFooter>
+                </PopoverContent>
+              </Portal>
+            </Popover>
           </div>
         );
       },
@@ -377,7 +438,6 @@ const LicensesTable = (props) => {
   };
 
   useEffect(() => {
-    
     (async () => {
       try {
         await getFireStoreData();
@@ -391,8 +451,8 @@ const LicensesTable = (props) => {
           return endUserAllData;
         };
         const allEndUserData = await getEndUsers();
-        setallEnduserData(allEndUserData)
-        
+        setallEnduserData(allEndUserData);
+
         const timer = setTimeout(() => {
           setIsLoading(false);
         }, 1000);
@@ -482,5 +542,3 @@ const LicensesTable = (props) => {
 };
 
 export default LicensesTable;
-
-
