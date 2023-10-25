@@ -49,6 +49,8 @@ import { getPartners } from "./api/getpartners";
 import axios from "axios";
 
 const Cart = (props) => {
+  console.log("props", props);
+
   const [orderDetails, setOrderDetails] = useState(null);
   const [endUserLicenseKey, setendUserLicenseKey] = useState(null);
 
@@ -281,7 +283,7 @@ const Cart = (props) => {
     });
     router.push("/dashboard");
   };
-  const CompleteOrder = async (props) => {
+  const CompleteOrder = async () => {
     // popover kapat
     onToggle();
 
@@ -294,24 +296,51 @@ const Cart = (props) => {
 
     try {
       //! OPEN AT LIVE
-      const tcxResponses = await PostData(
-        "/api/newlicense",
-        JSON.stringify(postData)
-      );
-
       // const tcxResponses = await PostData(
-      //   "/api/fakelicenseorder",
+      //   "/api/newlicense",
       //   JSON.stringify(postData)
       // );
-    
-      //addRandomLicenseKey(tcxResponses);
+
+      const tcxResponses = await PostData(
+        "/api/fakelicenseorder",
+        JSON.stringify(postData)
+      );
+      
+ addRandomLicenseKey(tcxResponses);
+
+
+      // Tüm yeni lisanslar için kupon kodu oluştur ve kodu email at.
+      tcxResponses.Items.forEach(async (item) => {
+        if (item.Type === "NewLicense") {
+          
+          const matchingPartner = props.responsePartners.find(
+            (partner) => partner.PartnerId === item.ResellerId
+          );
+          if (matchingPartner) {
+            item.LicenseKeys.forEach(async (item)=>{
+              const requestBody = { licensekey: item.LicenseKey, partnerId: matchingPartner.PartnerId};
+              const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody),
+              };
+              const response = await fetch("/api/coupon/create", requestOptions);
+              const responseData = await response.json();
+              console.log(responseData);
+            })
+            
+          }
+        }
+      });
+ 
+     
       mergeJSONObjects(cartDetailState, tcxResponses);
 
       await axios.post("/api/sendmail", tcxResponses);
 
       //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
 
-      await addDoc(collection(db, "licenses"), { tcxResponses });
+      //await addDoc(collection(db, "licenses"), { tcxResponses });
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
@@ -543,6 +572,6 @@ export async function getServerSideProps(context) {
   }));
 
   return {
-    props: { options, endUserDataOptions }, // will be passed to the page component as props
+    props: { options, endUserDataOptions, responsePartners }, // will be passed to the page component as props
   };
 }
