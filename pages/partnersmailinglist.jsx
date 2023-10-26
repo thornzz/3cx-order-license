@@ -450,7 +450,7 @@ const PartnersMailingList = ({ partnersFromAPI }) => {
       };
 
       const validate = scheme.safeParse(requestObj);
-      console.log(validate)
+      
       if(validate.success !== true) {
         toast.error(validate.error.errors[0].message, {
           position: "top-center",

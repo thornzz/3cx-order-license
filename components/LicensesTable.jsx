@@ -18,10 +18,10 @@ import { FaEdit } from "react-icons/fa";
 import { HiOutlineKey } from "react-icons/hi";
 import { SiMinutemailer } from "react-icons/si";
 import LicenseRenewModal from "./LicenseRenewModal";
-import ResendCouponModal from "./ResendCouponModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
 import { Icon, Text, useToast } from "@chakra-ui/react";
+import { ImQrcode } from "react-icons/im";
 import {
   collection,
   doc,
@@ -62,7 +62,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalCloseButton,
+  Flex
 } from "@chakra-ui/react";
+import { z } from "zod";
 
 const sortDateTime = (rowA, rowB) => {
   let moment = require("moment");
@@ -82,42 +84,17 @@ const LicensesTable = (props) => {
   const [enduserData, setendUserData] = useState(null);
   const [allEnduserData, setallEnduserData] = useState([]);
   const [licenseKey, setLicenseKey] = useState(null);
+  const [couponwithPartnerData, setCouponwithPartnerData] = useState({});
   const [openLicenseRenewModal, setlicenseRenewModal] = useState(null);
   const [openLicenseUpgradeModal, setlicenseUpgradeModal] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedCouponData, setSelectedCouponData] = useState({});
+  const [showAltEmailInput, setShowAltEmailInput] = useState(false);
+  const [altEmailText, setAltEmailText] = useState("");
+
   const toast = useToast();
-  const {
-    isOpen,
-    onisResendCouponModalOpen,
-    onisResendCouponModalClose,
-  } = useDisclosure();
-
-  // Resend Coupon Modal
-  <Modal
-        isOpen={isResendCouponModalOpen}
-        onClose={onisResendCouponModalClose}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create your account</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>Alternatif Email</FormLabel>
-              <Input placeholder='Alternatif email' />
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme='blue' mr={3}>
-              Gönder
-            </Button>
-            <Button onClick={onisResendCouponModalClose}>İptal</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const columns = [
     {
@@ -249,10 +226,10 @@ const LicensesTable = (props) => {
         row.Type === "NewLicense"
           ? "Yeni Lisans"
           : row.Type === "RenewAnnual"
-          ? "Lisans Yenileme"
-          : row.Type === "Maintenance"
-          ? "Maintenance"
-          : "Lisans Yükseltme",
+            ? "Lisans Yenileme"
+            : row.Type === "Maintenance"
+              ? "Maintenance"
+              : "Lisans Yükseltme",
       sortable: true,
       reorder: true,
       hide: "md",
@@ -367,17 +344,28 @@ const LicensesTable = (props) => {
               className="font-sm"
               animation="duration-500"
             >
-                <button
-        type="button"
-        className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        onClick={onisResendCouponModalOpen}
-      >
-        <SiMinutemailer />
-      </button>
+              <button
+                type="button"
+                className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                onClick={() => {
+                  const { LicenseKey } = row;
+                  const couponData = couponwithPartnerData.find((c) => c.licenseKey === LicenseKey);
+                  if (couponData) {
+                    setSelectedCouponData(couponData);
+                    onOpen();
+                  } else {
+                    toast({
+                      title: "Bu lisans key için kod bulunamadı.!",
+                      status: "error",
+                      position: 'top',
+                      duration: 2000,
+                      isClosable: true,
+                    });
+                  }}}
+              >
+                <SiMinutemailer />
+              </button>
             </Tooltip>
-
-         
-
           </div>
         );
       },
@@ -433,10 +421,83 @@ const LicensesTable = (props) => {
     setlicenseRenewModal(!openLicenseRenewModal);
   };
 
+  const handleAltEmailText = (event) => {
+    setAltEmailText(event.target.value);
+  };
+  const handleAltEmailCheckbox = (event) => {
+    if(!event.target.checked)
+        setAltEmailText("")
+    setShowAltEmailInput(event.target.checked);
+  };
   const handleSearch = (event) => {
     setSearchText(event.target.value);
   };
 
+  const handleEmailSend = async () => {
+    if (altEmailText.trim() === '') {
+      // altEmailText boşsa, doğrudan e-posta gönderme işlemine geç
+      sendEmail();
+    } else {
+      const emailScheme = z.string().email({message:'Mail adresi geçer'});
+      // altEmailText doluysa, zod ile kontrol yap
+      const emailValidate = emailScheme.safeParse(altEmailText);
+      if (emailValidate.success === false) {
+        toast({
+          title: "Geçersiz e-posta adresi!",
+          status: "error",
+          position: 'top',
+          duration: 2000,
+          isClosable: true,
+        });
+      } else {
+        // E-posta gönderme işlemi
+        await sendEmail();
+      }
+    }
+  }
+  
+  const sendEmail = async () => {
+    const emailRequestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "ibrahimak@gmail.com", // Burada gönderilecek e-posta adresini değiştirebilirsiniz
+        coupon: selectedCouponData.couponCode,
+        cc: altEmailText,
+      }),
+    };
+    const emailResponse = await fetch(
+      "/api/coupon/sendmail",
+      emailRequestOptions
+    ).then((response) => {
+      if (!response.ok) {
+        throw Error("HTTP hata, durum kodu: " + response.status);
+      }
+      return response.json();
+    }).then((data) => {
+      toast({
+        title: "E-posta gönderimi tamamlandı.",
+        status: "info",
+        position: 'top',
+        duration: 2000,
+        isClosable: true,
+      });
+      setShowAltEmailInput(false);
+      setAltEmailText("");
+      onClose();
+      console.log("Başarılı yanıt:", data);
+    }).catch((error) => {
+      toast({
+        title: "E-posta gönderiminde bir hata oluştu.",
+        status: "error",
+        position: 'top',
+        duration: 2000,
+        isClosable: true,
+      });
+      console.error("Hata:", error);
+    });
+  }
+  
   const filteredData = licenseState.filter((item) =>
     [item.ResellerName, item.LicenseKey, item.DateTime]
       .map((val) => val.toLowerCase())
@@ -450,13 +511,33 @@ const LicensesTable = (props) => {
   const getFireStoreData = async () => {
     // const firestoreData = await fetch('/api/getfirestoredata');
     // const data = await firestoreData.json();
+    const c = query(collection(db, "coupons"));
+    const couponsSnapshot = await getDocs(c);
+    const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }))
+    const resPartners = await fetch('/api/getpartners');
+    const partners = await resPartners.json();
+
+    const couponsWithPartnerData = couponsData.map((coupon) => {
+      const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
+      return {
+        partnerId: coupon.partnerId,
+        couponCode: coupon.couponCode,
+        licenseKey: coupon.licensekey,
+        email: partner ? partner.Email : null,
+      };
+    });
+
+    setCouponwithPartnerData(couponsWithPartnerData);
+
     const q = query(collection(db, "licenses"));
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const arr = querySnapshot.docs.map((d) => ({
         objectId: d.id,
         ...d.data(),
       }));
+
       const data = await extractData(arr);
+
       setLicenseState(data);
     });
   };
@@ -489,6 +570,61 @@ const LicensesTable = (props) => {
 
   return (
     <div>
+      {/* Resend Coupon Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <HStack mb={1}>
+              <ImQrcode />
+              <Text>Promosyon Kodu</Text>
+            </HStack>
+          </ModalHeader>
+
+          <ModalBody pb={4}>
+            <Stack>
+              <Checkbox
+                colorScheme="red"
+                size="md"
+                onChange={handleAltEmailCheckbox}
+              >
+                Alternatif email ekle
+              </Checkbox>
+              {showAltEmailInput && (
+                <FormControl>
+                  <Input
+                    placeholder="Alternatif email"
+                    onChange={handleAltEmailText}
+                    type="email"
+                  />
+                </FormControl>
+              )}
+            </Stack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={handleEmailSend}
+            >
+              Gönder
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={(e) => {
+                setShowAltEmailInput(false);
+                setAltEmailText("");
+                onClose();
+              }}
+            >
+              İptal
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Resend Coupon Modal */}
+
       <LicenseRenewModal
         renewalLicenseKey={licenseKey}
         showModal={openLicenseRenewModal}
@@ -504,7 +640,7 @@ const LicensesTable = (props) => {
         showModal={openEndUserModal}
         closeModal={showEndUserModal}
       />
-      
+
       {isLoading ? (
         <div
           style={{
@@ -526,6 +662,8 @@ const LicensesTable = (props) => {
         </div>
       ) : (
         <DataTable
+
+
           defaultSortFieldId={10}
           defaultSortAsc={false}
           columns={columns}
