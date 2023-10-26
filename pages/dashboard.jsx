@@ -155,7 +155,7 @@ const Dashboard = () => {
        
       </div> */}
 
-      <div>
+      <div style={{ minHeight:'720px'}}>
         <LicensesTable />
       </div>
 

@@ -1,5 +1,11 @@
 import DataTable from "react-data-table-component";
-import React, { useEffect, useState, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { tableStyle } from "./styles/tableStyle";
 import { useRecoilState } from "recoil";
 import { licenses } from "../atoms/fireStoreDataAtom";
@@ -11,8 +17,8 @@ import { TbLicense } from "react-icons/tb";
 import { FaEdit } from "react-icons/fa";
 import { HiOutlineKey } from "react-icons/hi";
 import { SiMinutemailer } from "react-icons/si";
-import { ImQrcode } from "react-icons/im";
 import LicenseRenewModal from "./LicenseRenewModal";
+import ResendCouponModal from "./ResendCouponModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
 import { Icon, Text, useToast } from "@chakra-ui/react";
@@ -46,12 +52,28 @@ import {
   ButtonGroup,
   Button,
   IconButton,
+  useDisclosure,
+  Checkbox,
+  VStack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 
+const sortDateTime = (rowA, rowB) => {
+  let moment = require("moment");
+  return (
+    moment(rowA.DateTime, "DD.MM.YYYY").unix() -
+    moment(rowB.DateTime, "DD.MM.YYYY").unix()
+  );
+};
 
 const LicensesTable = (props) => {
   const [searchText, setSearchText] = useState("");
-  const [altEmail, setAltEmail] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -65,62 +87,37 @@ const LicensesTable = (props) => {
   const [invoiceId, setInvoiceId] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
   const toast = useToast();
-  const inputRef = useRef(null);
-  
-  const updateInvoiceIdInItemObject = async (
-    invoiceId,
-    documentId,
-    itemLine
-  ) => {
-    try {
-      const licensesDocRef = doc(db, "licenses", documentId);
-      const docSnap = await getDoc(licensesDocRef);
-      const data = docSnap.data();
+  const {
+    isOpen,
+    onisResendCouponModalOpen,
+    onisResendCouponModalClose,
+  } = useDisclosure();
 
-      const updatedItems = data.tcxResponses.Items.map((item) => {
-        if (item.Line === itemLine) {
-          return { ...item, InvoiceId: invoiceId };
-        }
-        return item;
-      });
-      await updateDoc(licensesDocRef, {
-        tcxResponses: { Items: updatedItems },
-      });
-    } catch (error) {
-      console.error("Error updating invoice ID in Item object: ", error);
-    }
-  };
+  // Resend Coupon Modal
+  <Modal
+        isOpen={isResendCouponModalOpen}
+        onClose={onisResendCouponModalClose}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create your account</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <FormLabel>Alternatif Email</FormLabel>
+              <Input placeholder='Alternatif email' />
+            </FormControl>
+          </ModalBody>
 
-  // const getEndUserFromFireStore = async (licenseKey) => {
-  //   try {
-  //     const docRef = doc(db, "endusers", licenseKey);
-  //     const docSnap = await getDoc(docRef);
+          <ModalFooter>
+            <Button colorScheme='blue' mr={3}>
+              Gönder
+            </Button>
+            <Button onClick={onisResendCouponModalClose}>İptal</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-  //     if (docSnap.exists()) {
-  //       return { endUser: docSnap.data() };
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating endUser in Item object: ", error);
-  //   }
-  // };
-
-  const showEndUserModal = () => {
-    setOpenEndUserModal(!openEndUserModal);
-  };
-  const showUpgradeModal = () => {
-    setlicenseUpgradeModal(!openLicenseUpgradeModal);
-  };
-  const showLicenseRenewModal = () => {
-    setlicenseRenewModal(!openLicenseRenewModal);
-  };
-  const sortDateTime = (rowA, rowB) => {
-    let moment = require("moment");
-    return (
-      moment(rowA.DateTime, "DD.MM.YYYY").unix() -
-      moment(rowB.DateTime, "DD.MM.YYYY").unix()
-    );
- 
-  };
 
   const columns = [
     {
@@ -332,7 +329,7 @@ const LicensesTable = (props) => {
             <Tooltip
               content="Lisans Yenileme"
               className="font-sm"
-              animation="duration-1000"
+              animation="duration-500"
             >
               <button
                 type="button"
@@ -350,7 +347,7 @@ const LicensesTable = (props) => {
               content="Lisans Yükseltme"
               style="dark"
               className="font-sm"
-              animation="duration-1000"
+              animation="duration-500"
             >
               <button
                 type="button"
@@ -363,45 +360,24 @@ const LicensesTable = (props) => {
                 <HiOutlineKey />
               </button>
             </Tooltip>
-            <Popover>
-              <PopoverTrigger>
+
+            <Tooltip
+              content="Kupon Kodu Gönder"
+              style="dark"
+              className="font-sm"
+              animation="duration-500"
+            >
                 <button
-                  type="button"
-                  className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                >
-                  <SiMinutemailer />
-                </button>
-              </PopoverTrigger>
-              <Portal>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverHeader pt={4} fontWeight="bold" border="0">
-                  <HStack>
-                  <ImQrcode />
-                  <Text>Promosyon Kodu</Text></HStack>
-                  
-                  </PopoverHeader>
-                  <PopoverCloseButton />
-                  <PopoverBody>
-                    <FormControl>
-                      <FormLabel>Alternatif e-mail</FormLabel>
-                      <Input type="email" ref={inputRef}/>
-                    </FormControl>
-                  </PopoverBody>
-                  <PopoverFooter
-                    border="0"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    pb={4}
-                  >
-                    <ButtonGroup size="sm">
-                      <Button colorScheme="green" onClick={()=> alert(inputRef.current.value)}>Tekrar gönder</Button>
-                    </ButtonGroup>
-                  </PopoverFooter>
-                </PopoverContent>
-              </Portal>
-            </Popover>
+        type="button"
+        className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        onClick={onisResendCouponModalOpen}
+      >
+        <SiMinutemailer />
+      </button>
+            </Tooltip>
+
+         
+
           </div>
         );
       },
@@ -409,6 +385,54 @@ const LicensesTable = (props) => {
       hide: "md",
     },
   ];
+
+  const updateInvoiceIdInItemObject = async (
+    invoiceId,
+    documentId,
+    itemLine
+  ) => {
+    try {
+      const licensesDocRef = doc(db, "licenses", documentId);
+      const docSnap = await getDoc(licensesDocRef);
+      const data = docSnap.data();
+
+      const updatedItems = data.tcxResponses.Items.map((item) => {
+        if (item.Line === itemLine) {
+          return { ...item, InvoiceId: invoiceId };
+        }
+        return item;
+      });
+      await updateDoc(licensesDocRef, {
+        tcxResponses: { Items: updatedItems },
+      });
+    } catch (error) {
+      console.error("Error updating invoice ID in Item object: ", error);
+    }
+  };
+
+  // const getEndUserFromFireStore = async (licenseKey) => {
+  //   try {
+  //     const docRef = doc(db, "endusers", licenseKey);
+  //     const docSnap = await getDoc(docRef);
+
+  //     if (docSnap.exists()) {
+  //       return { endUser: docSnap.data() };
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating endUser in Item object: ", error);
+  //   }
+  // };
+
+  const showEndUserModal = () => {
+    setOpenEndUserModal(!openEndUserModal);
+  };
+  const showUpgradeModal = () => {
+    setlicenseUpgradeModal(!openLicenseUpgradeModal);
+  };
+  const showLicenseRenewModal = () => {
+    setlicenseRenewModal(!openLicenseRenewModal);
+  };
+
   const handleSearch = (event) => {
     setSearchText(event.target.value);
   };
@@ -480,6 +504,7 @@ const LicensesTable = (props) => {
         showModal={openEndUserModal}
         closeModal={showEndUserModal}
       />
+      
       {isLoading ? (
         <div
           style={{
