@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const resend = new Resend(process.env.RESEND_API_KEY);
   
     const emailOptions = {
-      from: 'coupon@order.k2msoftware.com',
+      from: "CDRCloud Promosyon <coupon@order.k2msoftware.com>",
       to: email,
       subject: 'Promosyon Kodu',
       html: `<div style="font-family: Arial, sans-serif; text-align: center; background-color: #f5f5f5; padding: 20px;">
