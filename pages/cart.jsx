@@ -166,12 +166,12 @@ const Cart = (props) => {
                   {item.Type === "NewLicense"
                     ? item.Edition
                     : item.Type === "RenewAnnual"
-                    ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
-                    : item.Type === "Maintenance"
-                    ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
-                    : getLicenseTypeAndSimcalls(
-                        cartDetailState[index]?.Items[0]?.ProductDescription
-                      )?.licenseType}
+                      ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
+                      : item.Type === "Maintenance"
+                        ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
+                        : getLicenseTypeAndSimcalls(
+                          cartDetailState[index]?.Items[0]?.ProductDescription
+                        )?.licenseType}
                 </h3>
               </div>
             </td>
@@ -190,10 +190,10 @@ const Cart = (props) => {
                   {item.Type === "NewLicense"
                     ? "Yeni Lisans"
                     : item.Type === "RenewAnnual"
-                    ? "Lisans Yenileme"
-                    : item.Type === "Upgrade"
-                    ? "Lisans Yükseltme"
-                    : "Maintenance"}
+                      ? "Lisans Yenileme"
+                      : item.Type === "Upgrade"
+                        ? "Lisans Yükseltme"
+                        : "Maintenance"}
                 </h3>
               </div>
             </td>
@@ -202,14 +202,14 @@ const Cart = (props) => {
               {item.Type === "NewLicense"
                 ? item.SimultaneousCalls
                 : item.Type === "RenewAnnual"
-                ? cartDetailState[index]?.Items[0].LicenseKeys[0]
+                  ? cartDetailState[index]?.Items[0].LicenseKeys[0]
                     .SimultaneousCalls
-                : item.Type === "Maintenance"
-                ? cartDetailState[index]?.Items[0].LicenseKeys[0]
-                    .SimultaneousCalls
-                : getLicenseTypeAndSimcalls(
-                    cartDetailState[index]?.Items[0]?.ProductDescription
-                  )?.simCall}
+                  : item.Type === "Maintenance"
+                    ? cartDetailState[index]?.Items[0].LicenseKeys[0]
+                      .SimultaneousCalls
+                    : getLicenseTypeAndSimcalls(
+                      cartDetailState[index]?.Items[0]?.ProductDescription
+                    )?.simCall}
             </td>
             <td className="p-4 px-6 text-center whitespace-nowrap">
               {item.Type === "Upgrade" ? 1 : item.Quantity}
@@ -294,17 +294,17 @@ const Cart = (props) => {
 
     try {
       //! OPEN AT LIVE
-      // const tcxResponses = await PostData(
-      //   "/api/newlicense",
-      //   JSON.stringify(postData)
-      // );
-
       const tcxResponses = await PostData(
-        "/api/fakelicenseorder",
+        "/api/newlicense",
         JSON.stringify(postData)
       );
 
-      addRandomLicenseKey(tcxResponses);
+      // const tcxResponses = await PostData(
+      //   "/api/fakelicenseorder",
+      //   JSON.stringify(postData)
+      // );
+
+      // addRandomLicenseKey(tcxResponses);
 
       // Tüm yeni lisanslar için kupon kodu oluştur ve kodu email at.
       try {
@@ -336,7 +336,7 @@ const Cart = (props) => {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     //email:matchingPartner.Email,
-                    email: "ibrahimak@gmail.com",
+                    email: "mustafa@k2mbilisim.com",
                     coupon: responseData.couponCode,
                   }),
                 };
@@ -345,7 +345,7 @@ const Cart = (props) => {
                   emailRequestOptions
                 );
                 const emailResponseData = await emailResponse.json();
-              
+
               });
             }
           }
@@ -360,7 +360,7 @@ const Cart = (props) => {
 
       //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
 
-      //await addDoc(collection(db, "licenses"), { tcxResponses });
+      await addDoc(collection(db, "licenses"), { tcxResponses });
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",

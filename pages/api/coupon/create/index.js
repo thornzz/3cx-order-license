@@ -10,12 +10,18 @@ export default async function handler(req, res) {
 
     if (req.method === "POST") {
         try {
-            const { licensekey,partnerId } = req.body;
+            const { licensekey, partnerId } = req.body;
 
             console.log(licensekey)
 
             const couponCode = generateCouponCode();
-            const newCouponObject = { partnerId:partnerId,licensekey: licensekey, couponCode: couponCode, createdAt: new Date() }
+            const newCouponObject = {
+                partnerId: partnerId,
+                licensekey: licensekey,
+                couponCode: couponCode,
+                createdAt: new Date(),
+                expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)  // Bugünden 30 gün sonrası
+            };
             await addDoc(collection(db, "coupons"), { ...newCouponObject });
             res.json({ couponCode: couponCode });
         } catch (error) {

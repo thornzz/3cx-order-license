@@ -361,7 +361,8 @@ const LicensesTable = (props) => {
                       duration: 2000,
                       isClosable: true,
                     });
-                  }}}
+                  }
+                }}
               >
                 <SiMinutemailer />
               </button>
@@ -425,8 +426,8 @@ const LicensesTable = (props) => {
     setAltEmailText(event.target.value);
   };
   const handleAltEmailCheckbox = (event) => {
-    if(!event.target.checked)
-        setAltEmailText("")
+    if (!event.target.checked)
+      setAltEmailText("")
     setShowAltEmailInput(event.target.checked);
   };
   const handleSearch = (event) => {
@@ -438,7 +439,7 @@ const LicensesTable = (props) => {
       // altEmailText boşsa, doğrudan e-posta gönderme işlemine geç
       sendEmail();
     } else {
-      const emailScheme = z.string().email({message:'Mail adresi geçer'});
+      const emailScheme = z.string().email({ message: 'Mail adresi geçer' });
       // altEmailText doluysa, zod ile kontrol yap
       const emailValidate = emailScheme.safeParse(altEmailText);
       if (emailValidate.success === false) {
@@ -455,13 +456,13 @@ const LicensesTable = (props) => {
       }
     }
   }
-  
+
   const sendEmail = async () => {
     const emailRequestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "ibrahimak@gmail.com", // Burada gönderilecek e-posta adresini değiştirebilirsiniz
+        email: "mustafa@k2mbilisim.com", // Burada gönderilecek e-posta adresini değiştirebilirsiniz
         coupon: selectedCouponData.couponCode,
         cc: altEmailText,
       }),
@@ -497,7 +498,7 @@ const LicensesTable = (props) => {
       console.error("Hata:", error);
     });
   }
-  
+
   const filteredData = licenseState.filter((item) =>
     [item.ResellerName, item.LicenseKey, item.DateTime]
       .map((val) => val.toLowerCase())
