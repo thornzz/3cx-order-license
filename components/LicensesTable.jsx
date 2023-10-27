@@ -65,6 +65,7 @@ import {
   Flex
 } from "@chakra-ui/react";
 import { z } from "zod";
+import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
 
 const sortDateTime = (rowA, rowB) => {
   let moment = require("moment");
@@ -268,8 +269,7 @@ const LicensesTable = (props) => {
       name: "Lisans Tipi",
       selector: (row) => row.Edition,
       sortable: true,
-      reorder: true,
-      hide: "md",
+      reorder: true
     },
     {
       name: "Sürüm",
@@ -287,15 +287,13 @@ const LicensesTable = (props) => {
       sortable: true,
       reorder: true,
       center: true,
-      hide: "md",
     },
     {
       name: "Tarih",
       selector: (row) => row.DateTime,
       reorder: true,
       sortable: true,
-      sortFunction: sortDateTime,
-      hide: "md",
+      sortFunction: sortDateTime
     },
     {
       name: "Lisans İşlemleri",
@@ -439,7 +437,7 @@ const LicensesTable = (props) => {
       // altEmailText boşsa, doğrudan e-posta gönderme işlemine geç
       sendEmail();
     } else {
-      const emailScheme = z.string().email({ message: 'Mail adresi geçer' });
+      const emailScheme = z.string().email({ message: 'Mail adresi geçersiz' });
       // altEmailText doluysa, zod ile kontrol yap
       const emailValidate = emailScheme.safeParse(altEmailText);
       if (emailValidate.success === false) {
@@ -500,7 +498,7 @@ const LicensesTable = (props) => {
   }
 
   const filteredData = licenseState.filter((item) =>
-    [item.ResellerName, item.LicenseKey, item.DateTime]
+    [item.ResellerName, item.LicenseKey, item.DateTime,item.companyName]
       .map((val) => val.toLowerCase())
       .some((val) => val.includes(searchText.toLowerCase()))
   );
@@ -509,44 +507,43 @@ const LicensesTable = (props) => {
     currentPage * rowsPerPage
   );
 
-  const getFireStoreData = async () => {
-    // const firestoreData = await fetch('/api/getfirestoredata');
-    // const data = await firestoreData.json();
-    const c = query(collection(db, "coupons"));
-    const couponsSnapshot = await getDocs(c);
-    const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }))
-    const resPartners = await fetch('/api/getpartners');
-    const partners = await resPartners.json();
-
-    const couponsWithPartnerData = couponsData.map((coupon) => {
-      const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
-      return {
-        partnerId: coupon.partnerId,
-        couponCode: coupon.couponCode,
-        licenseKey: coupon.licensekey,
-        email: partner ? partner.Email : null,
-      };
-    });
-
-    setCouponwithPartnerData(couponsWithPartnerData);
-
-    const q = query(collection(db, "licenses"));
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const arr = querySnapshot.docs.map((d) => ({
-        objectId: d.id,
-        ...d.data(),
-      }));
-
-      const data = await extractData(arr);
-
-      setLicenseState(data);
-    });
-  };
 
   useEffect(() => {
     (async () => {
       try {
-        await getFireStoreData();
+
+        // get firestore data
+
+        const c = query(collection(db, "coupons"));
+        const couponsSnapshot = await getDocs(c);
+        const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }))
+        const resPartners = await fetch('/api/getpartners');
+        const partners = await resPartners.json();
+
+        const couponsWithPartnerData = couponsData.map((coupon) => {
+          const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
+          return {
+            partnerId: coupon.partnerId,
+            couponCode: coupon.couponCode,
+            licenseKey: coupon.licensekey,
+            email: partner ? partner.Email : null,
+          };
+        });
+
+        setCouponwithPartnerData(couponsWithPartnerData);
+        let fireStoreData;
+        const q = query(collection(db, "licenses"));
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+          const arr = querySnapshot.docs.map((d) => ({
+            objectId: d.id,
+            ...d.data(),
+          }));
+
+          fireStoreData = await extractData(arr);
+         
+        });
+
+
         const getEndUsers = async () => {
           const collectionRef = collection(db, "endusers");
           const q = query(collectionRef);
@@ -557,6 +554,13 @@ const LicensesTable = (props) => {
           return endUserAllData;
         };
         const allEndUserData = await getEndUsers();
+
+        //end user bilgisi lisans datasının içine aktar
+    
+        const mergedData = await mergeEndUserwithLicense(fireStoreData, allEndUserData);
+        
+        
+        setLicenseState(mergedData);
         setallEnduserData(allEndUserData);
 
         const timer = setTimeout(() => {
