@@ -20,7 +20,7 @@ import { SiMinutemailer } from "react-icons/si";
 import LicenseRenewModal from "./LicenseRenewModal";
 import UpgradeLicenseModal from "./UpgradeLicenseModal";
 import { db } from "../firebase";
-import { Icon, Text, useToast } from "@chakra-ui/react";
+import { Icon, Spacer, Text, useToast } from "@chakra-ui/react";
 import { ImQrcode } from "react-icons/im";
 import {
   collection,
@@ -35,26 +35,12 @@ import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
 import {
   HStack,
-  Center,
-  Portal,
   FormControl,
-  FormLabel,
   Input,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
   Stack,
-  ButtonGroup,
   Button,
-  IconButton,
   useDisclosure,
   Checkbox,
-  VStack,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -62,10 +48,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalCloseButton,
-  Flex
+  Flex,
+  Box
 } from "@chakra-ui/react";
 import { z } from "zod";
 import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
+import { MultiSelect } from "chakra-multiselect";
 
 const sortDateTime = (rowA, rowB) => {
   let moment = require("moment");
@@ -93,9 +81,11 @@ const LicensesTable = (props) => {
   const [selectedCouponData, setSelectedCouponData] = useState({});
   const [showAltEmailInput, setShowAltEmailInput] = useState(false);
   const [altEmailText, setAltEmailText] = useState("");
-
+  const [selectedFilter, setSelectedFilter] = useState([]);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const optionsFilter =
+    [{ label: "Fatura Kesilmeyen", value: "faturasiz" }]
 
   const columns = [
     {
@@ -498,7 +488,7 @@ const LicensesTable = (props) => {
   }
 
   const filteredData = licenseState.filter((item) =>
-    [item.ResellerName, item.LicenseKey, item.DateTime,item.companyName]
+    [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
       .map((val) => val.toLowerCase())
       .some((val) => val.includes(searchText.toLowerCase()))
   );
@@ -540,7 +530,7 @@ const LicensesTable = (props) => {
           }));
 
           fireStoreData = await extractData(arr);
-         
+
         });
 
 
@@ -556,10 +546,11 @@ const LicensesTable = (props) => {
         const allEndUserData = await getEndUsers();
 
         //end user bilgisi lisans datasının içine aktar
-    
+
         const mergedData = await mergeEndUserwithLicense(fireStoreData, allEndUserData);
-        
-        
+        console.log("🚀 ~ file: LicensesTable.jsx:551 ~ mergedData:", mergedData)
+
+
         setLicenseState(mergedData);
         setallEnduserData(allEndUserData);
 
@@ -676,17 +667,56 @@ const LicensesTable = (props) => {
           customStyles={tableStyle}
           highlightOnHover={true}
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
-          subHeader
+          subHeader={true}
+          subHeaderAlign="left"
+
           subHeaderComponent={
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <h3 style={{ margin: "0 10px" }}>Ara :</h3>
-              <input
-                type="text"
-                value={searchText}
-                onChange={handleSearch}
-                style={{ border: "none", borderBottom: "1px solid black" }}
-              />
+            <div style={{ display: "flex" }}>
+
+              <div style={{ marginRight: '45vw', display: "flex", alignItems: 'center', width: '750px' }}>
+                <h3 style={{ marginRight: '10px' }}>Filtrele :</h3>
+                <MultiSelect
+                  options={optionsFilter}
+                  value={selectedFilter}
+
+                  onChange={setSelectedFilter}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: 'center', marginLeft: 'auto' }}>
+                <h3 style={{ marginRight: '10px' }}>Ara :</h3>
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={handleSearch}
+                  style={{ border: "none", borderBottom: "1px solid black" }}
+                />
+              </div>
             </div>
+
+
+            //   <input
+            //   type="text"
+            //   value={searchText}
+            //   onChange={handleSearch}
+            //   style={{ border: "none", borderBottom: "1px solid black" }}
+            // />
+            // <div style={{ display: "flex", justifyContent: "space-between" }}>
+
+            //   <MultiSelect
+            //             options={optionsFilter}
+            //             value={selectedFilter}
+
+            //             onChange={setSelectedFilter}
+            //           />
+            //   <h3 style={{ margin: "0 10px" }}>Ara :</h3>
+            //   <Spacer />
+            //   <input
+            //     type="text"
+            //     value={searchText}
+            //     onChange={handleSearch}
+            //     style={{ border: "none", borderBottom: "1px solid black" }}
+            //   />
+            // </div>
           }
           pagination
           paginationComponentOptions={{
