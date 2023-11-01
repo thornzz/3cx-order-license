@@ -53,10 +53,11 @@ import {
 } from "@chakra-ui/react";
 import { z } from "zod";
 import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
-import { MultiSelect } from "chakra-multiselect";
+import { MultiSelect,SelectionVisibilityMode } from "chakra-multiselect";
+let moment = require("moment");
 
 const sortDateTime = (rowA, rowB) => {
-  let moment = require("moment");
+ 
   return (
     moment(rowA.DateTime, "DD.MM.YYYY").unix() -
     moment(rowB.DateTime, "DD.MM.YYYY").unix()
@@ -64,6 +65,7 @@ const sortDateTime = (rowA, rowB) => {
 };
 
 const LicensesTable = (props) => {
+
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,8 +86,29 @@ const LicensesTable = (props) => {
   const [selectedFilter, setSelectedFilter] = useState([]);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const optionsFilter =
-    [{ label: "Fatura Kesilmeyen", value: "faturasiz" }]
+    [{ label: "Fatura Kesilmeyen", value: "faturasiz" },
+    {label:"Son 1 hafta",value:"son1hafta"},
+    {label:"Son 1 Ay",value:"son1ay"},
+    {label:"Son 1 Yıl",value:"son1yil"}
+  ]
+
+  const handleFilterChange = (newFilters) => {
+    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil']);
+    let currentFilters = [];
+
+    newFilters.forEach(newFilter => {
+        if (dateTimevalues.has(newFilter.value)) {
+            currentFilters = currentFilters.filter(currentFilter => !dateTimevalues.has(currentFilter.value));
+        }
+        currentFilters = currentFilters.filter(filter => filter.value !== newFilter.value);
+        currentFilters.push(newFilter);
+    });
+
+    setSelectedFilter(currentFilters);
+}
+
 
   const columns = [
     {
@@ -474,7 +497,7 @@ const LicensesTable = (props) => {
       setShowAltEmailInput(false);
       setAltEmailText("");
       onClose();
-      console.log("Başarılı yanıt:", data);
+
     }).catch((error) => {
       toast({
         title: "E-posta gönderiminde bir hata oluştu.",
@@ -487,15 +510,64 @@ const LicensesTable = (props) => {
     });
   }
 
-  const filteredData = licenseState.filter((item) =>
-    [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
-      .map((val) => val.toLowerCase())
-      .some((val) => val.includes(searchText.toLowerCase()))
-  );
+  const applyFilters = (data, selectedFilters) => {
+
+    const filterConditions = {
+      faturasiz: (item) => item.InvoiceId === null,
+      son1hafta: (item) => {
+        const lastWeek = moment().subtract(1, 'weeks');
+        const itemDate = moment(item.DateTime, 'DD.MM.YYYY'); // Örneğin: '2023-10-01 15:30:00'
+        return itemDate.isAfter(lastWeek);
+      },
+      son1ay: (item) => {
+        const lastMonth = moment().subtract(1, 'months');
+        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        return itemDate.isAfter(lastMonth);
+      },
+      son1yil: (item) => {
+        const lastYear = moment().subtract(1, 'years');
+        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        return itemDate.isAfter(lastYear);
+      }
+      // Diğer filtreler buraya eklenebilir
+    };
+   
+  
+
+    const filterFunction = (item) => {
+      const matchesSearchText = [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
+        .map((val) => val.toLowerCase())
+        .some((val) => val.includes(searchText.toLowerCase()));
+
+
+        const matchesSelectedFilters = selectedFilters.length === 0 || selectedFilters.every(filter => {
+          const filterCondition = filterConditions[filter.value];
+          return filterCondition ? filterCondition(item) : true;
+        });
+
+      return matchesSearchText && matchesSelectedFilters;
+    };
+
+    const filteredData = data.filter(filterFunction);
+
+    return filteredData;
+  };
+
+const filteredData = applyFilters(licenseState, selectedFilter);
+
+  // const filteredData = licenseState.filter((item) =>
+  //   [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
+  //     .map((val) => val.toLowerCase())
+  //     .some((val) => val.includes(searchText.toLowerCase()))
+  // );
   const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
+  // const paginatedData = filteredData.slice(
+  //   (currentPage - 1) * rowsPerPage,
+  //   currentPage * rowsPerPage
+  // );
 
 
   useEffect(() => {
@@ -548,8 +620,6 @@ const LicensesTable = (props) => {
         //end user bilgisi lisans datasının içine aktar
 
         const mergedData = await mergeEndUserwithLicense(fireStoreData, allEndUserData);
-        console.log("🚀 ~ file: LicensesTable.jsx:551 ~ mergedData:", mergedData)
-
 
         setLicenseState(mergedData);
         setallEnduserData(allEndUserData);
@@ -671,18 +741,19 @@ const LicensesTable = (props) => {
           subHeaderAlign="left"
 
           subHeaderComponent={
-            <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", flex: '1 100%', justifyContent: 'space-between', flexDirection: 'row', maxWidth: '100vw' }}>
 
-              <div style={{ marginRight: '45vw', display: "flex", alignItems: 'center', width: '750px' }}>
+              <div style={{ display: "flex", alignItems: 'center', width: '50vw' }}>
                 <h3 style={{ marginRight: '10px' }}>Filtrele :</h3>
                 <MultiSelect
                   options={optionsFilter}
                   value={selectedFilter}
-
-                  onChange={setSelectedFilter}
+                  onChange={handleFilterChange}
+                 
                 />
+
               </div>
-              <div style={{ display: "flex", alignItems: 'center', marginLeft: 'auto' }}>
+              <div style={{ display: "flex", alignItems: 'center' }}>
                 <h3 style={{ marginRight: '10px' }}>Ara :</h3>
                 <input
                   type="text"

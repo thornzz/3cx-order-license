@@ -6,6 +6,11 @@ const tableStyle = {
       color: "white",
       backgroundColor: "#111827",
     },
-}
+  	subHeader: {
+      style: {
+        backgroundColor:'red'
+      },
+    }
+  }
 };
 export { tableStyle };
