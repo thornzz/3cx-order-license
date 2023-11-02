@@ -64,7 +64,7 @@ const sortDateTime = (rowA, rowB) => {
   );
 };
 
-const LicensesTable = (props) => {
+const LicensesTable = ({setLoadingState}) => {
 
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
@@ -626,6 +626,7 @@ const filteredData = applyFilters(licenseState, selectedFilter);
 
         const timer = setTimeout(() => {
           setIsLoading(false);
+          setLoadingState(false);
         }, 1000);
         return () => clearTimeout(timer);
       } catch (e) {

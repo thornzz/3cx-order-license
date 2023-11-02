@@ -30,7 +30,7 @@ const Dashboard = () => {
   };
 
   const [licenseKey, setLicenseKey] = useState(null);
-
+  const [isLoading, setIsLoading] = useState(true);
   const showLicenseCheckModal = () => {
     setLicenseCheckModal(!openLicenseCheckModal);
   };
@@ -155,12 +155,16 @@ const Dashboard = () => {
        
       </div> */}
 
-      <div style={{ minHeight:'720px'}}>
-        <LicensesTable />
+      <div style={{ minHeight: '720px' }}>
+        <LicensesTable setLoadingState={setIsLoading} />
       </div>
-
-      <Footer />
+      <div className="w-full items-center">
+      {isLoading ? (
+        null) : (<Footer />)}
+      </div>
+    
     </div>
+    
   );
 };
 export default Dashboard;
