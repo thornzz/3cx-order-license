@@ -53,18 +53,18 @@ import {
 } from "@chakra-ui/react";
 import { z } from "zod";
 import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
-import { MultiSelect,SelectionVisibilityMode } from "chakra-multiselect";
+import { MultiSelect, SelectionVisibilityMode } from "chakra-multiselect";
 let moment = require("moment");
 
 const sortDateTime = (rowA, rowB) => {
- 
+
   return (
     moment(rowA.DateTime, "DD.MM.YYYY").unix() -
     moment(rowB.DateTime, "DD.MM.YYYY").unix()
   );
 };
 
-const LicensesTable = ({setLoadingState}) => {
+const LicensesTable = ({ setLoadingState }) => {
 
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
@@ -89,25 +89,27 @@ const LicensesTable = ({setLoadingState}) => {
 
   const optionsFilter =
     [{ label: "Fatura Kesilmeyen", value: "faturasiz" },
-    {label:"Son 1 hafta",value:"son1hafta"},
-    {label:"Son 1 Ay",value:"son1ay"},
-    {label:"Son 1 Yıl",value:"son1yil"}
-  ]
+    { label: "Bu hafta", value: "buhafta" },
+    { label: "Bu ay", value: "buay" },
+    { label: "Son 1 hafta", value: "son1hafta" },
+    { label: "Son 1 Ay", value: "son1ay" },
+    { label: "Son 1 Yıl", value: "son1yil" }
+    ]
 
   const handleFilterChange = (newFilters) => {
-    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil']);
+    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil', 'buhafta','buay']);
     let currentFilters = [];
 
     newFilters.forEach(newFilter => {
-        if (dateTimevalues.has(newFilter.value)) {
-            currentFilters = currentFilters.filter(currentFilter => !dateTimevalues.has(currentFilter.value));
-        }
-        currentFilters = currentFilters.filter(filter => filter.value !== newFilter.value);
-        currentFilters.push(newFilter);
+      if (dateTimevalues.has(newFilter.value)) {
+        currentFilters = currentFilters.filter(currentFilter => !dateTimevalues.has(currentFilter.value));
+      }
+      currentFilters = currentFilters.filter(filter => filter.value !== newFilter.value);
+      currentFilters.push(newFilter);
     });
 
     setSelectedFilter(currentFilters);
-}
+  }
 
 
   const columns = [
@@ -514,6 +516,23 @@ const LicensesTable = ({setLoadingState}) => {
 
     const filterConditions = {
       faturasiz: (item) => item.InvoiceId === null,
+
+      buhafta: (item) => {
+        const startOfWeek = moment().startOf('week'); // Bu hafta pazartesi günü
+        const endOfWeek = moment().endOf('week').subtract(1, 'day'); // Bu hafta pazar günü
+
+        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+
+        return itemDate.isBetween(startOfWeek, endOfWeek);
+      },
+      buay: (item) => {
+        const startOfMonth = moment().startOf('month'); // Ayın 1'i
+        const endOfMonth = moment().endOf('month'); // Ayın son günü
+    
+        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+    
+        return itemDate.isBetween(startOfMonth, endOfMonth);
+      },
       son1hafta: (item) => {
         const lastWeek = moment().subtract(1, 'weeks');
         const itemDate = moment(item.DateTime, 'DD.MM.YYYY'); // Örneğin: '2023-10-01 15:30:00'
@@ -531,8 +550,8 @@ const LicensesTable = ({setLoadingState}) => {
       }
       // Diğer filtreler buraya eklenebilir
     };
-   
-  
+
+
 
     const filterFunction = (item) => {
       const matchesSearchText = [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
@@ -540,10 +559,10 @@ const LicensesTable = ({setLoadingState}) => {
         .some((val) => val.includes(searchText.toLowerCase()));
 
 
-        const matchesSelectedFilters = selectedFilters.length === 0 || selectedFilters.every(filter => {
-          const filterCondition = filterConditions[filter.value];
-          return filterCondition ? filterCondition(item) : true;
-        });
+      const matchesSelectedFilters = selectedFilters.length === 0 || selectedFilters.every(filter => {
+        const filterCondition = filterConditions[filter.value];
+        return filterCondition ? filterCondition(item) : true;
+      });
 
       return matchesSearchText && matchesSelectedFilters;
     };
@@ -553,7 +572,7 @@ const LicensesTable = ({setLoadingState}) => {
     return filteredData;
   };
 
-const filteredData = applyFilters(licenseState, selectedFilter);
+  const filteredData = applyFilters(licenseState, selectedFilter);
 
   // const filteredData = licenseState.filter((item) =>
   //   [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
@@ -708,26 +727,7 @@ const filteredData = applyFilters(licenseState, selectedFilter);
         closeModal={showEndUserModal}
       />
 
-      {isLoading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <RotatingSquare
-            height="100"
-            width="100"
-            color="white"
-            ariaLabel="rotating-square-loading"
-            strokeWidth="4"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={true}
-          />
-        </div>
-      ) : (
+        {!isLoading && (
         <DataTable
 
 
@@ -750,7 +750,7 @@ const filteredData = applyFilters(licenseState, selectedFilter);
                   options={optionsFilter}
                   value={selectedFilter}
                   onChange={handleFilterChange}
-                 
+
                 />
 
               </div>
@@ -806,7 +806,8 @@ const filteredData = applyFilters(licenseState, selectedFilter);
           paginationServer
           paginationRowsPerPageOptions={[50, 100, 250, 500]}
         />
-      )}
+        )}
+      {/* )} */}
     </div>
   );
 };

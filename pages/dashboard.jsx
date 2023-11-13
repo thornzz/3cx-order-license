@@ -5,7 +5,7 @@ import { Button } from "flowbite-react";
 import LicensesTable from "../components/LicensesTable";
 import LicenseRenewModal from "../components/LicenseRenewModal";
 import UpgradeLicenseModal from "../components/UpgradeLicenseModal";
-
+import { MagnifyingGlass } from "react-loader-spinner";
 import Footer from "../components/Footer";
 import LicenseCheckModal from "../components/LicenseCheckModal";
 import AddEndUserModal from "../components/AddEndUserModal";
@@ -37,7 +37,23 @@ const Dashboard = () => {
   const [openLicenseCheckModal, setLicenseCheckModal] = useState(false);
 
   return (
-    <div className="bg-gray-900 h-screen">
+    <div className={isLoading ? "h-screen login" : "h-screen bg-gray-900"}>
+      {/* {!isLoading && ( */}
+      {isLoading ? (
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+     <MagnifyingGlass
+  visible={true}
+  height="80"
+  width="80"
+  ariaLabel="MagnifyingGlass-loading"
+  wrapperStyle={{}}
+  wrapperClass="MagnifyingGlass-wrapper"
+  glassColor = '#c0efff'
+  color = '#e15b64'
+/>
+    </div>
+      ) : (
+      <div>
       <AddEndUserModal
         showModal={openAddEndUserModal}
         closeModal={showAddEndUserModal}
@@ -112,49 +128,8 @@ const Dashboard = () => {
           Yeni Lisans
         </Button>
       </HStack>
-
-      {/* <div className="flex items-center justify-between">
-        <div className="flex">
-          <Button
-            onClick={showLicenseCheckModal}
-            className="bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Sorgulama
-          </Button>
-          <Button
-            onClick={showAddEndUserModal}
-            className="px-4 w-35 mb-2 mt-2 mr-2 bg-orange-400"
-          >
-            End User Ekle
-          </Button>
-        </div>
-      
-
-        <div className="flex">
-          <Button
-            onClick={showRenewLicenseModal}
-            className="bg-red-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Yenileme
-          </Button>
-          <Button
-            onClick={showUpgradeLicenseModal}
-            className="bg-green-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Yükseltme
-          </Button>
-          <div className="ml-40">
-        <Button
-            onClick={showNewLicenseModal}
-            className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
-          >
-            Yeni Lisans
-          </Button>
-          </div>
-        </div>
-       
-      </div> */}
-
+      </div>
+      )}
       <div style={{ minHeight: '720px' }}>
         <LicensesTable setLoadingState={setIsLoading} />
       </div>
