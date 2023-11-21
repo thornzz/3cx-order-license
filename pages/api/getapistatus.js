@@ -13,7 +13,7 @@ export async function getOrderApiStatus() {
 
         // Check if the response status code is 200
         if (response.status === 200) {
-            return { status: true };
+            return { status: false };
         } else {
             return { status: false };
         }

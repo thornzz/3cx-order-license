@@ -10,6 +10,7 @@ import Footer from "../components/Footer";
 import LicenseCheckModal from "../components/LicenseCheckModal";
 import AddEndUserModal from "../components/AddEndUserModal";
 import { ButtonGroup, Spacer, VStack, HStack } from "@chakra-ui/react";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const [openNewLicenseModal, setOpenNewLicenseModal] = useState(false);
@@ -35,7 +36,7 @@ const Dashboard = () => {
     setLicenseCheckModal(!openLicenseCheckModal);
   };
   const [openLicenseCheckModal, setLicenseCheckModal] = useState(false);
-  const [orderStatus, setOrderStatus] = useState(false);
+  const [orderStatus, setOrderStatus] = useState(true);
  
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +51,18 @@ const Dashboard = () => {
     };
   
     fetchData();
+if(!orderStatus)
+    toast.error("Api Bağlantısı Sağlanamadı!", {
+      position: "top-center",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+
+    });
   
   }, [orderStatus]); 
   
