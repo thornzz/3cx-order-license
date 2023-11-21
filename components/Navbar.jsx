@@ -9,7 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 import { Dropdown } from "flowbite-react";
 import { HiLogout, HiOutlineDocumentReport, HiViewGrid } from "react-icons/hi";
 import { FiMail } from "react-icons/fi";
-import { AiOutlineUser,AiOutlineHistory } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineHistory } from "react-icons/ai";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { cartLength } from "../atoms/shoppingCartAtom";
 import { useRecoilValue } from "recoil";
@@ -57,7 +57,7 @@ function Navbar() {
   };
   return (
     <>
-   
+
       <Drawer
         isOpen={isOpen}
         placement="right"
@@ -87,13 +87,13 @@ function Navbar() {
               </Box>
               <Box ml={1}>
                 <Link href={"/partnersmailinglist"}>
-                 
+
                   <Icon as={FiMail} w="7" h="7" /> Mail Formu
                 </Link>
               </Box>
               <Box ml={1}>
                 <Link href={"/mailhistory"}>
-                 
+
                   <Icon as={AiOutlineHistory} w="7" h="7" /> Mail Geçmişi
                 </Link>
               </Box>
@@ -162,7 +162,7 @@ function Navbar() {
           />
         </div>
       </nav>
-    
+
     </>
   );
 }

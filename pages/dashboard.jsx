@@ -35,6 +35,25 @@ const Dashboard = () => {
     setLicenseCheckModal(!openLicenseCheckModal);
   };
   const [openLicenseCheckModal, setLicenseCheckModal] = useState(false);
+  const [orderStatus, setOrderStatus] = useState(false);
+ 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resOrderApiStatus = await fetch('/api/getapistatus');
+        const orderApiStatus = await resOrderApiStatus.json();
+        setOrderStatus(orderApiStatus.status);
+        
+      } catch (error) {
+        console.error('Error fetching API status:', error);
+      }
+    };
+  
+    fetchData();
+  
+  }, [orderStatus]); 
+  
+
 
   return (
     <div className={isLoading ? "h-screen login" : "h-screen bg-gray-900"}>
@@ -87,47 +106,52 @@ const Dashboard = () => {
         closeModal={showUpgradeLicenseModal}
       ></UpgradeLicenseModal>
 
-      <Navbar />
-      <HStack>
-        <ButtonGroup ml={2}>
-          <Button
-            onClick={showLicenseCheckModal}
-            className="bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Sorgulama
-          </Button>
-          <Button
-            onClick={showAddEndUserModal}
-            className="px-4 w-35 mb-2 mt-2 mr-2 bg-orange-400"
-          >
-            End User Ekle
-          </Button>
-        </ButtonGroup>
-        <Spacer />
+<Navbar />
+<HStack>
+  <ButtonGroup ml={2}>
+    <Button
+      onClick={showLicenseCheckModal}
+      className={`bg-sky-500 px-4 w-35 mb-2 mt-2 mr-2 ${!orderStatus ? 'disabled' : ''}`}
+      disabled={!orderStatus}
+    >
+      Lisans Sorgulama
+    </Button>
+    <Button
+      onClick={showAddEndUserModal}
+      className={`px-4 w-35 mb-2 mt-2 mr-2 bg-orange-400 ${!orderStatus ? 'disabled' : ''}`}
+      disabled={!orderStatus}
+    >
+      End User Ekle
+    </Button>
+  </ButtonGroup>
+  <Spacer />
 
-        <ButtonGroup>
-          <Button
-            onClick={showRenewLicenseModal}
-            className="bg-red-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Yenileme
-          </Button>
-          <Button
-            onClick={showUpgradeLicenseModal}
-            className="bg-green-500 px-4 w-35 mb-2 mt-2 mr-2"
-          >
-            Lisans Yükseltme
-          </Button>
-        </ButtonGroup>
+  <ButtonGroup>
+    <Button
+      onClick={showRenewLicenseModal}
+      className={`bg-red-500 px-4 w-35 mb-2 mt-2 mr-2 ${!orderStatus ? 'disabled' : ''}`}
+      disabled={!orderStatus}
+    >
+      Lisans Yenileme
+    </Button>
+    <Button
+      onClick={showUpgradeLicenseModal}
+      className={`bg-green-500 px-4 w-35 mb-2 mt-2 mr-2 ${!orderStatus ? 'disabled' : ''}`}
+      disabled={!orderStatus}
+    >
+      Lisans Yükseltme
+    </Button>
+  </ButtonGroup>
 
-        <Button
-          style={{ marginRight: "10px", marginLeft: "150px" }}
-          onClick={showNewLicenseModal}
-          className="bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2"
-        >
-          Yeni Lisans
-        </Button>
-      </HStack>
+  <Button
+    style={{ marginRight: "10px", marginLeft: "150px" }}
+    onClick={showNewLicenseModal}
+    className={`bg-indigo-500 px-9 w-35 mb-2 mt-2 mr-2 ${!orderStatus ? 'disabled' : ''}`}
+    disabled={!orderStatus}
+  >
+    Yeni Lisans
+  </Button>
+</HStack>
       </div>
       )}
       <div style={{ minHeight: '720px' }}>

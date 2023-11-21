@@ -1,7 +1,12 @@
 
-export async function getPartners(){
+
+import { collection, query, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/index";
+
+export async function getPartners() {
     try {
-        // Make a request to the remote API endpoint to get the JSON response
+        let data = null;
+
         const username = process.env.NEXT_PUBLIC_3CX_API_KEY;
         const password = ''; // Your password goes here
         const basicAuth = btoa(`${username}:${password}`);
@@ -12,23 +17,33 @@ export async function getPartners(){
             }
         });
 
-        const data = await response.json();
-       
+        // Check if the response status code is 200
+        if (response.status === 200) {
+
+            data = await response.json();
+        } else {
+
+            // order api cant be connected
+            const partnersRef = query(collection(db, "partners"));
+            const partnersSnapshot = await getDocs(partnersRef);
+            data = partnersSnapshot.docs.map((d) => ({ ...d.data() }))
+        }
+
         // Extract only the PartnerId and CompanyName fields from each object in the array
         const filteredData = data.map(partner => ({
             PartnerId: partner.PartnerId,
             CompanyName: partner.CompanyName,
             ContactName: partner.ContactName,
-            PartnerLevelName:partner.PartnerLevelName,
-            Email:partner.ContactEmail,
-            ContactPhone:partner.ContactPhone
+            PartnerLevelName: partner.PartnerLevelName,
+            Email: partner.ContactEmail,
+            ContactPhone: partner.ContactPhone
         }));
 
         // Send the filtered data as the response
-       return filteredData
+        return filteredData
 
     } catch (error) {
-       console.log(error)
+        console.log(error)
     }
 
 }
@@ -37,6 +52,6 @@ export default async function handler(req, res) {
         const jsonData = await getPartners()
         res.status(200).json(jsonData)
     } catch (error) {
-        res.status(500).json({error: error.message});
+        res.status(500).json({ error: error.message });
     }
 }

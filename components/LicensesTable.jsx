@@ -97,7 +97,7 @@ const LicensesTable = ({ setLoadingState }) => {
     ]
 
   const handleFilterChange = (newFilters) => {
-    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil', 'buhafta','buay']);
+    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil', 'buhafta', 'buay']);
     let currentFilters = [];
 
     newFilters.forEach(newFilter => {
@@ -528,9 +528,9 @@ const LicensesTable = ({ setLoadingState }) => {
       buay: (item) => {
         const startOfMonth = moment().startOf('month'); // Ayın 1'i
         const endOfMonth = moment().endOf('month'); // Ayın son günü
-    
+
         const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
-    
+
         return itemDate.isBetween(startOfMonth, endOfMonth);
       },
       son1hafta: (item) => {
@@ -592,7 +592,6 @@ const LicensesTable = ({ setLoadingState }) => {
   useEffect(() => {
     (async () => {
       try {
-
         // get firestore data
 
         const c = query(collection(db, "coupons"));
@@ -600,6 +599,7 @@ const LicensesTable = ({ setLoadingState }) => {
         const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }))
         const resPartners = await fetch('/api/getpartners');
         const partners = await resPartners.json();
+     
 
         const couponsWithPartnerData = couponsData.map((coupon) => {
           const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
@@ -727,7 +727,7 @@ const LicensesTable = ({ setLoadingState }) => {
         closeModal={showEndUserModal}
       />
 
-        {!isLoading && (
+      {!isLoading && (
         <DataTable
 
 
@@ -806,7 +806,7 @@ const LicensesTable = ({ setLoadingState }) => {
           paginationServer
           paginationRowsPerPageOptions={[50, 100, 250, 500]}
         />
-        )}
+      )}
       {/* )} */}
     </div>
   );
