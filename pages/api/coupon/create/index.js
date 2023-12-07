@@ -23,7 +23,7 @@ export default async function handler(req, res) {
                 expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)  // Bugünden 30 gün sonrası
             };
             await addDoc(collection(db, "coupons"), { ...newCouponObject });
-            res.json({ couponCode: couponCode });
+            res.json({ couponCode: couponCode, licensekey: licensekey});
         } catch (error) {
             const errorData = { error: error.message };
             res.status(500).json(errorData);

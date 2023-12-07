@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { coupon, email, cc } = req.body;
+  const { coupon, email, cc, licensekey } = req.body;
 
   // Firestore'dan tüm kupon verilerini alalım
   const couponsCollection = collection(db, "coupons");
@@ -26,6 +26,8 @@ export default async function handler(req, res) {
   }
 
   const { expiryDate } = couponData;
+
+  const formattedLicenseKey = licensekey.replace(/^(.{4})-(.{4})-(.{4})-(.{4})$/, '$1-XXXX-XXXX-$4');
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -43,7 +45,7 @@ export default async function handler(req, res) {
     subject: 'Promosyon Kodu',
     html: `<div style="font-family: Arial, sans-serif; text-align: center; background-color: #f5f5f5; padding: 20px;">
         <h1 style="color: #333;">Promosyon Kodu</h1>
-        <p style="color: #666;">1 yıllık ücretsiz kullanım için <a href="https://www.CDRCloud.com">CDRCloud.com</a>'da kullanabileceğiniz kupon kodunuz:</p>
+        <p style="color: #666;">${formattedLicenseKey} 3CX lisanslı ile birlikte <a href="https://www.CDRCloud.com">CDRCloud.com</a>'da 1 yıl süreyle ücretsiz geçerli olan kupon kodunuz:</p>
         <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; display: inline-block;">
           <p style="font-size: 18px; color: #333; font-weight: bold; margin: 0;">${coupon}</p>
         </div>

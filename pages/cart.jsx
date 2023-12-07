@@ -306,14 +306,16 @@ const Cart = (props) => {
 
       // addRandomLicenseKey(tcxResponses);
 
-      // Tüm yeni lisanslar için kupon kodu oluştur ve kodu email at.
+      // Tüm  lisanslar için kupon kodu oluştur ve kodu email at.
       try {
         tcxResponses.Items.forEach(async (item) => {
-          if (item.Type === "NewLicense") {
+          // if (item.Type === "NewLicense") {
             const matchingPartner = props.responsePartners.find(
               (partner) => partner.PartnerId === item.ResellerId
             );
+           
             if (matchingPartner) {
+             
               item.LicenseKeys.forEach(async (item) => {
                 const requestBody = {
                   licensekey: item.LicenseKey,
@@ -335,11 +337,13 @@ const Cart = (props) => {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    //email:matchingPartner.Email,
-                    email: "mustafa@k2mbilisim.com",
+                    email:matchingPartner.Email,
+                    //email: "ibrahim@k2mbilisim.com",
                     coupon: responseData.couponCode,
+                    licensekey: responseData.licensekey
                   }),
                 };
+               
                 const emailResponse = await fetch(
                   "/api/coupon/sendmail",
                   emailRequestOptions
@@ -347,7 +351,7 @@ const Cart = (props) => {
                 const emailResponseData = await emailResponse.json();
 
               });
-            }
+            // }
           }
         });
       } catch (error) {
