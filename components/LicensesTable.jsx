@@ -49,7 +49,7 @@ import {
   ModalHeader,
   ModalCloseButton,
   Flex,
-  Box
+  Box,
 } from "@chakra-ui/react";
 import { z } from "zod";
 import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
@@ -57,7 +57,6 @@ import { MultiSelect, SelectionVisibilityMode } from "chakra-multiselect";
 let moment = require("moment");
 
 const sortDateTime = (rowA, rowB) => {
-
   return (
     moment(rowA.DateTime, "DD.MM.YYYY").unix() -
     moment(rowB.DateTime, "DD.MM.YYYY").unix()
@@ -65,7 +64,6 @@ const sortDateTime = (rowA, rowB) => {
 };
 
 const LicensesTable = ({ setLoadingState }) => {
-
   const [searchText, setSearchText] = useState("");
   const [licenseState, setLicenseState] = useRecoilState(licenses);
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,30 +85,39 @@ const LicensesTable = ({ setLoadingState }) => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const optionsFilter =
-    [{ label: "Fatura Kesilmeyen", value: "faturasiz" },
+  const optionsFilter = [
+    { label: "Fatura Kesilmeyen", value: "faturasiz" },
     { label: "Bu hafta", value: "buhafta" },
     { label: "Bu ay", value: "buay" },
     { label: "Son 1 hafta", value: "son1hafta" },
     { label: "Son 1 Ay", value: "son1ay" },
-    { label: "Son 1 Yıl", value: "son1yil" }
-    ]
+    { label: "Son 1 Yıl", value: "son1yil" },
+  ];
 
   const handleFilterChange = (newFilters) => {
-    const dateTimevalues = new Set(['son1ay', 'son1hafta', 'son1yil', 'buhafta', 'buay']);
+    const dateTimevalues = new Set([
+      "son1ay",
+      "son1hafta",
+      "son1yil",
+      "buhafta",
+      "buay",
+    ]);
     let currentFilters = [];
 
-    newFilters.forEach(newFilter => {
+    newFilters.forEach((newFilter) => {
       if (dateTimevalues.has(newFilter.value)) {
-        currentFilters = currentFilters.filter(currentFilter => !dateTimevalues.has(currentFilter.value));
+        currentFilters = currentFilters.filter(
+          (currentFilter) => !dateTimevalues.has(currentFilter.value)
+        );
       }
-      currentFilters = currentFilters.filter(filter => filter.value !== newFilter.value);
+      currentFilters = currentFilters.filter(
+        (filter) => filter.value !== newFilter.value
+      );
       currentFilters.push(newFilter);
     });
 
     setSelectedFilter(currentFilters);
-  }
-
+  };
 
   const columns = [
     {
@@ -191,6 +198,18 @@ const LicensesTable = ({ setLoadingState }) => {
       filter: true,
       reorder: true,
     },
+    {
+      name: "Seviye",
+      selector: (row) => {
+        if (row?.PartnerLevelName === undefined) {
+          return "";
+        } else {
+          return `${row.PartnerLevelName} (%${row.DiscountPercent})`;
+        }
+      },
+      reorder: true,
+      hide: "md",
+    },
 
     {
       name: "End User",
@@ -242,10 +261,10 @@ const LicensesTable = ({ setLoadingState }) => {
         row.Type === "NewLicense"
           ? "Yeni Lisans"
           : row.Type === "RenewAnnual"
-            ? "Lisans Yenileme"
-            : row.Type === "Maintenance"
-              ? "Maintenance"
-              : "Lisans Yükseltme",
+          ? "Lisans Yenileme"
+          : row.Type === "Maintenance"
+          ? "Maintenance"
+          : "Lisans Yükseltme",
       sortable: true,
       reorder: true,
       hide: "md",
@@ -284,18 +303,18 @@ const LicensesTable = ({ setLoadingState }) => {
       name: "Lisans Tipi",
       selector: (row) => row.Edition,
       sortable: true,
-      reorder: true
-    },
-    {
-      name: "Sürüm",
-      selector: (row) => {
-        return row.IsPerpetual ? "Perpetual" : "Annual";
-      },
-      sortable: true,
       reorder: true,
-      center: true,
-      hide: "md",
     },
+    // {
+    //   name: "Sürüm",
+    //   selector: (row) => {
+    //     return row.IsPerpetual ? "Perpetual" : "Annual";
+    //   },
+    //   sortable: true,
+    //   reorder: true,
+    //   center: true,
+    //   hide: "md",
+    // },
     {
       name: "Kanal",
       selector: (row) => row.SimultaneousCalls,
@@ -308,7 +327,7 @@ const LicensesTable = ({ setLoadingState }) => {
       selector: (row) => row.DateTime,
       reorder: true,
       sortable: true,
-      sortFunction: sortDateTime
+      sortFunction: sortDateTime,
     },
     {
       name: "Lisans İşlemleri",
@@ -362,7 +381,9 @@ const LicensesTable = ({ setLoadingState }) => {
                 className="text-white bg-red-500 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 onClick={() => {
                   const { LicenseKey } = row;
-                  const couponData = couponwithPartnerData.find((c) => c.licenseKey === LicenseKey);
+                  const couponData = couponwithPartnerData.find(
+                    (c) => c.licenseKey === LicenseKey
+                  );
                   if (couponData) {
                     setSelectedCouponData(couponData);
                     onOpen();
@@ -370,7 +391,7 @@ const LicensesTable = ({ setLoadingState }) => {
                     toast({
                       title: "Bu lisans key için kod bulunamadı.!",
                       status: "error",
-                      position: 'top',
+                      position: "top",
                       duration: 2000,
                       isClosable: true,
                     });
@@ -439,8 +460,7 @@ const LicensesTable = ({ setLoadingState }) => {
     setAltEmailText(event.target.value);
   };
   const handleAltEmailCheckbox = (event) => {
-    if (!event.target.checked)
-      setAltEmailText("")
+    if (!event.target.checked) setAltEmailText("");
     setShowAltEmailInput(event.target.checked);
   };
   const handleSearch = (event) => {
@@ -448,18 +468,18 @@ const LicensesTable = ({ setLoadingState }) => {
   };
 
   const handleEmailSend = async () => {
-    if (altEmailText.trim() === '') {
+    if (altEmailText.trim() === "") {
       // altEmailText boşsa, doğrudan e-posta gönderme işlemine geç
       sendEmail();
     } else {
-      const emailScheme = z.string().email({ message: 'Mail adresi geçersiz' });
+      const emailScheme = z.string().email({ message: "Mail adresi geçersiz" });
       // altEmailText doluysa, zod ile kontrol yap
       const emailValidate = emailScheme.safeParse(altEmailText);
       if (emailValidate.success === false) {
         toast({
           title: "Geçersiz e-posta adresi!",
           status: "error",
-          position: 'top',
+          position: "top",
           duration: 2000,
           isClosable: true,
         });
@@ -468,7 +488,7 @@ const LicensesTable = ({ setLoadingState }) => {
         await sendEmail();
       }
     }
-  }
+  };
 
   const sendEmail = async () => {
     const emailRequestOptions = {
@@ -483,86 +503,91 @@ const LicensesTable = ({ setLoadingState }) => {
     const emailResponse = await fetch(
       "/api/coupon/sendmail",
       emailRequestOptions
-    ).then((response) => {
-      if (!response.ok) {
-        throw Error("HTTP hata, durum kodu: " + response.status);
-      }
-      return response.json();
-    }).then((data) => {
-      toast({
-        title: "E-posta gönderimi tamamlandı.",
-        status: "info",
-        position: 'top',
-        duration: 2000,
-        isClosable: true,
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw Error("HTTP hata, durum kodu: " + response.status);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        toast({
+          title: "E-posta gönderimi tamamlandı.",
+          status: "info",
+          position: "top",
+          duration: 2000,
+          isClosable: true,
+        });
+        setShowAltEmailInput(false);
+        setAltEmailText("");
+        onClose();
+      })
+      .catch((error) => {
+        toast({
+          title: "E-posta gönderiminde bir hata oluştu.",
+          status: "error",
+          position: "top",
+          duration: 2000,
+          isClosable: true,
+        });
+        console.error("Hata:", error);
       });
-      setShowAltEmailInput(false);
-      setAltEmailText("");
-      onClose();
-
-    }).catch((error) => {
-      toast({
-        title: "E-posta gönderiminde bir hata oluştu.",
-        status: "error",
-        position: 'top',
-        duration: 2000,
-        isClosable: true,
-      });
-      console.error("Hata:", error);
-    });
-  }
+  };
 
   const applyFilters = (data, selectedFilters) => {
-
     const filterConditions = {
       faturasiz: (item) => item.InvoiceId === null,
 
       buhafta: (item) => {
-        const startOfWeek = moment().startOf('week'); // Bu hafta pazartesi günü
-        const endOfWeek = moment().endOf('week').subtract(1, 'day'); // Bu hafta pazar günü
+        const startOfWeek = moment().startOf("week"); // Bu hafta pazartesi günü
+        const endOfWeek = moment().endOf("week").subtract(1, "day"); // Bu hafta pazar günü
 
-        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        const itemDate = moment(item.DateTime, "DD.MM.YYYY");
 
         return itemDate.isBetween(startOfWeek, endOfWeek);
       },
       buay: (item) => {
-        const startOfMonth = moment().startOf('month'); // Ayın 1'i
-        const endOfMonth = moment().endOf('month'); // Ayın son günü
+        const startOfMonth = moment().startOf("month"); // Ayın 1'i
+        const endOfMonth = moment().endOf("month"); // Ayın son günü
 
-        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        const itemDate = moment(item.DateTime, "DD.MM.YYYY");
 
         return itemDate.isBetween(startOfMonth, endOfMonth);
       },
       son1hafta: (item) => {
-        const lastWeek = moment().subtract(1, 'weeks');
-        const itemDate = moment(item.DateTime, 'DD.MM.YYYY'); // Örneğin: '2023-10-01 15:30:00'
+        const lastWeek = moment().subtract(1, "weeks");
+        const itemDate = moment(item.DateTime, "DD.MM.YYYY"); // Örneğin: '2023-10-01 15:30:00'
         return itemDate.isAfter(lastWeek);
       },
       son1ay: (item) => {
-        const lastMonth = moment().subtract(1, 'months');
-        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        const lastMonth = moment().subtract(1, "months");
+        const itemDate = moment(item.DateTime, "DD.MM.YYYY");
         return itemDate.isAfter(lastMonth);
       },
       son1yil: (item) => {
-        const lastYear = moment().subtract(1, 'years');
-        const itemDate = moment(item.DateTime, 'DD.MM.YYYY');
+        const lastYear = moment().subtract(1, "years");
+        const itemDate = moment(item.DateTime, "DD.MM.YYYY");
         return itemDate.isAfter(lastYear);
-      }
+      },
       // Diğer filtreler buraya eklenebilir
     };
 
-
-
     const filterFunction = (item) => {
-      const matchesSearchText = [item.ResellerName, item.LicenseKey, item.DateTime, item.companyName]
+      const matchesSearchText = [
+        item.ResellerName,
+        item.LicenseKey,
+        item.DateTime,
+        item.companyName,
+      ]
         .map((val) => val.toLowerCase())
         .some((val) => val.includes(searchText.toLowerCase()));
 
-
-      const matchesSelectedFilters = selectedFilters.length === 0 || selectedFilters.every(filter => {
-        const filterCondition = filterConditions[filter.value];
-        return filterCondition ? filterCondition(item) : true;
-      });
+      const matchesSelectedFilters =
+        selectedFilters.length === 0 ||
+        selectedFilters.every((filter) => {
+          const filterCondition = filterConditions[filter.value];
+          return filterCondition ? filterCondition(item) : true;
+        });
 
       return matchesSearchText && matchesSelectedFilters;
     };
@@ -583,66 +608,70 @@ const LicensesTable = ({ setLoadingState }) => {
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
+
   // const paginatedData = filteredData.slice(
   //   (currentPage - 1) * rowsPerPage,
   //   currentPage * rowsPerPage
   // );
 
+  const getFireStoreData = async () => {
+    // get firestore data
+
+    const c = query(collection(db, "coupons"));
+    const couponsSnapshot = await getDocs(c);
+    const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }));
+    const resPartners = await fetch("/api/getpartners");
+    const partners = await resPartners.json();
+
+    const couponsWithPartnerData = couponsData.map((coupon) => {
+      const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
+      return {
+        partnerId: coupon.partnerId,
+        couponCode: coupon.couponCode,
+        licenseKey: coupon.licensekey,
+        email: partner ? partner.Email : null,
+      };
+    });
+
+    setCouponwithPartnerData(couponsWithPartnerData);
+    let fireStoreData;
+    const q = query(collection(db, "licenses"));
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const arr = querySnapshot.docs.map((d) => ({
+        objectId: d.id,
+        ...d.data(),
+      }));
+
+      fireStoreData = await extractData(arr, partners);
+    });
+
+    const getEndUsers = async () => {
+      const collectionRef = collection(db, "endusers");
+      const q = query(collectionRef);
+      const querySnapshot = await getDocs(q);
+      const endUserAllData = querySnapshot.docs.map((d) => ({
+        ...d.data(),
+      }));
+      return endUserAllData;
+    };
+    const allEndUserData = await getEndUsers();
+
+    //end user bilgisi lisans datasının içine aktar
+
+    const mergedData = await mergeEndUserwithLicense(
+      fireStoreData,
+      allEndUserData
+    );
+
+    setLicenseState(mergedData);
+    setallEnduserData(allEndUserData);
+  };
 
   useEffect(() => {
     (async () => {
       try {
         // get firestore data
-
-        const c = query(collection(db, "coupons"));
-        const couponsSnapshot = await getDocs(c);
-        const couponsData = couponsSnapshot.docs.map((d) => ({ ...d.data() }))
-        const resPartners = await fetch('/api/getpartners');
-        const partners = await resPartners.json();
-     
-
-        const couponsWithPartnerData = couponsData.map((coupon) => {
-          const partner = partners.find((p) => p.PartnerId === coupon.partnerId);
-          return {
-            partnerId: coupon.partnerId,
-            couponCode: coupon.couponCode,
-            licenseKey: coupon.licensekey,
-            email: partner ? partner.Email : null,
-          };
-        });
-
-        setCouponwithPartnerData(couponsWithPartnerData);
-        let fireStoreData;
-        const q = query(collection(db, "licenses"));
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-          const arr = querySnapshot.docs.map((d) => ({
-            objectId: d.id,
-            ...d.data(),
-          }));
-
-          fireStoreData = await extractData(arr);
-
-        });
-
-
-        const getEndUsers = async () => {
-          const collectionRef = collection(db, "endusers");
-          const q = query(collectionRef);
-          const querySnapshot = await getDocs(q);
-          const endUserAllData = querySnapshot.docs.map((d) => ({
-            ...d.data(),
-          }));
-          return endUserAllData;
-        };
-        const allEndUserData = await getEndUsers();
-
-        //end user bilgisi lisans datasının içine aktar
-
-        const mergedData = await mergeEndUserwithLicense(fireStoreData, allEndUserData);
-
-        setLicenseState(mergedData);
-        setallEnduserData(allEndUserData);
-
+        await getFireStoreData();
         const timer = setTimeout(() => {
           setIsLoading(false);
           setLoadingState(false);
@@ -689,11 +718,7 @@ const LicensesTable = ({ setLoadingState }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button
-              colorScheme="blue"
-              mr={3}
-              onClick={handleEmailSend}
-            >
+            <Button colorScheme="blue" mr={3} onClick={handleEmailSend}>
               Gönder
             </Button>
             <Button
@@ -729,8 +754,6 @@ const LicensesTable = ({ setLoadingState }) => {
 
       {!isLoading && (
         <DataTable
-
-
           defaultSortFieldId={10}
           defaultSortAsc={false}
           columns={columns}
@@ -740,22 +763,28 @@ const LicensesTable = ({ setLoadingState }) => {
           noDataComponent={"Herhangi bir kayıt bulunamadı"}
           subHeader={true}
           subHeaderAlign="left"
-
           subHeaderComponent={
-            <div style={{ display: "flex", flex: '1 100%', justifyContent: 'space-between', flexDirection: 'row', maxWidth: '100vw' }}>
-
-              <div style={{ display: "flex", alignItems: 'center', width: '50vw' }}>
-                <h3 style={{ marginRight: '10px' }}>Filtrele :</h3>
+            <div
+              style={{
+                display: "flex",
+                flex: "1 100%",
+                justifyContent: "space-between",
+                flexDirection: "row",
+                maxWidth: "100vw",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", width: "50vw" }}
+              >
+                <h3 style={{ marginRight: "10px" }}>Filtrele :</h3>
                 <MultiSelect
                   options={optionsFilter}
                   value={selectedFilter}
                   onChange={handleFilterChange}
-
                 />
-
               </div>
-              <div style={{ display: "flex", alignItems: 'center' }}>
-                <h3 style={{ marginRight: '10px' }}>Ara :</h3>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <h3 style={{ marginRight: "10px" }}>Ara :</h3>
                 <input
                   type="text"
                   value={searchText}
@@ -764,7 +793,6 @@ const LicensesTable = ({ setLoadingState }) => {
                 />
               </div>
             </div>
-
 
             //   <input
             //   type="text"

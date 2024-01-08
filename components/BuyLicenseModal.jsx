@@ -34,7 +34,7 @@ const BuyLicenseModal = (props) => {
       // Extract only the PartnerId and CompanyName fields from each object in the array
       const filteredData = data.map((partner) => ({
         value: partner.PartnerId,
-        label: `${partner.CompanyName} (${partner.PartnerLevelName})`,
+        label: `${partner.CompanyName} (${partner.PartnerLevelName} %${partner.DiscountPercent})`,
       }));
       setOptions(filteredData);
       setPartners(data); // Update the options state with the filtered data

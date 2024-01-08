@@ -166,12 +166,12 @@ const Cart = (props) => {
                   {item.Type === "NewLicense"
                     ? item.Edition
                     : item.Type === "RenewAnnual"
-                      ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
-                      : item.Type === "Maintenance"
-                        ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
-                        : getLicenseTypeAndSimcalls(
-                          cartDetailState[index]?.Items[0]?.ProductDescription
-                        )?.licenseType}
+                    ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
+                    : item.Type === "Maintenance"
+                    ? cartDetailState[index]?.Items[0].LicenseKeys[0].Edition
+                    : getLicenseTypeAndSimcalls(
+                        cartDetailState[index]?.Items[0]?.ProductDescription
+                      )?.licenseType}
                 </h3>
               </div>
             </td>
@@ -190,10 +190,10 @@ const Cart = (props) => {
                   {item.Type === "NewLicense"
                     ? "Yeni Lisans"
                     : item.Type === "RenewAnnual"
-                      ? "Lisans Yenileme"
-                      : item.Type === "Upgrade"
-                        ? "Lisans Yükseltme"
-                        : "Maintenance"}
+                    ? "Lisans Yenileme"
+                    : item.Type === "Upgrade"
+                    ? "Lisans Yükseltme"
+                    : "Maintenance"}
                 </h3>
               </div>
             </td>
@@ -202,14 +202,14 @@ const Cart = (props) => {
               {item.Type === "NewLicense"
                 ? item.SimultaneousCalls
                 : item.Type === "RenewAnnual"
-                  ? cartDetailState[index]?.Items[0].LicenseKeys[0]
+                ? cartDetailState[index]?.Items[0].LicenseKeys[0]
                     .SimultaneousCalls
-                  : item.Type === "Maintenance"
-                    ? cartDetailState[index]?.Items[0].LicenseKeys[0]
-                      .SimultaneousCalls
-                    : getLicenseTypeAndSimcalls(
-                      cartDetailState[index]?.Items[0]?.ProductDescription
-                    )?.simCall}
+                : item.Type === "Maintenance"
+                ? cartDetailState[index]?.Items[0].LicenseKeys[0]
+                    .SimultaneousCalls
+                : getLicenseTypeAndSimcalls(
+                    cartDetailState[index]?.Items[0]?.ProductDescription
+                  )?.simCall}
             </td>
             <td className="p-4 px-6 text-center whitespace-nowrap">
               {item.Type === "Upgrade" ? 1 : item.Quantity}
@@ -310,47 +310,45 @@ const Cart = (props) => {
       try {
         tcxResponses.Items.forEach(async (item) => {
           // if (item.Type === "NewLicense") {
-            const matchingPartner = props.responsePartners.find(
-              (partner) => partner.PartnerId === item.ResellerId
-            );
-           
-            if (matchingPartner) {
-             
-              item.LicenseKeys.forEach(async (item) => {
-                const requestBody = {
-                  licensekey: item.LicenseKey,
-                  partnerId: matchingPartner.PartnerId,
-                };
-                const requestOptions = {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(requestBody),
-                };
-                const response = await fetch(
-                  "/api/coupon/create",
-                  requestOptions
-                );
-                const responseData = await response.json();
+          const matchingPartner = props.responsePartners.find(
+            (partner) => partner.PartnerId === item.ResellerId
+          );
 
-                // Send email
-                const emailRequestOptions = {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    email:matchingPartner.Email,
-                    //email: "ibrahim@k2mbilisim.com",
-                    coupon: responseData.couponCode,
-                    licensekey: responseData.licensekey
-                  }),
-                };
-               
-                const emailResponse = await fetch(
-                  "/api/coupon/sendmail",
-                  emailRequestOptions
-                );
-                const emailResponseData = await emailResponse.json();
+          if (matchingPartner) {
+            item.LicenseKeys.forEach(async (item) => {
+              const requestBody = {
+                licensekey: item.LicenseKey,
+                partnerId: matchingPartner.PartnerId,
+              };
+              const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody),
+              };
+              const response = await fetch(
+                "/api/coupon/create",
+                requestOptions
+              );
+              const responseData = await response.json();
 
-              });
+              // Send email
+              const emailRequestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: matchingPartner.Email,
+                  //email: "ibrahim@k2mbilisim.com",
+                  coupon: responseData.couponCode,
+                  licensekey: responseData.licensekey,
+                }),
+              };
+
+              const emailResponse = await fetch(
+                "/api/coupon/sendmail",
+                emailRequestOptions
+              );
+              const emailResponseData = await emailResponse.json();
+            });
             // }
           }
         });
@@ -573,7 +571,7 @@ export async function getServerSideProps(context) {
   // Extract only the PartnerId and CompanyName fields from each object in the array
   const options = responsePartners.map((partner) => ({
     value: partner.PartnerId,
-    label: partner.CompanyName,
+    label: `${partner.CompanyName} (${partner.PartnerLevelName} %${partner.DiscountPercent})`,
   }));
 
   // Get End Users
