@@ -125,7 +125,6 @@ const Cart = (props) => {
                             };
                           }),
                         };
-                        console.log(newCartDetail);
                         return newCartDetail;
                       });
                     }}
