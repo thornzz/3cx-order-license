@@ -118,12 +118,14 @@ const Cart = (props) => {
                           Items: newCartDetail[index].Items.map((item) => {
                             return {
                               ...item,
-                              ResellerName: data?.label,
+                              ResellerName: data?.label
+                                .replace(/\(.*?\)/g, "")
+                                .trim(),
                               ResellerId: data?.value,
                             };
                           }),
                         };
-
+                        console.log(newCartDetail);
                         return newCartDetail;
                       });
                     }}
