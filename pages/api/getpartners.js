@@ -1,10 +1,11 @@
-import { collection, query, getDocs } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
+
 import { db } from "../../firebase/index";
 
 export async function getPartners() {
   try {
     let data = null;
-
+    console.log("getPartners çağrıldı");
     const username = process.env.NEXT_PUBLIC_3CX_API_KEY;
     const password = ""; // Your password goes here
     const basicAuth = btoa(`${username}:${password}`);

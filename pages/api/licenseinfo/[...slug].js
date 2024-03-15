@@ -1,11 +1,9 @@
+import { calculateRemainingDay, convertDateTime } from "../../../utility/DateTimeUtils";
 import PostData from "../../../utility/HttpPostUtility";
-import {
-  convertDateTime,
-  calculateRemainingDay,
-} from "../../../utility/DateTimeUtils";
 
 export default async function handler(req, res) {
   const { slug } = req.query;
+  console.log(slug)
   const licensekey = slug[0];
   const licenseType = slug[1] === "true" ? "Maintenance" : "RenewAnnual";
   const isUpgrade = slug[2] === "true" ? "Upgrade" : null;

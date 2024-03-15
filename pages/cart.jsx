@@ -1,35 +1,18 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
 import {
-  cart,
-  cartDetail,
-  cartDetailDiscountTotal,
-  cartDetailSubTotal,
-  cartDetailGrandTotal,
-  cartLength,
-  cartDetailLicenseTotal,
-  partners,
-  cartDetailHostingTotal,
-} from "../atoms/shoppingCartAtom";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
-  useDisclosure,
+  Box,
   Button,
   ButtonGroup,
-  Box,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
+  useDisclosure,
 } from "@chakra-ui/react";
-
-import { toast } from "react-toastify";
-import PostData from "../utility/HttpPostUtility";
-import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
-import { db } from "../firebase/index";
+import axios from "axios";
 import {
   addDoc,
   collection,
@@ -38,15 +21,32 @@ import {
   getDocs,
   query,
 } from "firebase/firestore";
-import mergeJSONObjects from "../utility/MergeJSONObjects";
-import { licenses } from "../atoms/fireStoreDataAtom";
-import Select from "react-select";
-import Navbar from "../components/Navbar";
-import { useRouter } from "next/router";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import React, { Fragment, useEffect, useState } from "react";
 import { RiDeleteBin5Line } from "react-icons/ri";
+import Select from "react-select";
+import { toast } from "react-toastify";
+import { useRecoilState, useRecoilValue } from "recoil";
+
+import { licenses } from "../atoms/fireStoreDataAtom";
+import {
+  cart,
+  cartDetail,
+  cartDetailDiscountTotal,
+  cartDetailGrandTotal,
+  cartDetailHostingTotal,
+  cartDetailLicenseTotal,
+  cartDetailSubTotal,
+  cartLength,
+  partners,
+} from "../atoms/shoppingCartAtom";
+import Navbar from "../components/Navbar";
+import { db } from "../firebase/index";
+import PostData from "../utility/HttpPostUtility";
+import mergeJSONObjects from "../utility/MergeJSONObjects";
+import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
 import { getPartners } from "./api/getpartners";
-import axios from "axios";
 
 const Cart = (props) => {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -285,6 +285,8 @@ const Cart = (props) => {
   const CompleteOrder = async () => {
     // popover kapat
     onToggle();
+    console.log(cartState, "cartState");
+    console.log(cartDetailState, "cartdetailState");
 
     const postData = {
       PO: "MYPO123",
@@ -295,75 +297,75 @@ const Cart = (props) => {
 
     try {
       //! OPEN AT LIVE
-      const tcxResponses = await PostData(
-        "/api/newlicense",
-        JSON.stringify(postData)
-      );
-
       // const tcxResponses = await PostData(
-      //   "/api/fakelicenseorder",
+      //   "/api/newlicense",
       //   JSON.stringify(postData)
       // );
 
+      const tcxResponses = await PostData(
+        "/api/fakelicenseorder",
+        JSON.stringify(postData)
+      );
+      console.log(tcxResponses, "satış öncesi");
       // addRandomLicenseKey(tcxResponses);
 
       // Tüm  lisanslar için kupon kodu oluştur ve kodu email at.
-      try {
-        tcxResponses.Items.forEach(async (item) => {
-          // if (item.Type === "NewLicense") {
-          const matchingPartner = props.responsePartners.find(
-            (partner) => partner.PartnerId === item.ResellerId
-          );
+      // try {
+      //   tcxResponses.Items.forEach(async (item) => {
+      //     // if (item.Type === "NewLicense") {
+      //     const matchingPartner = props.responsePartners.find(
+      //       (partner) => partner.PartnerId === item.ResellerId
+      //     );
 
-          if (matchingPartner) {
-            item.LicenseKeys.forEach(async (item) => {
-              const requestBody = {
-                licensekey: item.LicenseKey,
-                partnerId: matchingPartner.PartnerId,
-              };
-              const requestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody),
-              };
-              const response = await fetch(
-                "/api/coupon/create",
-                requestOptions
-              );
-              const responseData = await response.json();
+      //     if (matchingPartner) {
+      //       item.LicenseKeys.forEach(async (item) => {
+      //         const requestBody = {
+      //           licensekey: item.LicenseKey,
+      //           partnerId: matchingPartner.PartnerId,
+      //         };
+      //         const requestOptions = {
+      //           method: "POST",
+      //           headers: { "Content-Type": "application/json" },
+      //           body: JSON.stringify(requestBody),
+      //         };
+      //         const response = await fetch(
+      //           "/api/coupon/create",
+      //           requestOptions
+      //         );
+      //         const responseData = await response.json();
 
-              // Send email
-              const emailRequestOptions = {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: matchingPartner.Email,
-                  //email: "ibrahim@k2mbilisim.com",
-                  coupon: responseData.couponCode,
-                  licensekey: responseData.licensekey,
-                }),
-              };
+      //         // Send email
+      //         const emailRequestOptions = {
+      //           method: "POST",
+      //           headers: { "Content-Type": "application/json" },
+      //           body: JSON.stringify({
+      //             email: matchingPartner.Email,
+      //             //email: "ibrahim@k2mbilisim.com",
+      //             coupon: responseData.couponCode,
+      //             licensekey: responseData.licensekey,
+      //           }),
+      //         };
 
-              const emailResponse = await fetch(
-                "/api/coupon/sendmail",
-                emailRequestOptions
-              );
-              const emailResponseData = await emailResponse.json();
-            });
-            // }
-          }
-        });
-      } catch (error) {
-        console.error(error);
-      }
+      //         const emailResponse = await fetch(
+      //           "/api/coupon/sendmail",
+      //           emailRequestOptions
+      //         );
+      //         const emailResponseData = await emailResponse.json();
+      //       });
+      //       // }
+      //     }
+      //   });
+      // } catch (error) {
+      //   console.error(error);
+      // }
 
       mergeJSONObjects(cartDetailState, tcxResponses);
-
-      await axios.post("/api/sendmail", tcxResponses);
+      console.log(tcxResponses, "satış sonrası");
+      //await axios.post("/api/sendmail", tcxResponses);
 
       //! OPEN THIS COMMENT WHEN YOU WANT TO SAVE TO FIRESTORE
 
-      await addDoc(collection(db, "licenses"), { tcxResponses });
+      //await addDoc(collection(db, "licenses"), { tcxResponses });
 
       toast.success("Sipariş başarıyla oluşturuldu.", {
         position: "top-center",
