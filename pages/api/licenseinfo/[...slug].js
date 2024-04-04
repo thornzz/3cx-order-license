@@ -33,7 +33,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
           Type: isUpgrade ? "Upgrade" : licenseType,
           UpgradeKey: licensekey,
           Edition: "Enterprise",
-          SimultaneousCalls: 64,
+          SimultaneousCalls: 1024,
           ResellerId: null,
           AddHosting: false,
         },

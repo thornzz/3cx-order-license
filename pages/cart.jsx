@@ -1,52 +1,22 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import {
-  cart,
-  cartDetail,
-  cartDetailDiscountTotal,
-  cartDetailSubTotal,
-  cartDetailGrandTotal,
-  cartLength,
-  cartDetailLicenseTotal,
-  partners,
-  cartDetailHostingTotal,
-} from "../atoms/shoppingCartAtom";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
-  useDisclosure,
-  Button,
-  ButtonGroup,
-  Box,
-} from "@chakra-ui/react";
-
-import { toast } from "react-toastify";
-import PostData from "../utility/HttpPostUtility";
-import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
-import { db } from "../firebase/index";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-} from "firebase/firestore";
-import mergeJSONObjects from "../utility/MergeJSONObjects";
-import { licenses } from "../atoms/fireStoreDataAtom";
-import Select from "react-select";
-import Navbar from "../components/Navbar";
-import { useRouter } from "next/router";
-import Head from "next/head";
-import { RiDeleteBin5Line } from "react-icons/ri";
-import { getPartners } from "./api/getpartners";
+import { Box, Button, ButtonGroup, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, useDisclosure } from "@chakra-ui/react";
 import axios from "axios";
+import { addDoc, collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import React, { Fragment, useEffect, useState } from "react";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import Select from "react-select";
+import { toast } from "react-toastify";
+import { useRecoilState, useRecoilValue } from "recoil";
+
+import { licenses } from "../atoms/fireStoreDataAtom";
+import { cart, cartDetail, cartDetailDiscountTotal, cartDetailGrandTotal, cartDetailHostingTotal, cartDetailLicenseTotal, cartDetailSubTotal, cartLength, partners } from "../atoms/shoppingCartAtom";
+import Navbar from "../components/Navbar";
+import { db } from "../firebase/index";
+import PostData from "../utility/HttpPostUtility";
+import mergeJSONObjects from "../utility/MergeJSONObjects";
+import addRandomLicenseKey from "../utility/RandomLicenseKeyObject";
+import { getPartners } from "./api/getpartners";
 
 const Cart = (props) => {
   const [orderDetails, setOrderDetails] = useState(null);
