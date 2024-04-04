@@ -1,9 +1,12 @@
-import { calculateRemainingDay, convertDateTime } from "../../../utility/DateTimeUtils";
+import {
+  calculateRemainingDay,
+  convertDateTime,
+} from "../../../utility/DateTimeUtils";
 import PostData from "../../../utility/HttpPostUtility";
 
 export default async function handler(req, res) {
   const { slug } = req.query;
-  console.log(slug)
+  console.log(slug);
   const licensekey = slug[0];
   const licenseType = slug[1] === "true" ? "Maintenance" : "RenewAnnual";
   const isUpgrade = slug[2] === "true" ? "Upgrade" : null;
@@ -31,7 +34,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
           Type: isUpgrade ? "Upgrade" : licenseType,
           UpgradeKey: licensekey,
           Edition: "Enterprise",
-          SimultaneousCalls: 64,
+          SimultaneousCalls: 1024,
           ResellerId: null,
           AddHosting: false,
         },
@@ -68,6 +71,8 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
 
     const { status, ErrorCode } = data;
 
+    console.log(data);
+
     if (status && ErrorCode) {
       handleError(ErrorCode);
       data = await PostData(
@@ -91,7 +96,7 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
       "MaintenanceDate",
       "HostingExpiry",
       "Edition",
-      "HostingExists"
+      "HostingExists",
     ];
 
     const desiredObject = {};
@@ -102,12 +107,16 @@ export async function getLicenceKeyInfo(licensekey, licenseType, isUpgrade) {
     if (desiredObject) {
       desiredObject.IsActive =
         desiredObject.MaintenanceDate !== null ||
-          desiredObject.ExpiryDate !== null
+        desiredObject.ExpiryDate !== null
           ? true
           : false;
 
-      desiredObject.HostingExists = (data.Items.some(item => item.Type === 'Hosting')) ? 'Var' : 'Yok';
-      
+      desiredObject.HostingExists = data.Items.some(
+        (item) => item.Type === "Hosting"
+      )
+        ? "Var"
+        : "Yok";
+
       desiredObject.RemainingDays =
         desiredObject.MaintenanceDate !== null
           ? calculateRemainingDay(desiredObject.MaintenanceDate)
