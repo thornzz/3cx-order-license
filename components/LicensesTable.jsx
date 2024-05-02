@@ -1,59 +1,63 @@
-import DataTable from "react-data-table-component";
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
-import { tableStyle } from "./styles/tableStyle";
-import { useRecoilState } from "recoil";
-import { licenses } from "../atoms/fireStoreDataAtom";
-import { RotatingSquare } from "react-loader-spinner";
-import { AiOutlineEye } from "react-icons/ai";
-import { RxClipboardCopy } from "react-icons/rx";
-import EndUserModal from "./EndUserModal";
-import { TbLicense } from "react-icons/tb";
-import { FaEdit } from "react-icons/fa";
-import { HiOutlineKey } from "react-icons/hi";
-import { SiMinutemailer } from "react-icons/si";
-import LicenseRenewModal from "./LicenseRenewModal";
-import UpgradeLicenseModal from "./UpgradeLicenseModal";
-import { db } from "../firebase";
 import { Icon, Spacer, Text, useToast } from "@chakra-ui/react";
-import { ImQrcode } from "react-icons/im";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  HStack,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { MultiSelect, SelectionVisibilityMode } from "chakra-multiselect";
 import {
   collection,
   doc,
   getDoc,
   getDocs,
-  updateDoc,
   onSnapshot,
   query,
+  updateDoc,
 } from "firebase/firestore";
-import extractData from "../utility/extractFirestoreData";
 import { Tooltip } from "flowbite-react";
-import {
-  HStack,
-  FormControl,
-  Input,
-  Stack,
-  Button,
-  useDisclosure,
-  Checkbox,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalCloseButton,
-  Flex,
-  Box,
-} from "@chakra-ui/react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import DataTable from "react-data-table-component";
+import { AiOutlineEye } from "react-icons/ai";
+import { FaEdit } from "react-icons/fa";
+import { HiOutlineKey } from "react-icons/hi";
+import { ImQrcode } from "react-icons/im";
+import { RxClipboardCopy } from "react-icons/rx";
+import { SiMicrosoftexcel } from "react-icons/si";
+import { SiMinutemailer } from "react-icons/si";
+import { TbLicense } from "react-icons/tb";
+import { RotatingSquare } from "react-loader-spinner";
+import { useRecoilState } from "recoil";
 import { z } from "zod";
+
+import { licenses } from "../atoms/fireStoreDataAtom";
+import { db } from "../firebase";
+import extractData from "../utility/extractFirestoreData";
 import mergeEndUserwithLicense from "../utility/mergeEndUserwithLicense";
-import { MultiSelect, SelectionVisibilityMode } from "chakra-multiselect";
+import EndUserModal from "./EndUserModal";
+import LicenseRenewModal from "./LicenseRenewModal";
+import { tableStyle } from "./styles/tableStyle";
+import UpgradeLicenseModal from "./UpgradeLicenseModal";
+import xlsx from "json-as-xlsx";
+
 let moment = require("moment");
 
 const sortDateTime = (rowA, rowB) => {
@@ -608,7 +612,7 @@ const LicensesTable = ({ setLoadingState }) => {
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
-
+  console.log(paginatedData);
   // const paginatedData = filteredData.slice(
   //   (currentPage - 1) * rowsPerPage,
   //   currentPage * rowsPerPage
@@ -665,6 +669,45 @@ const LicensesTable = ({ setLoadingState }) => {
 
     setLicenseState(mergedData);
     setallEnduserData(allEndUserData);
+  };
+
+  const exportToExcel = () => {
+    // Rastgele bir string oluşturalım
+    let randomString = Math.random().toString(36).substring(2, 10);
+
+    // Günün tarihini alalım
+    let date = new Date();
+    let day = String(date.getDate()).padStart(2, "0");
+    let month = String(date.getMonth() + 1).padStart(2, "0"); // Ocak ayı 0 olarak başlar
+    let year = date.getFullYear();
+
+    // Dosya adını oluşturalım
+    let fileName = `${randomString}_${day}${month}${year}`;
+
+    let data = [
+      {
+        sheet: "LicenseKeys",
+        columns: [
+          { label: "Bayi Adı", value: "ResellerName" },
+          { label: "İşlem Tipi", value: "Type" },
+          { label: "Tarih", value: "DateTime" },
+          { label: "Sürüm", value: "Edition" },
+          { label: "Lisans Anahtarı", value: "LicenseKey" },
+          { label: "Kanal", value: "SimultaneousCalls" },
+        ],
+        content: filteredData,
+      },
+    ];
+
+    let settings = {
+      fileName: fileName,
+      extraLength: 3,
+      writeMode: "writeFile",
+      writeOptions: {},
+      RTL: false,
+    };
+
+    xlsx(data, settings);
   };
 
   useEffect(() => {
@@ -782,6 +825,20 @@ const LicensesTable = ({ setLoadingState }) => {
                   value={selectedFilter}
                   onChange={handleFilterChange}
                 />
+                <Button
+                  color={"green"}
+                  className={`bg-green-500 px-4 w-35 ml-3 mb-2 mt-2 mr-2 pr-2 hidden md:inline-flex`}
+                  onClick={exportToExcel}
+                >
+                  <SiMicrosoftexcel
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      paddingRight: "5px",
+                    }}
+                  />
+                  Excel'e Aktar
+                </Button>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <h3 style={{ marginRight: "10px" }}>Ara :</h3>

@@ -1,6 +1,26 @@
-import { Box, Button, ButtonGroup, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, useDisclosure } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
+  useDisclosure,
+} from "@chakra-ui/react";
 import axios from "axios";
-import { addDoc, collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+} from "firebase/firestore";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { Fragment, useEffect, useState } from "react";
@@ -10,7 +30,17 @@ import { toast } from "react-toastify";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { licenses } from "../atoms/fireStoreDataAtom";
-import { cart, cartDetail, cartDetailDiscountTotal, cartDetailGrandTotal, cartDetailHostingTotal, cartDetailLicenseTotal, cartDetailSubTotal, cartLength, partners } from "../atoms/shoppingCartAtom";
+import {
+  cart,
+  cartDetail,
+  cartDetailDiscountTotal,
+  cartDetailGrandTotal,
+  cartDetailHostingTotal,
+  cartDetailLicenseTotal,
+  cartDetailSubTotal,
+  cartLength,
+  partners,
+} from "../atoms/shoppingCartAtom";
 import Navbar from "../components/Navbar";
 import { db } from "../firebase/index";
 import PostData from "../utility/HttpPostUtility";
@@ -264,7 +294,7 @@ const Cart = (props) => {
     };
 
     try {
-      //! OPEN AT LIVE
+      // //! OPEN AT LIVE
       const tcxResponses = await PostData(
         "/api/newlicense",
         JSON.stringify(postData)
@@ -275,7 +305,7 @@ const Cart = (props) => {
       //   JSON.stringify(postData)
       // );
 
-      // addRandomLicenseKey(tcxResponses);
+      //addRandomLicenseKey(tcxResponses);
 
       // Tüm  lisanslar için kupon kodu oluştur ve kodu email at.
       try {
